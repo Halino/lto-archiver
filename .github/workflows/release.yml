@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Create build environment and install dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -m venv .build-venv
+          .\.build-venv\Scripts\python.exe -m pip install --requirement requirements-build.txt
+          .\.build-venv\Scripts\python.exe -m pip check
+      - name: Require the tag to match the declared package version
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = & .\.build-venv\Scripts\python.exe -c "import sys; sys.path.insert(0, 'src'); import ltobackup; print(ltobackup.__version__)"
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($version)) {
+            throw 'Could not read ltobackup.__version__'
+          }
+          $version = $version.Trim()
+          if ($env:GITHUB_REF_NAME -cne "v$version") {
+            throw "Tag $env:GITHUB_REF_NAME must exactly match v$version"
+          }
+          "RELEASE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Run complete unittest suite
+        shell: pwsh
+        env:
+          PYTHONPATH: src
+        run: .\.build-venv\Scripts\python.exe -m unittest discover -s tests -v
+      - name: Audit the exact public source manifest
+        shell: pwsh
+        run: .\.build-venv\Scripts\python.exe scripts\audit-public-content.py --manifest public-files.txt --root .
+      - name: Build release archive
+        shell: pwsh
+        run: .\scripts\build-release.ps1 -Version $env:RELEASE_VERSION
+      - name: Verify release archive
+        shell: pwsh
+        run: .\scripts\verify-release.ps1 -Version $env:RELEASE_VERSION
+      - name: Audit release archive
+        shell: pwsh
+        run: .\.build-venv\Scripts\python.exe scripts\audit-public-content.py "release/LTO-Archiver-$env:RELEASE_VERSION.zip"
+      - name: Publish verified release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = $env:RELEASE_VERSION
+          gh release create $env:GITHUB_REF_NAME `
+            "release/LTO-Archiver-$version.zip" `
+            "release/LTO-Archiver-$version.zip.sha256" `
+            --title "LTO Archiver $version" `
+            --notes-file "docs/release-notes-$version.md" `
+            --verify-tag

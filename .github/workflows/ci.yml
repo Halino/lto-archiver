@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Create build environment and install dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python -m venv .build-venv
+          .\.build-venv\Scripts\python.exe -m pip install --requirement requirements-build.txt
+          .\.build-venv\Scripts\python.exe -m pip check
+      - name: Run complete unittest suite
+        shell: pwsh
+        env:
+          PYTHONPATH: src
+        run: .\.build-venv\Scripts\python.exe -m unittest discover -s tests -v
+      - name: Audit the exact public source manifest
+        shell: pwsh
+        run: .\.build-venv\Scripts\python.exe scripts\audit-public-content.py --manifest public-files.txt --root .

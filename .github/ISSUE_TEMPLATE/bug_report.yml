@@ -1,0 +1,72 @@
+name: Bug report
+description: Report a reproducible LTO Archiver defect using sanitized information.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, private paths, catalog databases, HPE support tickets,
+        or other sensitive operational data. For a security issue, follow SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: LTO Archiver version
+      description: Include the exact application version.
+      placeholder: "0.11.26"
+    validations:
+      required: true
+  - type: input
+    id: windows-version
+    attributes:
+      label: Windows version
+      description: Include edition and build, with no organization-specific information.
+    validations:
+      required: true
+  - type: input
+    id: storeopen-version
+    attributes:
+      label: HPE StoreOpen version
+      description: Include the installed StoreOpen version.
+    validations:
+      required: true
+  - type: input
+    id: drive-media-generation
+    attributes:
+      label: Drive and media generation
+      description: State the LTO generation only; do not include serial numbers or real media labels.
+      placeholder: "Example: LTO-8 drive with LTO-8 media"
+    validations:
+      required: true
+  - type: textarea
+    id: safe-reproduction
+    attributes:
+      label: Exact safe reproduction steps
+      description: Use a disposable or non-production test case. State any destructive action clearly.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual behavior
+      description: Paste only sanitized output.
+    validations:
+      required: true
+  - type: checkboxes
+    id: attachment-safety
+    attributes:
+      label: Attachment safety confirmation
+      description: Confirm before submitting this public report.
+      options:
+        - label: I confirm that attachments contain no credentials, private paths, catalog database, or HPE support ticket.
+          required: true

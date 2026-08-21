@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lto-archiver"
+version = "0.11.26"
+description = "LTO Archiver for append-only SMB library backups to HPE LTFS tapes"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+lto-backup = "ltobackup.cli:main"
+lto-backup-gui = "ltobackup.gui:main"
+lto-archiver = "ltobackup.gui:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

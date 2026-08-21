@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose an improvement with its operational and destructive-operation impact.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe the user or operator problem without sensitive operational details.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the desired behavior and success criteria.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe workarounds or other approaches considered.
+    validations:
+      required: true
+  - type: textarea
+    id: destructive-operation-impact
+    attributes:
+      label: Destructive-operation impact
+      description: Explain any effect on destructive tape operations, or state that there is no effect.
+    validations:
+      required: true

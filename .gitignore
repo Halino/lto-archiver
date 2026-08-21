@@ -1,0 +1,37 @@
+# Build e ambienti locali
+.build-venv/
+build/
+dist/
+build-*/
+dist-*/
+build-final/
+dist-final/
+build-0101/
+dist-0101/
+*.egg-info/
+__pycache__/
+*.py[cod]
+
+# Pacchetti vendor e staging binario
+staging/
+.deploy-*/
+release/
+
+# Stato operativo e dati locali
+*.db
+*.db-wal
+*.db-shm
+*.log
+*.partial-*
+tmp*/
+
+# Configurazioni locali e segreti
+.env
+.env.*
+*.secrets.*
+.idea/
+.vscode/
+
+# Sistema operativo
+Thumbs.db
+Desktop.ini
