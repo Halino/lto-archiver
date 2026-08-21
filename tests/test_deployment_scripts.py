@@ -204,6 +204,16 @@ class DeploymentScriptTests(unittest.TestCase):
         self.assertIn("Remove-OwnedTemporaryDirectory -Path $temporaryDirectory", verifier)
         self.assertIn("throw", verifier.split("function Remove-OwnedTemporaryDirectory", 1)[1])
 
+    def test_release_verifier_waits_for_gui_process_tree_before_cleanup(self) -> None:
+        verifier = VERIFIER.read_text(encoding="utf-8")
+
+        self.assertIn("function Invoke-ReleaseBinaryVersion", verifier)
+        self.assertIn("Start-Process", verifier)
+        self.assertIn("-Wait -PassThru", verifier)
+        self.assertIn("$process.Dispose()", verifier)
+        self.assertIn("Invoke-ReleaseBinaryVersion -BinaryPath $binaryPath", verifier)
+        self.assertNotIn("$versionLines = @(& $binaryPath '--version' 2>&1)", verifier)
+
     @unittest.skipUnless(
         NATIVE_WINDOWS_POWERSHELL,
         "requires native Windows PowerShell; Wine returns success without executing -File",
