@@ -24,10 +24,10 @@ Aggiornare coerentemente versione Python, `pyproject.toml` e risorse Windows, qu
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
-  '.\scripts\build-release.ps1' -Version 0.11.26
+  '.\scripts\build-release.ps1' -Version 0.11.27
 ```
 
-Lo script esegue i test, genera GUI e CLI, calcola gli SHA-256, aggiunge installer/configuratore/documentazione e produce `release\LTO-Archiver-0.11.26.zip`.
+Lo script esegue i test, genera GUI e CLI, calcola gli SHA-256, aggiunge installer/configuratore/documentazione e produce `release\LTO-Archiver-0.11.27.zip`.
 
 ## Verifica del rilascio
 

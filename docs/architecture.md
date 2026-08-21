@@ -32,7 +32,7 @@ Durante la copia i blocchi sono provvisori. Diventano visibili a ricerca e ripri
 
 Il checkpoint e per ciclo cassetta, non per singolo file. Dopo un arresto durante `writing`, una cassetta nuova viene riscritta da zero. Per APPEND viene invalidato soltanto il nuovo blocco provvisorio: nastro, file e blocchi gia consolidati restano validi e il retry non puo chiamare il formatter.
 
-## Protocollo di progresso 0.11.26
+## Protocollo di progresso 0.11.27
 
 Per ogni file il motore segue questa sequenza:
 

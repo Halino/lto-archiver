@@ -1,6 +1,6 @@
 # Installazione su Windows Server 2022
 
-Questa procedura installa LTO Archiver **0.11.26**. Supporta Windows Server
+Questa procedura installa LTO Archiver **0.11.27**. Supporta Windows Server
 2022 x64, HPE StoreOpen 3.5.0, un driver HPE LTO supportato e drive e supporti
 HPE LTO compatibili. Installazione e operazioni StoreOpen richiedono un
 amministratore; gli operatori backup necessitano anche di lettura della sorgente
@@ -14,7 +14,7 @@ LTO Archiver non contiene ne ridistribuisce software HPE. Scaricare il checksum
 pubblicato con la release e confrontarlo con:
 
 ```powershell
-Get-FileHash .\LTO-Archiver-0.11.26.zip -Algorithm SHA256
+Get-FileHash .\LTO-Archiver-0.11.27.zip -Algorithm SHA256
 ```
 
 Estrarre localmente soltanto uno ZIP il cui SHA-256 coincide con il valore
@@ -25,7 +25,7 @@ pubblicato. Avviare PowerShell come amministratore e lanciare l'installer:
 & 'C:\Program Files\LtoBackupManager\LtoBackupManagerCli.exe' --version
 ```
 
-Il comando versione deve riportare `0.11.26`. L'installer verifica gli hash GUI
+Il comando versione deve riportare `0.11.27`. L'installer verifica gli hash GUI
 e CLI, installa in `C:\Program Files\LtoBackupManager`, protegge
 `C:\ProgramData\LtoBackupManager` per SYSTEM e Administrators e crea un backup
 del catalogo esistente prima di sostituire gli eseguibili.
@@ -52,9 +52,10 @@ stato privilegiata:
   --state-dir 'C:\ProgramData\LtoBackupManager' catalog check
 ```
 
-Con la 0.11.26 il comando riporta schema catalogo 13. La migrazione conserva il
-seriale Win32 di StoreOpen come informazione diagnostica, consente che cassette
-diverse condividano quel valore e rende univoca ogni etichetta LTFS non vuota.
+Con la 0.11.27 il comando riporta schema catalogo 13. Questa release non aggiunge
+migrazioni. Lo schema conserva il seriale Win32 di StoreOpen come informazione
+diagnostica, consente che cassette diverse condividano quel valore e rende
+univoca ogni etichetta LTFS non vuota.
 Prima di un job reale, verificare che la GUI mostri `write.pending`,
 `close.pending`, `close.complete` e `timing.complete`; il file successivo non
 deve iniziare prima di `close.complete`.

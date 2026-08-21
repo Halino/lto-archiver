@@ -77,7 +77,7 @@ class DocumentationTests(unittest.TestCase):
                 self.assertIn(marker, troubleshooting, f"{language} missing {marker}")
 
             for text in (
-                "verify-release.ps1 -Version 0.11.26 -ReleaseDirectory",
+                "verify-release.ps1 -Version 0.11.27 -ReleaseDirectory",
                 "build-public-snapshot.py",
                 "--manifest public-files.txt",
                 "audit-public-content.py",
@@ -129,8 +129,8 @@ class DocumentationTests(unittest.TestCase):
                 self.assertIn(text, cli + troubleshooting, f"{language} missing {text}")
 
             for text in (
-                "release/LTO-Archiver-0.11.26.zip",
-                "release/LTO-Archiver-0.11.26.zip.sha256",
+                "release/LTO-Archiver-0.11.27.zip",
+                "release/LTO-Archiver-0.11.27.zip.sha256",
                 "exit 0" if language == "en" else "uscita 0",
                 "gh release create $env:GITHUB_REF_NAME",
                 '"release/LTO-Archiver-$version.zip"',
@@ -165,8 +165,8 @@ class DocumentationTests(unittest.TestCase):
             self.assertNotIn("-Force", diagnostic, f"{language} reuses diagnostic copy")
             normalized_release = release_text.replace("\n", " ")
             for text in (
-                "final 0.11.26 public tree after Tasks 7–9" if language == "en"
-                else "albero pubblico finale 0.11.26 dopo Tasks 7–9",
+                "final 0.11.27 public tree after Tasks 7–9" if language == "en"
+                else "albero pubblico finale 0.11.27 dopo Tasks 7–9",
                 "current intermediate checkout" if language == "en"
                 else "worktree intermedio corrente",
                 "exit 0" if language == "en" else "uscita 0",
@@ -174,7 +174,7 @@ class DocumentationTests(unittest.TestCase):
             ):
                 self.assertIn(text, normalized_release, f"{language} missing {text}")
             self.assertIn(
-                "audit-public-content.py `\n  'release\\LTO-Archiver-0.11.26.zip'",
+                "audit-public-content.py `\n  'release\\LTO-Archiver-0.11.27.zip'",
                 release_text,
                 f"{language} missing ZIP audit",
             )
@@ -185,8 +185,8 @@ class DocumentationTests(unittest.TestCase):
         for name in names:
             english = (root / "docs" / "en" / name).read_text(encoding="utf-8")
             italian = (root / "docs" / "it" / name).read_text(encoding="utf-8")
-            self.assertIn("0.11.26", english, name)
-            self.assertIn("0.11.26", italian, name)
+            self.assertIn("0.11.27", english, name)
+            self.assertIn("0.11.27", italian, name)
         for language in ("en", "it"):
             text = (root / "docs" / language / "user-guide.md").read_text(encoding="utf-8")
             self.assertIn("NUOVA", text)
@@ -222,12 +222,12 @@ class DocumentationTests(unittest.TestCase):
 
         self.assertIn("[Italiano](README.it.md)", english)
         self.assertIn("[English](README.md)", italian)
-        self.assertIn("0.11.26", english)
-        self.assertIn("0.11.26", italian)
+        self.assertIn("0.11.27", english)
+        self.assertIn("0.11.27", italian)
         self.assertIn("Apache-2.0", english)
         self.assertIn("docs/en/index.md", english)
         self.assertIn("docs/it/index.md", italian)
-        self.assertIn("## [0.11.26]", changelog)
+        self.assertIn("## [0.11.27]", changelog)
 
     def test_relative_markdown_links_resolve(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -270,11 +270,11 @@ class DocumentationTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertIn("0.11.26", readme)
-        self.assertIn("0.11.26", installation)
-        self.assertIn("0.11.26", documentation_index)
-        self.assertIn("0.11.26", development)
-        release_notes = (root / "docs" / "release-notes-0.11.26.md").read_text(
+        self.assertIn("0.11.27", readme)
+        self.assertIn("0.11.27", installation)
+        self.assertIn("0.11.27", documentation_index)
+        self.assertIn("0.11.27", development)
+        release_notes = (root / "docs" / "release-notes-0.11.27.md").read_text(
             encoding="utf-8"
         )
         self.assertIn("seriale Win32", release_notes)

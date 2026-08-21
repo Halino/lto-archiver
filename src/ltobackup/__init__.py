@@ -1,3 +1,3 @@
 """LTO Archiver."""
 
-__version__ = "0.11.26"
+__version__ = "0.11.27"

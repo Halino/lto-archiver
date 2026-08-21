@@ -49,6 +49,7 @@ docs/release-notes-0.11.23.md
 docs/release-notes-0.11.24.md
 docs/release-notes-0.11.25.md
 docs/release-notes-0.11.26.md
+docs/release-notes-0.11.27.md
 docs/troubleshooting.md
 hooks/hook-_tkinter.py
 hooks/pre_find_module_path/hook-tkinter.py

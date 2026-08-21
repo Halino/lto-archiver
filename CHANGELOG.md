@@ -4,6 +4,23 @@ All notable changes to LTO Archiver are documented in this file. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases
 use semantic versions.
 
+## [0.11.27] - 2026-08-21
+
+### Fixed
+
+- The LTFS finalization monitor now shows whether each unmount phase is in
+  progress, complete, or failed instead of presenting every phase as learning.
+- Completed and failed finalization timers no longer continue to increase.
+- After a successful eject (or another terminal automatic-job event), the
+  finalization panel returns to its compact idle state instead of retaining the
+  last eject phase.
+
+### Changed
+
+- Application and Windows file/product release metadata are 0.11.27. Catalog
+  schema remains 13; this release adds no catalog migration and does not alter
+  completed tapes, blocks, files, hashes, manifests, or checkpoints.
+
 ## [0.11.26] - 2026-08-20
 
 ### Added
@@ -75,6 +92,7 @@ use semantic versions.
 - The GUI distinguished `read.pending`, `write.pending`, and
   `close_queue.pending` without attributing unconfirmed bytes.
 
+[0.11.27]: ../../releases/tag/v0.11.27
 [0.11.26]: ../../releases/tag/v0.11.26
 [0.11.25]: ../../releases/tag/v0.11.25
 [0.11.24]: ../../releases/tag/v0.11.24

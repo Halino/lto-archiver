@@ -528,33 +528,41 @@ def finalization_view(event: dict, *, language: str = "it") -> dict:
             "eject": "Espulsione cassetta",
             "learning": "In apprendimento",
             "stage": "Fase",
+            "pending": "In corso",
+            "complete": "Fase completata",
+            "failed": "Errore di finalizzazione",
         },
         "en": {
             "index_sync": "Synchronizing LTFS cache and index",
             "mapping_release": "Releasing drive letter", "eject": "Ejecting tape",
-            "learning": "Learning", "stage": "Stage",
+            "learning": "Learning", "stage": "Stage", "pending": "In progress",
+            "complete": "Stage complete", "failed": "Finalization error",
         },
         "fr": {
             "index_sync": "Synchronisation du cache et de l'index LTFS",
             "mapping_release": "Liberation de la lettre de lecteur", "eject": "Ejection de la cassette",
-            "learning": "Apprentissage", "stage": "Phase",
+            "learning": "Apprentissage", "stage": "Phase", "pending": "En cours",
+            "complete": "Phase terminee", "failed": "Erreur de finalisation",
         },
         "de": {
             "index_sync": "LTFS-Cache und Index synchronisieren",
             "mapping_release": "Laufwerksbuchstaben freigeben", "eject": "Band auswerfen",
-            "learning": "Lernphase", "stage": "Phase",
+            "learning": "Lernphase", "stage": "Phase", "pending": "In Arbeit",
+            "complete": "Phase abgeschlossen", "failed": "Finalisierungsfehler",
         },
         "es": {
             "index_sync": "Sincronizacion de cache e indice LTFS",
             "mapping_release": "Liberacion de letra de unidad", "eject": "Expulsion del cartucho",
-            "learning": "Aprendiendo", "stage": "Fase",
+            "learning": "Aprendiendo", "stage": "Fase", "pending": "En curso",
+            "complete": "Fase completada", "failed": "Error de finalizacion",
         },
     }.get(language)
     if labels is None:
         labels = {
             "index_sync": "Sincronizzazione cache e indice LTFS",
             "mapping_release": "Rilascio lettera di unita", "eject": "Espulsione cassetta",
-            "learning": "In apprendimento", "stage": "Fase",
+            "learning": "In apprendimento", "stage": "Fase", "pending": "In corso",
+            "complete": "Fase completata", "failed": "Errore di finalizzazione",
         }
     kind = str(event.get("event") or "")
     if kind != "unmount.progress":
@@ -564,6 +572,7 @@ def finalization_view(event: dict, *, language: str = "it") -> dict:
     elapsed = max(0.0, float(event.get("elapsed_seconds") or 0.0))
     eta = event.get("eta_seconds")
     stage = str(event.get("stage") or "index_sync")
+    status = str(event.get("status") or "pending")
     number = max(1, int(event.get("stage_number") or 1))
     total = max(number, int(event.get("stage_total") or 3))
     completed = number if event.get("status") == "complete" else number - 1
@@ -573,7 +582,7 @@ def finalization_view(event: dict, *, language: str = "it") -> dict:
         "counter": f"{labels['stage']} {number} / {total}",
         "elapsed": format_duration(elapsed, language=language),
         "eta": format_duration(eta, language=language) if eta is not None else labels["learning"],
-        "detail": labels["learning"] if eta is None else "",
+        "detail": labels.get(status, status),
     }
 
 
@@ -4789,6 +4798,29 @@ class LtoBackupWindow(tk.Tk):
             self._automatic_activity_event = None
             self._automatic_activity_started_at = None
             self._automatic_writing = event.get("event") == "automatic.writing"
+            last_finalization = getattr(self, "_automatic_finalization_event", None)
+            if (
+                event.get("event") in {
+                    "automatic.ejected",
+                    "automatic.append_full",
+                    "automatic.paused",
+                    "automatic.completed",
+                    "automatic.failed",
+                }
+                and last_finalization is not None
+                and last_finalization.get("status") == "complete"
+            ):
+                self._automatic_finalization_event = None
+                self._automatic_finalization_updated_at = None
+                self.automatic_finalize_phase.set(self._t("Inattivo"))
+                self.automatic_finalize_detail.set(
+                    self._t("Nessuna finalizzazione in corso")
+                )
+                self.automatic_finalize_counter.set("-")
+                self.automatic_finalize_elapsed.set("-")
+                self.automatic_finalize_eta.set("-")
+                self.automatic_finalize_progress["value"] = 0
+                self._set_automatic_finalization_active(False)
             if event.get("event") == "automatic.writing":
                 self._automatic_timing_event = None
                 self._automatic_timing_updated_at = None
@@ -5050,6 +5082,7 @@ class LtoBackupWindow(tk.Tk):
         if (
             getattr(self, "_automatic_finalization_event", None) is not None
             and getattr(self, "_automatic_finalization_updated_at", None) is not None
+            and self._automatic_finalization_event.get("status") == "pending"
         ):
             now = time.monotonic()
             advanced = dict(self._automatic_finalization_event)

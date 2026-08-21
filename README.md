@@ -2,7 +2,7 @@
 
 [Italiano](README.it.md)
 
-Current version: **0.11.26**.
+Current version: **0.11.27**.
 
 ## What it does
 
@@ -54,7 +54,7 @@ After verifying the release checksum, install as an administrator and confirm
 the installed CLI version:
 
 ```powershell
-Get-FileHash .\LTO-Archiver-0.11.26.zip -Algorithm SHA256
+Get-FileHash .\LTO-Archiver-0.11.27.zip -Algorithm SHA256
 & '.\install-lto-backup-manager.ps1' -SourceDirectory '.'
 & 'C:\Program Files\LtoBackupManager\LtoBackupManagerCli.exe' --version
 ```
@@ -83,17 +83,18 @@ Start with the [English documentation][en-index]. Long procedures live in the
 
 ## Releases and verification
 
-Current public release: **0.11.26**. See the [changelog](CHANGELOG.md) and the
+Current public release: **0.11.27**. See the [changelog](CHANGELOG.md) and the
 [release process][en-release-process] for reproducible checks. Verify the ZIP
 SHA-256 and the GUI/CLI version before distribution. No production server
 operation is part of release preparation.
 
 ## Project status and limitations
 
-Version 0.11.26 upgrades existing catalogs to schema 13. The migration removes
-the old uniqueness constraint on the diagnostic Win32 serial and makes each
-non-empty LTFS volume label unique; it does not alter completed tapes, blocks,
-files, hashes, or checkpoints. LTFS, StoreOpen, the drive, and the operator
+Version 0.11.27 keeps catalog schema 13 and performs no new catalog migration.
+The schema retains the diagnostic Win32 serial without making it a unique media
+key, and makes each non-empty LTFS volume label unique. The release does not
+alter completed tapes, blocks, files, hashes, manifests, or checkpoints. LTFS,
+StoreOpen, the drive, and the operator
 control physical media behavior. A tape copy is not by itself a redundancy
 strategy, and recovery after an interrupted unmount may require the HPE tools
 described in the [LTFS operations guide][en-ltfs].

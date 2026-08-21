@@ -1,6 +1,6 @@
 # LTO Archiver operator manuals
 
-These operator manuals describe public release **0.11.26** for Windows Server
+These operator manuals describe public release **0.11.27** for Windows Server
 2022 and append-only SMB archives on LTFS tape. HPE StoreOpen, HPE drivers, and
 HPE support tools are external prerequisites; they are not bundled with LTO
 Archiver.
@@ -15,8 +15,8 @@ Archiver.
   catalog search, offline browsing, and restore.
 - [Troubleshooting](../troubleshooting.md): non-destructive diagnosis of slow
   LTFS operations.
-- [Development](../development.md) and [release management](../release-notes-0.11.26.md):
-  local engineering and the 0.11.26 release record.
+- [Development](../development.md) and [release management](../release-notes-0.11.27.md):
+  local engineering and the 0.11.27 release record.
 
 Read [administration](administration.md) before operating the shared state and
 [LTFS operations](ltfs-operations.md) before diagnosing a mounted drive. The

@@ -17,23 +17,23 @@ $env:PYTHONPATH = 'src'
 `-m unittest tests.test_cli.CliTests -v`. Per GUI/CLI:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Version 0.11.26
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Version 0.11.27
 ```
 
 I punti versione sono `src/ltobackup/__init__.py`, `pyproject.toml`, entrambi
 `packaging/version_info*.txt`. Prima snapshot pubblico controllare LICENSE,
 NOTICE, THIRD_PARTY_NOTICES, metadata, README versione/licenza.
 
-## Tool repository release 0.11.26
+## Tool repository release 0.11.27
 
-Applicare l'intero blocco comandi **solo nell'albero pubblico finale 0.11.26
+Applicare l'intero blocco comandi **solo nell'albero pubblico finale 0.11.27
 dopo Tasks 7–9** quando i file tool sono presenti. Nel **worktree intermedio
 corrente** non sono disponibili: non eseguirli. Sono tool repository, mai
 comandi applicazione/produzione.
 
 ```powershell
-& .\scripts\build-release.ps1 -Version 0.11.26
-& .\scripts\verify-release.ps1 -Version 0.11.26 -ReleaseDirectory .\release
+& .\scripts\build-release.ps1 -Version 0.11.27
+& .\scripts\verify-release.ps1 -Version 0.11.27 -ReleaseDirectory .\release
 
 & .\.build-venv\Scripts\python.exe scripts\build-public-snapshot.py `
   --root . --manifest public-files.txt --target C:\Temp\lto-archiver-public
@@ -42,7 +42,7 @@ comandi applicazione/produzione.
 & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
   C:\Temp\lto-archiver-public
 & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
-  'release\LTO-Archiver-0.11.26.zip'
+  'release\LTO-Archiver-0.11.27.zip'
 & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
   --manifest public-files.txt --root . --git-history
 ```

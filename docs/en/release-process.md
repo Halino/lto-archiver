@@ -1,19 +1,19 @@
 # Release process
 
-This is repository work, never a production-server procedure. The 0.11.26 tag
-is `v0.11.26`; title is `LTO Archiver 0.11.26`.
+This is repository work, never a production-server procedure. The 0.11.27 tag
+is `v0.11.27`; title is `LTO Archiver 0.11.27`.
 
 1. On an idle build workstation align version seams, run the full unittest
    command in [development](development.md), then check legal files/notices.
 2. The final Task 7 builder tests unless skipped, builds GUI/CLI, optionally
    signs only when both signing parameters exist, and writes
-   `release/LTO-Archiver-0.11.26.zip` plus
-   `release/LTO-Archiver-0.11.26.zip.sha256`. A checksum does not mean signed.
+   `release/LTO-Archiver-0.11.27.zip` plus
+   `release/LTO-Archiver-0.11.27.zip.sha256`. A checksum does not mean signed.
 3. Verify executable presence/version, installer/CFA tool, docs/license/notice,
    ZIP hash, and absence of state, logs, databases, secrets, private paths, or
    HPE software. Verifier mismatch, forbidden content, or unexpected executable
    is nonzero and blocks publication; never publish an uncertain artifact.
-4. **Precondition:** apply this entire command block only in the **final 0.11.26
+4. **Precondition:** apply this entire command block only in the **final 0.11.27
    public tree after Tasks 7–9** have added their tool/workflow files. In the
    **current intermediate checkout**, do not run it. These are repository tools,
    never application/production commands. On Windows every successful command
@@ -21,14 +21,14 @@ is `v0.11.26`; title is `LTO Archiver 0.11.26`.
    publication:
 
    ```powershell
-   & '.\scripts\build-release.ps1' -Version 0.11.26
-   & .\scripts\verify-release.ps1 -Version 0.11.26 -ReleaseDirectory .\release
+   & '.\scripts\build-release.ps1' -Version 0.11.27
+   & .\scripts\verify-release.ps1 -Version 0.11.27 -ReleaseDirectory .\release
    & .\.build-venv\Scripts\python.exe scripts\build-public-snapshot.py `
      --root . --manifest public-files.txt --target C:\Temp\lto-archiver-public
    & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
      --manifest public-files.txt --root .
    & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
-     'release\LTO-Archiver-0.11.26.zip'
+     'release\LTO-Archiver-0.11.27.zip'
    & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
      --manifest public-files.txt --root . --git-history
    ```

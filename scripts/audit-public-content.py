@@ -122,7 +122,10 @@ _IANA_SPECIAL_PURPOSE_NETWORKS = (
 _SYNTHETIC_KEY_FIXTURE_PATH = "tests/fixtures/public-audit-private-key.txt"
 _SYNTHETIC_KEY_FIXTURE_MARKER = b"\nPUBLIC_AUDIT_SYNTHETIC_KEY_FIXTURE\n"
 _DEPLOYMENT_KEY_LITERAL_SUFFIX = b"\\" + b'nfixture"'
-_PUBLIC_FILE_VERSION = ".".join(str(part) for part in (0, 11, 26, 0))
+_PUBLIC_FILE_VERSIONS = frozenset(
+    ".".join(str(part) for part in version)
+    for version in ((0, 11, 26, 0), (0, 11, 27, 0))
+)
 
 
 def _is_private_address(value: str) -> bool:
@@ -222,7 +225,7 @@ def _line_for_match(text: str, match: re.Match[str]) -> str:
 
 
 def _is_file_version_context(text: str, match: re.Match[str]) -> bool:
-    if match.group(0) != _PUBLIC_FILE_VERSION:
+    if match.group(0) not in _PUBLIC_FILE_VERSIONS:
         return False
     line_start = text.rfind("\n", 0, match.start()) + 1
     prefix = text[line_start : match.start()].strip().casefold()

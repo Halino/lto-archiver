@@ -1,6 +1,6 @@
 # Installation on Windows Server 2022
 
-This procedure installs LTO Archiver **0.11.26**. It supports Windows Server
+This procedure installs LTO Archiver **0.11.27**. It supports Windows Server
 2022 x64, HPE StoreOpen 3.5.0, an HPE-supported LTO driver, and compatible HPE
 LTO drive and media. Installation and StoreOpen operations require an
 administrator; backup operators also need SMB source read access and
@@ -14,7 +14,7 @@ Archiver ZIP contains none of that HPE software, and does not redistribute it.
 Download the published checksum with the release and compare it with:
 
 ```powershell
-Get-FileHash .\LTO-Archiver-0.11.26.zip -Algorithm SHA256
+Get-FileHash .\LTO-Archiver-0.11.27.zip -Algorithm SHA256
 ```
 
 Only extract a ZIP whose SHA-256 matches the published value, to a local
@@ -25,7 +25,7 @@ directory. Run PowerShell as Administrator and invoke the included installer:
 & 'C:\Program Files\LtoBackupManager\LtoBackupManagerCli.exe' --version
 ```
 
-The version command must report `0.11.26`. The installer verifies GUI and CLI
+The version command must report `0.11.27`. The installer verifies GUI and CLI
 hashes, installs beneath `C:\Program Files\LtoBackupManager`, protects
 `C:\ProgramData\LtoBackupManager` for SYSTEM and Administrators, and backs up
 the existing catalog before replacing executables.
@@ -52,9 +52,10 @@ directory:
   --state-dir 'C:\ProgramData\LtoBackupManager' catalog check
 ```
 
-For 0.11.26 this reports catalog schema 13. The migration keeps the StoreOpen
-Win32 serial as diagnostic information, permits different cartridges to share
-that value, and makes each non-empty LTFS volume label unique. Before a live
+For 0.11.27 this reports catalog schema 13. This release adds no migration. The
+schema keeps the StoreOpen Win32 serial as diagnostic information, permits
+different cartridges to share that value, and makes each non-empty LTFS volume
+label unique. Before a live
 job, confirm that the GUI can display `write.pending`, `close.pending`,
 `close.complete`, and `timing.complete`; the next file must not start before
 `close.complete`.

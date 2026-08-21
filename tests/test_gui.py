@@ -40,7 +40,7 @@ class GuiParserTests(unittest.TestCase):
             gui.build_parser().parse_args(["--version"])
 
         self.assertEqual(0, stopped.exception.code)
-        self.assertEqual("LTO Archiver 0.11.26", output.getvalue().strip())
+        self.assertEqual("LTO Archiver 0.11.27", output.getvalue().strip())
 
     def test_main_handles_version_before_gui_startup_and_returns_zero(self) -> None:
         output = io.StringIO()
@@ -54,7 +54,7 @@ class GuiParserTests(unittest.TestCase):
                 result = ("SystemExit", stopped.code)
 
         self.assertEqual(0, result)
-        self.assertEqual("LTO Archiver 0.11.26", output.getvalue().strip())
+        self.assertEqual("LTO Archiver 0.11.27", output.getvalue().strip())
         startup.assert_not_called()
 
     def test_version_emitter_uses_native_writer_when_python_streams_are_absent(self) -> None:
@@ -68,7 +68,7 @@ class GuiParserTests(unittest.TestCase):
             emitted = emitter(native_writer=native_writer)
 
         self.assertTrue(emitted)
-        native_writer.assert_called_once_with("LTO Archiver 0.11.26\n")
+        native_writer.assert_called_once_with("LTO Archiver 0.11.27\n")
 
     def test_version_emitter_prefers_a_normal_stream_without_native_calls(self) -> None:
         emitter = getattr(gui, "_emit_gui_version", None)
@@ -79,7 +79,7 @@ class GuiParserTests(unittest.TestCase):
         emitted = emitter(stream=output, native_writer=native_writer)
 
         self.assertTrue(emitted)
-        self.assertEqual("LTO Archiver 0.11.26\n", output.getvalue())
+        self.assertEqual("LTO Archiver 0.11.27\n", output.getvalue())
         native_writer.assert_not_called()
 
 
@@ -351,6 +351,29 @@ class ProgressTrackerTests(unittest.TestCase):
         self.assertEqual("In apprendimento", view["eta"])
         self.assertEqual(0.0, view["percent"])
 
+    def test_finalization_view_reports_the_real_stage_status(self) -> None:
+        base_event = {
+            "event": "unmount.progress",
+            "stage": "index_sync",
+            "stage_number": 1,
+            "stage_total": 3,
+            "elapsed_seconds": 25.0,
+            "eta_seconds": None,
+        }
+
+        for status, expected in (
+            ("pending", "In corso"),
+            ("complete", "Fase completata"),
+            ("failed", "Errore di finalizzazione"),
+        ):
+            with self.subTest(status=status):
+                view = gui.finalization_view(
+                    {**base_event, "status": status},
+                    language="it",
+                )
+
+                self.assertEqual(expected, view["detail"])
+
     def test_finalization_event_updates_the_dedicated_monitor(self) -> None:
         window = SimpleNamespace(
             _automatic_job_id="JOB1",
@@ -547,6 +570,101 @@ class ProgressTrackerTests(unittest.TestCase):
 
         window.automatic_finalize_elapsed.set.assert_called_with("00:00:35")
         window.automatic_finalize_eta.set.assert_called_with("In apprendimento")
+
+    def test_completed_finalization_elapsed_time_stays_frozen(self) -> None:
+        interpreter = tk.Tcl()
+        elapsed = tk.StringVar(master=interpreter, value="00:00:25")
+        window = SimpleNamespace(
+            _automatic_finalization_event={
+                "event": "unmount.progress",
+                "stage": "index_sync",
+                "status": "complete",
+                "stage_number": 1,
+                "stage_total": 3,
+                "elapsed_seconds": 25.0,
+            },
+            _automatic_finalization_updated_at=100.0,
+            _automatic_activity_event=None,
+            _automatic_activity_started_at=None,
+            _automatic_writing=False,
+            _automatic_last_write_at=None,
+            language="it",
+            automatic_finalize_phase=tk.StringVar(master=interpreter),
+            automatic_finalize_detail=tk.StringVar(master=interpreter),
+            automatic_finalize_counter=tk.StringVar(master=interpreter),
+            automatic_finalize_elapsed=elapsed,
+            automatic_finalize_eta=tk.StringVar(master=interpreter),
+            automatic_finalize_progress={},
+        )
+
+        with patch("ltobackup.gui.time.monotonic", return_value=110.0):
+            gui.LtoBackupWindow._update_automatic_speed_idle(window)
+
+        self.assertEqual("00:00:25", elapsed.get())
+
+    def test_ejected_event_returns_finalization_monitor_to_idle(self) -> None:
+        interpreter = tk.Tcl()
+        window = SimpleNamespace(
+            _automatic_job_id="JOB1",
+            _automatic_activity_event=None,
+            _automatic_activity_started_at=None,
+            _automatic_writing=False,
+            _automatic_finalization_event={
+                "event": "unmount.progress",
+                "stage": "eject",
+                "status": "complete",
+            },
+            _automatic_finalization_updated_at=100.0,
+            automatic_finalize_phase=tk.StringVar(
+                master=interpreter, value="Espulsione cassetta"
+            ),
+            automatic_finalize_detail=tk.StringVar(
+                master=interpreter, value="Fase completata"
+            ),
+            automatic_finalize_counter=tk.StringVar(
+                master=interpreter, value="Fase 3 / 3"
+            ),
+            automatic_finalize_elapsed=tk.StringVar(
+                master=interpreter, value="00:01:00"
+            ),
+            automatic_finalize_eta=tk.StringVar(
+                master=interpreter, value="In apprendimento"
+            ),
+            automatic_finalize_progress={"value": 100.0},
+            automatic_state=tk.StringVar(master=interpreter),
+            operation_var=tk.StringVar(master=interpreter),
+            status_var=tk.StringVar(master=interpreter),
+            _t=lambda text: text,
+            _append_log=lambda _message: None,
+        )
+        window._set_automatic_finalization_active = (
+            lambda active: setattr(window, "finalization_active", bool(active))
+        )
+        window._apply_automatic_live_event = lambda event, message: (
+            gui.LtoBackupWindow._apply_automatic_live_event(window, event, message)
+        )
+
+        gui.LtoBackupWindow._handle_progress(
+            window,
+            {
+                "event": "automatic.ejected",
+                "job_id": "JOB1",
+                "physical_label": "IR1822",
+            },
+        )
+
+        self.assertEqual("Inattivo", window.automatic_finalize_phase.get())
+        self.assertEqual(
+            "Nessuna finalizzazione in corso",
+            window.automatic_finalize_detail.get(),
+        )
+        self.assertEqual("-", window.automatic_finalize_counter.get())
+        self.assertEqual("-", window.automatic_finalize_elapsed.get())
+        self.assertEqual("-", window.automatic_finalize_eta.get())
+        self.assertEqual(0, window.automatic_finalize_progress["value"])
+        self.assertIsNone(window._automatic_finalization_event)
+        self.assertIsNone(window._automatic_finalization_updated_at)
+        self.assertFalse(window.finalization_active)
 
     def test_speed_chart_keeps_fixed_geometry_while_trace_changes(self) -> None:
         try:

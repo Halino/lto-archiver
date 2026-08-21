@@ -49,7 +49,7 @@ NATIVE_WINDOWS_POWERSHELL = os.name == "nt" and not Path(
 def _write_release_archive(
     release_directory: Path,
     *,
-    version: str = "0.11.26",
+    version: str = "0.11.27",
     extra_files: dict[str, bytes] | None = None,
     omitted_files: frozenset[str] = frozenset(),
 ) -> None:
@@ -95,7 +95,7 @@ def _run_release_verifier(release_directory: Path) -> subprocess.CompletedProces
             "-File",
             str(VERIFIER),
             "-Version",
-            "0.11.26",
+            "0.11.27",
             "-ReleaseDirectory",
             str(release_directory),
         ],
@@ -123,23 +123,23 @@ class DeploymentScriptTests(unittest.TestCase):
             release_directory = Path(temporary)
             _write_release_archive(release_directory)
 
-            checksum = release_directory / "LTO-Archiver-0.11.26.zip.sha256"
+            checksum = release_directory / "LTO-Archiver-0.11.27.zip.sha256"
             record = checksum.read_bytes()
 
         self.assertTrue(record.endswith(b"\n"))
         self.assertFalse(record.endswith(b"\r\n"))
 
-    def test_release_01126_is_declared_consistently(self) -> None:
+    def test_release_01127_is_declared_consistently(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        expected = "0.11.26"
+        expected = "0.11.27"
         self.assertIn(f'version = "{expected}"', (root / "pyproject.toml").read_text())
         self.assertIn(f'__version__ = "{expected}"', (root / "src/ltobackup/__init__.py").read_text())
         for name in ("version_info.txt", "version_info_cli.txt"):
             text = (root / "packaging" / name).read_text()
-            self.assertIn("filevers=(0, 11, 26, 0)", text)
-            self.assertIn("prodvers=(0, 11, 26, 0)", text)
-            self.assertIn("FileVersion', '0.11.26", text)
-            self.assertIn("ProductVersion', '0.11.26", text)
+            self.assertIn("filevers=(0, 11, 27, 0)", text)
+            self.assertIn("prodvers=(0, 11, 27, 0)", text)
+            self.assertIn("FileVersion', '0.11.27", text)
+            self.assertIn("ProductVersion', '0.11.27", text)
     def test_public_release_package_includes_legal_and_bilingual_docs(self) -> None:
         builder = (ROOT / "scripts" / "build-release.ps1").read_text(
             encoding="utf-8"
@@ -223,7 +223,7 @@ class DeploymentScriptTests(unittest.TestCase):
             with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
                 release_directory = Path(temporary)
                 _write_release_archive(release_directory)
-                checksum = release_directory / "LTO-Archiver-0.11.26.zip.sha256"
+                checksum = release_directory / "LTO-Archiver-0.11.27.zip.sha256"
                 record = checksum.read_bytes().removesuffix(b"\n")
                 checksum.write_bytes(invalid_record(record))
 
@@ -245,7 +245,7 @@ class DeploymentScriptTests(unittest.TestCase):
                     release_directory,
                     extra_files={"catalog.db": b"forbidden after checksum validation"},
                 )
-                checksum = release_directory / "LTO-Archiver-0.11.26.zip.sha256"
+                checksum = release_directory / "LTO-Archiver-0.11.27.zip.sha256"
                 record = checksum.read_bytes().removesuffix(b"\n")
                 checksum.write_bytes(record + terminator)
 

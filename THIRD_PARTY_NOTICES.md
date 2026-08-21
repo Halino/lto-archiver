@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 This inventory covers the PyInstaller build environment reviewed for LTO
-Archiver 0.11.26. The project itself has no third-party runtime Python package
+Archiver 0.11.27. The project itself has no third-party runtime Python package
 dependencies. The release executables are produced from the standard-library
 application source using PyInstaller. Exact package versions and licensing
 claims below were taken from the installed Windows build environment's package

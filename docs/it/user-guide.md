@@ -1,6 +1,6 @@
 # Guida utente
 
-LTO Archiver **0.11.26** ha quattro fasi: **Librerie**, **Piano cassette**,
+LTO Archiver **0.11.27** ha quattro fasi: **Librerie**, **Piano cassette**,
 **Job automatici** e **Backup / catalogo e ripristino**. Il job viene salvato
 prima di usare un drive, evitando azioni nastro non pianificate.
 

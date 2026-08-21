@@ -467,9 +467,14 @@ class PublicationTests(unittest.TestCase):
 
     def test_four_part_file_version_is_not_mistaken_for_an_ipv4_address(self) -> None:
         auditor = importlib.import_module("scripts.audit_public_content")
-        version = b"0.11" + b".26.0"
+        version = b"0.11" + b".27.0"
         self.assertFalse(auditor.audit_bytes("release.txt", b"file/product version " + version))
         self.assertTrue(auditor.audit_bytes("sample.txt", b"host=" + version))
+        historical = b"0.11" + b".26.0"
+        self.assertFalse(
+            auditor.audit_bytes("historical-release.txt", b"file version " + historical)
+        )
+        self.assertTrue(auditor.audit_bytes("sample.txt", b"host=" + historical))
         private_version = b"10.0" + b".0.1"
         self.assertTrue(auditor.audit_bytes("release.txt", b"file version " + private_version))
 

@@ -1,10 +1,12 @@
 # Documentazione di LTO Archiver
 
-LTO Archiver gestisce backup append-only di grandi librerie SMB su cassette LTFS. Questa documentazione descrive la versione 0.11.26.
+LTO Archiver gestisce backup append-only di grandi librerie SMB su cassette LTFS. Questa documentazione descrive la versione 0.11.27.
 
-La 0.11.26 rende misurabili i tempi di chiusura `CopyFileEx`, mantiene la media
-effettiva durante l'unmount, rende puntuale il grafico a cinque minuti e corregge
-l'identità dei supporti HPE StoreOpen: cassette LTFS diverse possono condividere
+La 0.11.27 corregge lo stato del monitor di finalizzazione: distingue fasi in
+corso, completate e fallite, blocca il cronometro al termine e torna inattiva
+dopo l'espulsione. Mantiene inoltre la media effettiva durante l'unmount, il
+grafico puntuale a cinque minuti e l'identità dei supporti HPE StoreOpen:
+cassette LTFS diverse possono condividere
 il seriale Win32 diagnostico, mentre l'etichetta LTFS resta univoca e viene
 verificata prima della scrittura.
 
@@ -15,7 +17,7 @@ verificata prima della scrittura.
 - Per capire catalogo, checkpoint ed eventi: [Architettura](architecture.md)
 - Per analizzare mount, scrittura e GUI: [Diagnostica](troubleshooting.md)
 - Per modificare e distribuire il progetto: [Sviluppo e rilascio](development.md)
-- Per le modifiche incluse nella versione corrente: [Note di rilascio 0.11.26](release-notes-0.11.26.md)
+- Per le modifiche incluse nella versione corrente: [Note di rilascio 0.11.27](release-notes-0.11.27.md)
 
 Il [README principale](../README.md) rimane il riferimento sintetico per funzioni, requisiti, comandi CLI e capacita dei supporti.
 

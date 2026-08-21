@@ -1,6 +1,6 @@
 # Amministrazione
 
-Questa guida riguarda lo stato LTO Archiver **0.11.26** in
+Questa guida riguarda lo stato LTO Archiver **0.11.27** in
 `C:\ProgramData\LtoBackupManager`. Mantenere la directory accessibile soltanto
 a SYSTEM e Administrators come installato. Contiene `config.json`, `catalog.db`,
 `logs`, `temp` e `run.lock`; cambiare permessi o copiare file mutabili durante
@@ -39,7 +39,7 @@ diretto.
 Pianificare manutenzione fuori da `formatting`, `mounting`, `writing` e
 `unmounting`. Consentire upgrade solo senza job attivo, senza lettera LTFS
 montata e dopo rilascio del lavoro indice StoreOpen/FUSE. Prima della modifica,
-validare backup catalogo e registrare versione 0.11.26; dopo eseguire
+validare backup catalogo e registrare versione 0.11.27; dopo eseguire
 `catalog check`.
 
 L'applicazione recupera da stop controllato al checkpoint cassetta, ma non puo

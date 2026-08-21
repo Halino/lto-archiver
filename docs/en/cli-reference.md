@@ -1,6 +1,6 @@
 # CLI reference
 
-LTO Archiver 0.11.26 exposes `lto-backup`. This inventory was checked against
+LTO Archiver 0.11.27 exposes `lto-backup`. This inventory was checked against
 `python -m ltobackup --help` and every subcommand's `--help`, not an old README.
 
 ## Common contract

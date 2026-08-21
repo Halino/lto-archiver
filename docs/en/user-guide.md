@@ -1,6 +1,6 @@
 # User guide
 
-LTO Archiver **0.11.26** has four operator stages: **Libraries**, **Cassette
+LTO Archiver **0.11.27** has four operator stages: **Libraries**, **Cassette
 plan**, **Automatic jobs**, and **Backup / catalog and restore**. The job is
 saved before it uses a drive; that separation protects operators from an
 unplanned tape action.

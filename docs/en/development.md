@@ -18,23 +18,23 @@ runtime, for example `-m unittest tests.test_cli.CliTests -v`. Build GUI and
 CLI with:
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Version 0.11.26
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-release.ps1 -Version 0.11.27
 ```
 
 Version seams are `src/ltobackup/__init__.py`, `pyproject.toml`, and both
 `packaging/version_info*.txt` files. Before a public snapshot, check LICENSE,
 NOTICE, THIRD_PARTY_NOTICES, package metadata, README version/license claims.
 
-## 0.11.26 repository release tools
+## 0.11.27 repository release tools
 
-Apply this entire command block **only in the final 0.11.26 public tree after
+Apply this entire command block **only in the final 0.11.27 public tree after
 Tasks 7–9** have added the tool files. In the **current intermediate checkout**
 they are unavailable: do not run them. They are repository tools, never
 application/production commands.
 
 ```powershell
-& .\scripts\build-release.ps1 -Version 0.11.26
-& .\scripts\verify-release.ps1 -Version 0.11.26 -ReleaseDirectory .\release
+& .\scripts\build-release.ps1 -Version 0.11.27
+& .\scripts\verify-release.ps1 -Version 0.11.27 -ReleaseDirectory .\release
 
 & .\.build-venv\Scripts\python.exe scripts\build-public-snapshot.py `
   --root . --manifest public-files.txt --target C:\Temp\lto-archiver-public
@@ -43,7 +43,7 @@ application/production commands.
 & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
   C:\Temp\lto-archiver-public
 & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
-  'release\LTO-Archiver-0.11.26.zip'
+  'release\LTO-Archiver-0.11.27.zip'
 & .\.build-venv\Scripts\python.exe scripts\audit-public-content.py `
   --manifest public-files.txt --root . --git-history
 ```

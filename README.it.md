@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-Versione corrente: **0.11.26**.
+Versione corrente: **0.11.27**.
 
 ## Cosa fa
 
@@ -54,7 +54,7 @@ Dopo aver verificato il checksum della release, installare come amministratore
 e confermare la versione della CLI installata:
 
 ```powershell
-Get-FileHash .\LTO-Archiver-0.11.26.zip -Algorithm SHA256
+Get-FileHash .\LTO-Archiver-0.11.27.zip -Algorithm SHA256
 & '.\install-lto-backup-manager.ps1' -SourceDirectory '.'
 & 'C:\Program Files\LtoBackupManager\LtoBackupManagerCli.exe' --version
 ```
@@ -83,7 +83,7 @@ nella [guida di installazione][it-installation], [guida utente][it-user-guide],
 
 ## Release e verifica
 
-Release pubblica corrente: **0.11.26**. Consultare il [changelog](CHANGELOG.md)
+Release pubblica corrente: **0.11.27**. Consultare il [changelog](CHANGELOG.md)
 e il [processo di release][it-release-process] per controlli riproducibili.
 Verificare SHA-256 dello ZIP e versione GUI/CLI prima della distribuzione.
 Nessuna operazione sul server di produzione fa parte della preparazione della
@@ -91,10 +91,11 @@ release.
 
 ## Stato del progetto e limiti
 
-La 0.11.26 aggiorna i cataloghi esistenti allo schema 13. La migrazione elimina
-il vecchio vincolo univoco sul seriale Win32 diagnostico e rende univoca ogni
-etichetta LTFS non vuota; non modifica cassette completate, blocchi, file, hash
-o checkpoint. LTFS, StoreOpen, il drive e l'operatore controllano il
+La 0.11.27 mantiene lo schema catalogo 13 e non esegue nuove migrazioni. Lo
+schema conserva il seriale Win32 diagnostico senza usarlo come chiave univoca
+del supporto e rende univoca ogni etichetta LTFS non vuota. La release non
+modifica cassette completate, blocchi, file, hash, manifest o checkpoint. LTFS,
+StoreOpen, il drive e l'operatore controllano il
 comportamento fisico del supporto. Una copia su nastro non e di per se una
 strategia di ridondanza; il recupero dopo un unmount interrotto puo richiedere
 gli strumenti HPE descritti nella [guida alle operazioni LTFS][it-ltfs].

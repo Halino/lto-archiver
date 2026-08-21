@@ -1,6 +1,6 @@
 # LTFS operations and safe completion
 
-This guide covers LTO Archiver **0.11.26** with HPE StoreOpen 3.5.0. LTO is
+This guide covers LTO Archiver **0.11.27** with HPE StoreOpen 3.5.0. LTO is
 sequential media: a filesystem write may be accepted by caches before physical
 tape work and LTFS index work are complete. StoreOpen/FUSE owns formatting,
 mount, LTFS filesystem service, unmount, and ejection; LTO Archiver writes to

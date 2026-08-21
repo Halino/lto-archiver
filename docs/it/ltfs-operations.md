@@ -1,6 +1,6 @@
 # Operazioni LTFS e completamento sicuro
 
-Questa guida tratta LTO Archiver **0.11.26** con HPE StoreOpen 3.5.0. LTO e un
+Questa guida tratta LTO Archiver **0.11.27** con HPE StoreOpen 3.5.0. LTO e un
 supporto sequenziale: una scrittura filesystem puo essere accettata dalle cache
 prima del lavoro fisico nastro e dell'indice LTFS. StoreOpen/FUSE possiede
 formattazione, mount, servizio filesystem LTFS, unmount ed espulsione; LTO

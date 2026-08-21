@@ -1,6 +1,6 @@
 # Administration
 
-This guide applies to LTO Archiver **0.11.26** state in
+This guide applies to LTO Archiver **0.11.27** state in
 `C:\ProgramData\LtoBackupManager`. Keep that directory accessible only to
 SYSTEM and Administrators as installed. It contains `config.json`, `catalog.db`,
 `logs`, `temp`, and `run.lock`; changing permissions or copying mutable files
@@ -39,7 +39,7 @@ the device, but it must not be turned into a concurrent job or direct probe.
 Schedule maintenance windows outside `formatting`, `mounting`, `writing`, and
 `unmounting`. Gate upgrades on no active job, no mounted LTFS letter, and
 StoreOpen/FUSE having released index work. Before a change, validate a catalog
-backup and record the installed 0.11.26 version; after it, run `catalog check`.
+backup and record the installed 0.11.27 version; after it, run `catalog check`.
 
 The application can recover from a controlled stop at a cassette checkpoint,
 but it cannot declare a tape committed after an interrupted provider flush or

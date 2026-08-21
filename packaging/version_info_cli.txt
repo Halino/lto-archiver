@@ -1,7 +1,7 @@
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(0, 11, 26, 0),
-    prodvers=(0, 11, 26, 0),
+    filevers=(0, 11, 27, 0),
+    prodvers=(0, 11, 27, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -15,11 +15,11 @@ VSVersionInfo(
         '040904B0',
         [StringStruct('CompanyName', 'LTO Archiver'),
          StringStruct('FileDescription', 'LTO Archiver command line'),
-         StringStruct('FileVersion', '0.11.26'),
+         StringStruct('FileVersion', '0.11.27'),
          StringStruct('InternalName', 'LtoBackupManagerCli'),
          StringStruct('OriginalFilename', 'LtoBackupManagerCli.exe'),
          StringStruct('ProductName', 'LTO Archiver'),
-         StringStruct('ProductVersion', '0.11.26')]
+         StringStruct('ProductVersion', '0.11.27')]
       )
     ]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])

@@ -1,6 +1,6 @@
 # Riferimento CLI
 
-LTO Archiver 0.11.26 espone `lto-backup`. L'inventario deriva da
+LTO Archiver 0.11.27 espone `lto-backup`. L'inventario deriva da
 `python -m ltobackup --help` e da `--help` di ogni sottocomando, non da README
 precedenti.
 
