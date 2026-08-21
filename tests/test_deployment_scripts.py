@@ -195,6 +195,15 @@ class DeploymentScriptTests(unittest.TestCase):
         self.assertIn("${binary}: exit=", verifier)
         self.assertNotIn("$binary: exit=", verifier)
 
+    def test_release_verifier_retries_transient_scanner_locks_during_cleanup(self) -> None:
+        verifier = VERIFIER.read_text(encoding="utf-8")
+
+        self.assertIn("function Remove-OwnedTemporaryDirectory", verifier)
+        self.assertIn("[int]$MaximumAttempts = 20", verifier)
+        self.assertIn("Start-Sleep -Milliseconds 250", verifier)
+        self.assertIn("Remove-OwnedTemporaryDirectory -Path $temporaryDirectory", verifier)
+        self.assertIn("throw", verifier.split("function Remove-OwnedTemporaryDirectory", 1)[1])
+
     @unittest.skipUnless(
         NATIVE_WINDOWS_POWERSHELL,
         "requires native Windows PowerShell; Wine returns success without executing -File",

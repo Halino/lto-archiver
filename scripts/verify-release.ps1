@@ -86,6 +86,26 @@ function Assert-SafeArchiveEntries {
     }
 }
 
+function Remove-OwnedTemporaryDirectory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [int]$MaximumAttempts = 20
+    )
+
+    for ($attempt = 1; $attempt -le $MaximumAttempts; $attempt++) {
+        try {
+            Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
+            return
+        }
+        catch {
+            if ($attempt -eq $MaximumAttempts) {
+                throw
+            }
+            Start-Sleep -Milliseconds 250
+        }
+    }
+}
+
 if ($Version -notmatch '^\d+\.\d+\.\d+$') {
     throw "Invalid release version: $Version"
 }
@@ -232,7 +252,7 @@ finally {
         $parentStillValid = (Split-Path -Parent $temporaryDirectory).TrimEnd('\', '/') -eq $temporaryParent
         $leafStillValid = (Split-Path -Leaf $temporaryDirectory) -match '^LTO-Archiver-verify-[0-9a-f]{32}$'
         if ($parentStillValid -and $leafStillValid -and (Test-Path -LiteralPath $temporaryDirectory)) {
-            Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force
+            Remove-OwnedTemporaryDirectory -Path $temporaryDirectory
         }
     }
 }
