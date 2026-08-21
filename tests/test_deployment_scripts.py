@@ -8,6 +8,7 @@ import unittest
 import uuid
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,10 +71,17 @@ def _write_release_archive(
         for name, content in sorted(files.items()):
             package.writestr(name, content)
     archive_digest = hashlib.sha256(archive.read_bytes()).hexdigest().upper()
-    archive.with_suffix(".zip.sha256").write_text(
-        f"{archive_digest}  {archive.name}\n",
-        encoding="ascii",
+    archive.with_suffix(".zip.sha256").write_bytes(
+        f"{archive_digest}  {archive.name}\n".encode("ascii"),
     )
+
+
+def _windows_powershell_environment() -> dict[str, str]:
+    return {
+        key: value
+        for key, value in os.environ.items()
+        if key.casefold() != "psmodulepath"
+    }
 
 
 def _run_release_verifier(release_directory: Path) -> subprocess.CompletedProcess[str]:
@@ -95,12 +103,32 @@ def _run_release_verifier(release_directory: Path) -> subprocess.CompletedProces
         text=True,
         encoding="utf-8",
         errors="replace",
+        env=_windows_powershell_environment(),
         check=False,
         timeout=30,
     )
 
 
 class DeploymentScriptTests(unittest.TestCase):
+    def test_windows_powershell_subprocess_drops_inherited_module_path(self) -> None:
+        with mock.patch.dict(os.environ, {"PSModulePath": "pwsh-only-modules"}):
+            environment = _windows_powershell_environment()
+
+        self.assertFalse(
+            any(key.casefold() == "psmodulepath" for key in environment)
+        )
+
+    def test_release_fixture_has_a_platform_independent_lf_checksum(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            release_directory = Path(temporary)
+            _write_release_archive(release_directory)
+
+            checksum = release_directory / "LTO-Archiver-0.11.26.zip.sha256"
+            record = checksum.read_bytes()
+
+        self.assertTrue(record.endswith(b"\n"))
+        self.assertFalse(record.endswith(b"\r\n"))
+
     def test_release_01126_is_declared_consistently(self) -> None:
         root = Path(__file__).resolve().parents[1]
         expected = "0.11.26"
@@ -232,27 +260,7 @@ class DeploymentScriptTests(unittest.TestCase):
                 release_directory,
                 extra_files={"../escaped.txt": b"must never be extracted"},
             )
-            completed = subprocess.run(
-                [
-                    "powershell.exe",
-                    "-NoLogo",
-                    "-NoProfile",
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-File",
-                    str(VERIFIER),
-                    "-Version",
-                    "0.11.26",
-                    "-ReleaseDirectory",
-                    str(release_directory),
-                ],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                check=False,
-                timeout=30,
-            )
+            completed = _run_release_verifier(release_directory)
 
             output = completed.stdout + completed.stderr
             self.assertNotEqual(0, completed.returncode, output)
@@ -282,27 +290,7 @@ class DeploymentScriptTests(unittest.TestCase):
                 sentinel = temp_root / f"LTO-Archiver-verifier-sentinel-{uuid.uuid4()}"
                 sentinel.mkdir()
                 try:
-                    completed = subprocess.run(
-                        [
-                            "powershell.exe",
-                            "-NoLogo",
-                            "-NoProfile",
-                            "-ExecutionPolicy",
-                            "Bypass",
-                            "-File",
-                            str(VERIFIER),
-                            "-Version",
-                            "0.11.26",
-                            "-ReleaseDirectory",
-                            str(release_directory),
-                        ],
-                        capture_output=True,
-                        text=True,
-                        encoding="utf-8",
-                        errors="replace",
-                        check=False,
-                        timeout=30,
-                    )
+                    completed = _run_release_verifier(release_directory)
                     output = completed.stdout + completed.stderr
                     self.assertNotEqual(0, completed.returncode, output)
                     self.assertIn("Forbidden release content", output)
@@ -324,27 +312,7 @@ class DeploymentScriptTests(unittest.TestCase):
             )
             temp_root = Path(tempfile.gettempdir())
             before = set(temp_root.glob("LTO-Archiver-verify-*"))
-            completed = subprocess.run(
-                [
-                    "powershell.exe",
-                    "-NoLogo",
-                    "-NoProfile",
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-File",
-                    str(VERIFIER),
-                    "-Version",
-                    "0.11.26",
-                    "-ReleaseDirectory",
-                    str(release_directory),
-                ],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                check=False,
-                timeout=30,
-            )
+            completed = _run_release_verifier(release_directory)
 
         output = completed.stdout + completed.stderr
         self.assertNotEqual(0, completed.returncode, output)
