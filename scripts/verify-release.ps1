@@ -221,7 +221,7 @@ try {
         $versionExitCode = $LASTEXITCODE
         $versionOutput = (($versionLines | Out-String).Trim())
         if ($versionExitCode -ne 0 -or $versionOutput -cne $expectedExecutableVersions[$binary]) {
-            throw "Executable version mismatch for $binary: exit=$versionExitCode output='$versionOutput'"
+            throw "Executable version mismatch for ${binary}: exit=$versionExitCode output='$versionOutput'"
         }
     }
 

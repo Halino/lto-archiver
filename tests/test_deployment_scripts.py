@@ -161,6 +161,12 @@ class DeploymentScriptTests(unittest.TestCase):
         self.assertIn("(?:\\r\\n|\\n)?\\z'", verifier)
         self.assertIn("$record -cnotmatch $pattern", verifier)
 
+    def test_release_verifier_delimits_variables_before_colons(self) -> None:
+        verifier = VERIFIER.read_text(encoding="utf-8")
+
+        self.assertIn("${binary}: exit=", verifier)
+        self.assertNotIn("$binary: exit=", verifier)
+
     @unittest.skipUnless(
         NATIVE_WINDOWS_POWERSHELL,
         "requires native Windows PowerShell; Wine returns success without executing -File",

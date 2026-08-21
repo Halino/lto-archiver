@@ -111,6 +111,13 @@ def _parse_workflow_yaml(text: str) -> dict[str, object]:
 
 
 class PublicationTests(unittest.TestCase):
+    def test_public_checkout_preserves_canonical_lf_bytes(self) -> None:
+        attributes = ROOT / ".gitattributes"
+
+        self.assertTrue(attributes.is_file())
+        self.assertIn("* text=auto eol=lf", attributes.read_text(encoding="utf-8"))
+        self.assertIn(".gitattributes", (ROOT / "public-files.txt").read_text(encoding="utf-8"))
+
     def test_apache_license_and_owner_are_declared(self) -> None:
         license_bytes = (ROOT / "LICENSE").read_bytes()
         license_text = license_bytes.decode("utf-8")
