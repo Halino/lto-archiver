@@ -86,6 +86,34 @@ function Assert-SafeArchiveEntries {
     }
 }
 
+function Invoke-ReleaseBinaryVersion {
+    param(
+        [Parameter(Mandatory = $true)][string]$BinaryPath
+    )
+
+    $standardOutputPath = "$BinaryPath.version.stdout"
+    $standardErrorPath = "$BinaryPath.version.stderr"
+    $process = $null
+    try {
+        $process = Start-Process -FilePath $BinaryPath -ArgumentList '--version' `
+            -Wait -PassThru `
+            -RedirectStandardOutput $standardOutputPath `
+            -RedirectStandardError $standardErrorPath
+        $exitCode = $process.ExitCode
+    }
+    finally {
+        if ($null -ne $process) {
+            $process.Dispose()
+        }
+    }
+
+    return [PSCustomObject]@{
+        ExitCode = $exitCode
+        Output = ([IO.File]::ReadAllText($standardOutputPath)).Trim()
+        Error = ([IO.File]::ReadAllText($standardErrorPath)).Trim()
+    }
+}
+
 function Remove-OwnedTemporaryDirectory {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -237,11 +265,13 @@ try {
             throw "Executable SHA-256 mismatch for $binary"
         }
 
-        $versionLines = @(& $binaryPath '--version' 2>&1)
-        $versionExitCode = $LASTEXITCODE
-        $versionOutput = (($versionLines | Out-String).Trim())
-        if ($versionExitCode -ne 0 -or $versionOutput -cne $expectedExecutableVersions[$binary]) {
-            throw "Executable version mismatch for ${binary}: exit=$versionExitCode output='$versionOutput'"
+        $versionResult = Invoke-ReleaseBinaryVersion -BinaryPath $binaryPath
+        if (
+            $versionResult.ExitCode -ne 0 -or
+            $versionResult.Output -cne $expectedExecutableVersions[$binary] -or
+            $versionResult.Error
+        ) {
+            throw "Executable version mismatch for ${binary}: exit=$($versionResult.ExitCode) output='$($versionResult.Output)' error='$($versionResult.Error)'"
         }
     }
 
