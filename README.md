@@ -1,5 +1,11 @@
 # LTO Archiver
 
+The active project is Linux-only. Use the
+[Linux source branch](https://github.com/Halino/lto-archiver/tree/linux)
+and the [Linux manuals](docs/en/index.md). The former Windows application,
+installers and operating instructions are kept in the
+[Windows archive](docs/windows-archive.md).
+
 LTO Archiver is an open-source RHEL 9 service for sequential, append-only
 backup to LTFS tapes. Its authenticated WebUI handles shares, libraries, jobs,
 cassette changes, catalog search and restore. The WebUI has no direct tape,
@@ -8,13 +14,26 @@ through the daemon and separate brokers.
 
 ## Source version and compatibility
 
-This source tree targets application **0.11.28-155**, Python runtime **3**,
+This source tree targets application **0.11.28-155**, Python runtime **3**
+(`lto-archiver-python-runtime 0.11.27-3.el9`),
 external LTFS driver **22** (`lto-ltfs 0.1.0-22.el9`), and catalog **schema 41**.
 These are package/source identities, not a claim that public RPMs or a public
 release already exist. Verify installed versions on the target host before an
 installation; release 155 is a fresh disposable-host path, not a qualified
 upgrade. The driver has its own repository, provenance, license and release
-process; this application does not embed or rebuild it.
+process in [Halino/lto-ltfs-driver](https://github.com/Halino/lto-ltfs-driver);
+this application does not embed or rebuild it.
+
+## Availability
+
+Reviewed Linux source is public. The application and driver source tags identify
+candidates; they are not installable RPM release evidence. GitHub build and CI
+qualification has not completed successfully, and final signing, attestation,
+disposable-host acceptance and publication remain pending. Do not install a
+historical Windows ZIP or unsigned build artifact as the current Linux release.
+See the [current release notes](docs/release-notes-0.11.28-155.md) and
+[RPM verification guide](docs/en/github-rpm-verification.md) before downloading
+or installing packages.
 
 The application and driver are independent of Hewlett Packard Enterprise.
 No HPE firmware, installer, diagnostic package, proprietary driver or vendor
@@ -47,7 +66,7 @@ covers offline metadata lookup. The [release process](docs/en/release-process.md
 explains build, signatures and publication; GitHub Releases are direct asset
 downloads, not a DNF repository.
 The [GitHub-built RPM verification guide](docs/en/github-rpm-verification.md)
-lists the two approval gates, signature and attestation checks, and exact
+lists the source and final-asset review boundaries, signature and attestation checks, and exact
 download/install order. No public RPM is implied by this source snapshot.
 
 For source builds and contributions, see [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -62,6 +81,8 @@ path already completed on an earlier cassette is a separate semantic
 limitation from unused-suffix replanning. Publication-content auditing and
 physical-media qualification require their own evidence. Only the supported
 RHEL 9/Linux distribution is described here; no Windows installer is shipped.
+Linux-side import of an existing sealed legacy capture and portable tape
+filenames are compatibility features, not Windows application support.
 The public disposable-VM smoke covers installation, genuine WebUI login and
 correct hardware-preflight refusal with no tape/SCSI device. It does not cover
 daemon-mediated import, physical LTFS operations or backup/restore.

@@ -1,6 +1,8 @@
 # Linux operator FAQ
 
-Release **0.11.27-129** is Linux/WebUI-only. See the
+The current source candidate **0.11.28-155** is Linux/WebUI-only, paired with
+runtime **0.11.27-3**, driver **0.1.0-22**, and catalog **schema 41**. Linux RPM
+publication and qualification are pending. See the
 [WebUI guide](../linux/webui.md) for the complete workflow.
 
 **Does saving start a job?** No. Review the frozen plan and required authority,
@@ -21,6 +23,7 @@ physical qualification and sampled readback; see the
 metadata-only. Restore execution needs the requested cassette and a read-only
 LTFS mount. See [catalog search](../linux/catalog-search.md).
 
-**Can Windows-origin state be migrated?** Yes, through the protected
-[offline migration](../linux/migration.md) workflow. No Windows application is
-distributed in this release.
+**Can existing legacy state be imported?** The Linux source includes protected
+[offline import](../linux/migration.md) of an existing sealed capture. It is
+outside the fresh-install smoke qualification profile. Windows application
+guidance is in the [Windows archive](../windows-archive.md).

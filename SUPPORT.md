@@ -1,9 +1,11 @@
 # Support
 
-Use the future public GitHub project's issue tracker for reproducible
-application defects and feature requests after removing operational data.
-The exact repository URL will be added only after the public owner and
-destination are approved. Suspected vulnerabilities must follow
+Use the [application GitHub issue tracker](https://github.com/Halino/lto-archiver/issues)
+for reproducible Linux application defects and feature requests after removing
+operational data. Report driver source or packaging defects to the
+[driver issue tracker](https://github.com/Halino/lto-ltfs-driver/issues).
+The active application branch is `linux`; historical Windows material is in
+the [Windows archive](docs/windows-archive.md). Suspected vulnerabilities must follow
 [SECURITY.md](SECURITY.md), not a public issue.
 
 Include the application, runtime and LTFS-driver versions; RHEL 9 version;

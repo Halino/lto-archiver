@@ -1,12 +1,14 @@
 # Security policy
 
-Security fixes target the current `0.11.x` application line. Include the
-affected version when reporting an older release.
+Security reports for the active Linux source target the `linux` branch and
+the current `0.11.28` candidate. Include the exact commit and affected package
+version. Historical Windows material is archived, not an active supported
+distribution; see the [Windows archive](docs/windows-archive.md).
 
 Do not open an ordinary GitHub issue for a suspected vulnerability. Use the
-future public repository's private GitHub vulnerability-reporting feature;
-its exact address will be recorded here after the repository owner and
-destination are approved. If that feature is unavailable, do not publish
+application repository's [private GitHub reporting page](https://github.com/Halino/lto-archiver/security/advisories/new).
+For driver vulnerabilities use the [driver's private reporting page](https://github.com/Halino/lto-ltfs-driver/security/advisories/new).
+If private reporting is unavailable, do not publish
 exploit details or secrets in an issue. Wait for a private reporting path to
 be announced.
 

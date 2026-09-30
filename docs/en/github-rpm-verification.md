@@ -1,8 +1,14 @@
 # GitHub-built RPM verification
 
-This repository contains a proposed, separately gated GitHub build and
-publication process. Its presence does **not** mean that a public repository,
-tag, signing key, or GitHub Release exists. The application and Python runtime
+The active application repository is
+[Halino/lto-archiver, branch `linux`](https://github.com/Halino/lto-archiver/tree/linux);
+the separate driver repository is
+[Halino/lto-ltfs-driver](https://github.com/Halino/lto-ltfs-driver).
+The Linux source and candidate tags are public, but GitHub qualification has
+not completed successfully and signed Linux RPM releases are not yet available.
+Historical Windows ZIPs are [archived](../windows-archive.md), not a Linux
+download; do not use the repository's generic latest-release URL.
+The application and Python runtime
 are built from one reviewed public tag on GitHub. The LTFS driver is a
 separate project and is not built, signed, or released by this workflow.
 
@@ -40,10 +46,13 @@ detached signature, public key file and attestation bundle, full primary and
 signing-subkey fingerprints, and the sanitized disposable RHEL 9
 fresh-install/WebUI hardware-absent and snapshot-restoration report digest. Together with the four RPM rows in the
 manifest, this binds all eight Release asset bytes. Configure the
-`public-rpm-publication` Environment with required reviewers, no self-review,
-a protected selected-tag rule, matching approval variables and the reviewed
+`public-rpm-publication` Environment with required human review, administrator
+bypass disabled, a protected selected-tag rule, matching approval variables and the reviewed
 base64-encoded sanitized smoke report in
-`PUBLIC_RPM_APPROVED_SMOKE_REPORT_BASE64`. The workflow decodes and validates
+`PUBLIC_RPM_APPROVED_SMOKE_REPORT_BASE64`. The currently approved single-owner
+policy permits the owner who initiated a run to review it; it is not a
+two-person approval guarantee. Automated agents must not approve on the
+human reviewer's behalf. The workflow decodes and validates
 the report bytes, including real-login/expected hardware-refusal and snapshot-restoration claims,
 before creating a draft. The Environment reviewer must separately inspect the
 underlying VM transcript; JSON claims alone cannot establish execution. See
@@ -70,11 +79,13 @@ assets manually.
 
 ## Verify a published direct download
 
-Only after an actual approved release exists, replace `OWNER/REPO`,
-`v0.11.28`, and the reviewed 40-character commit and fingerprints below:
+Only after an actual approved Linux release exists, use its exact tag (the
+current source candidate is `v0.11.28`), reviewed 40-character commit and
+independently approved fingerprints below. A public source tag alone is not
+evidence that these downloadable assets exist:
 
 ```sh
-gh release download v0.11.28 --repo OWNER/REPO --dir verified-rpms
+gh release download v0.11.28 --repo Halino/lto-archiver --dir verified-rpms
 cd verified-rpms
 sha256sum FINAL-RPM-SHA256SUMS FINAL-RPM-SHA256SUMS.asc RPM-PUBLIC-KEY.asc ATTESTATION.json
 # Compare all four digests with the separately approved exact-asset record.
@@ -91,8 +102,8 @@ rpmkeys --dbpath "$rpmdb" --import RPM-PUBLIC-KEY.asc
 for package in ./*.rpm; do
   rpmkeys --dbpath "$rpmdb" --checksig --verbose "$package"
   rpm --dbpath "$rpmdb" -K "$package"
-  gh attestation verify "$package" --repo OWNER/REPO \
-    --signer-workflow OWNER/REPO/.github/workflows/build-release.yml \
+  gh attestation verify "$package" --repo Halino/lto-archiver \
+    --signer-workflow Halino/lto-archiver/.github/workflows/build-release.yml \
     --source-ref refs/tags/v0.11.28 \
     --source-digest REVIEWED_PUBLIC_COMMIT \
     --signer-digest REVIEWED_PUBLIC_COMMIT \

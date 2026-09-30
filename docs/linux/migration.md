@@ -1,15 +1,22 @@
-# Offline Windows-to-Linux migration
+# Linux-side import of a sealed legacy capture
 
 `lto-archiver-migrate` accepts the sealed Windows capture, verifies a canonical
 bundle, and activates a frozen job in a new Linux state directory. It does not
 start the daemon, scan source libraries, invoke LTFS, or inspect any tape.
 
+This Linux compatibility feature requires an already sealed legacy capture.
+Windows-side preparation and operating procedures belong to the
+[Windows archive](../windows-archive.md). The current public fresh-install
+smoke does not qualify catalog migration or daemon-mediated import; a real
+cutover requires separate review and acceptance evidence.
+
 ## Safety boundary
 
 Before starting:
 
-1. Stop and disable the Windows archiver service. Confirm that its GUI, LTFS
-   processes, and LTFS mounts are absent.
+1. Obtain an existing sealed capture and an independently recorded proof of
+   the legacy application's quiescent capture boundary. If either is missing,
+   stop; do not create or modify legacy state using this Linux guide.
 2. Keep the sealed capture and its independently recorded SHA-256 unchanged.
    Store both the capture and canonical bundle outside the source repository
    with administrator-only permissions.

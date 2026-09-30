@@ -7,15 +7,19 @@ explicit handling of destructive and privileged operations.
 ## Development environment
 
 - Use Python 3.11.
-- Develop and run the test suite on Linux. Release 0.11.27-133 is Linux/WebUI-only;
-  Windows application builds, installers, and PowerShell operator workflows are
-  outside this release. Windows-origin catalog migration remains supported.
+- Develop and run the test suite on Linux. The current source candidate is
+  application 0.11.28-155, runtime 0.11.27-3, driver 0.1.0-22 and schema 41.
+  Linux-side import of existing legacy catalogs and cross-platform filenames
+  are compatibility features. Former Windows builds and operator guidance are
+  in the [Windows archive](docs/windows-archive.md).
 - Install the pinned development/build dependencies documented by the project
   before running tests.
 
 ## Branches, tests, and commits
 
-Create a short-lived branch from the current default branch. Use a descriptive
+Create a short-lived branch from the active default branch,
+[`linux`](https://github.com/Halino/lto-archiver/tree/linux), and submit pull
+requests against `linux`. Use a descriptive
 lowercase name with a conventional prefix, for example `feat/catalog-export`,
 `fix/ltfs-retry`, or `docs/operator-guide`.
 
@@ -42,3 +46,10 @@ results, documentation changes, and any compatibility or catalog-schema impact.
 Use the pull-request template as the review evidence checklist. Never include
 credentials, private paths, catalog databases, operational logs, media labels,
 or HPE support tickets in a branch, commit, issue, or pull request.
+
+The LTFS driver is maintained in
+[Halino/lto-ltfs-driver](https://github.com/Halino/lto-ltfs-driver); submit driver
+changes there. Follow [Linux development](docs/en/development.md) and the
+[release process](docs/en/release-process.md) for the distinct source,
+package, signing and qualification gates. Updating documentation on `linux`
+does not move an already published source tag or qualify its RPMs.
