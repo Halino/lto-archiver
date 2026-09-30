@@ -37,6 +37,7 @@ docs/qualification/physical-ltfs-runbook.md
 docs/release-notes-0.11.27-155.md
 docs/release-notes-0.11.28-155.md
 docs/release-notes-0.11.29-155.md
+docs/release-notes-0.11.30-155.md
 docs/windows-archive.md
 packaging/deployment/app-runtime-signing-policy.json
 packaging/deployment/rpm-verify-policy.json

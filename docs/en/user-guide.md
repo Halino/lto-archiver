@@ -1,6 +1,6 @@
 # User guide
 
-This source tree targets application **0.11.29-155**, runtime **3**,
+This source tree targets application **0.11.30-155**, runtime **3**,
 external driver **22**, and catalog **schema 41**. Verify the installed
 package identities before operating a host. The Linux WebUI is the normal
 operator surface; no Windows application or installer is distributed.

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lto-archiver"
-version = "0.11.29"
+version = "0.11.30"
 description = "LTO Archiver for append-only SMB library backups to HPE LTFS tapes"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.11"

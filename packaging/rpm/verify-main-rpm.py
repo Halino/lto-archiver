@@ -22,7 +22,7 @@ from typing import Any
 
 PRIVATE_RUNTIME_ROOT = "/usr/lib64/lto-archiver/python-runtime/3.11/site-packages"
 GLOBAL_SITE_ROOT = "/usr/lib/python3.11/site-packages/"
-APPLICATION_DIST_INFO = "lto_archiver-0.11.29.dist-info"
+APPLICATION_DIST_INFO = "lto_archiver-0.11.30.dist-info"
 DEVICE_RELABELER = "/usr/libexec/lto-archiver/relabel-device-aliases.py"
 HISTORICAL_RUNNER_NAMES = frozenset(
     {"deploy-rhel9.py", "rollback-rhel9.py", "verify-deployment-rhel9.py"}
@@ -556,7 +556,7 @@ def verify_contract(
     }
     if runtime_requirements != {exact_runtime}:
         raise ContractError("runtime dependency is not exact")
-    exact_ltfs = "lto-ltfs = 0.1.1-22.el9"
+    exact_ltfs = "lto-ltfs = 0.1.2-22.el9"
     ltfs_requirements = {
         requirement
         for requirement in requirements

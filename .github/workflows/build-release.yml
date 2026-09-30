@@ -46,6 +46,7 @@ jobs:
           REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
         run: |
           set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
           [[ "$REVIEWED_COMMIT" =~ ^[0-9a-f]{40}$ ]]
           test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
@@ -119,6 +120,7 @@ jobs:
           REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
         run: |
           set -euo pipefail
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
           [[ "$REVIEWED_COMMIT" =~ ^[0-9a-f]{40}$ ]]
           test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
@@ -199,8 +201,8 @@ jobs:
           python3.11 packaging/rpm/verify-public-artifacts.py \
             --first build-a --second build-b --tag "$RELEASE_TAG" \
             --commit "$REVIEWED_COMMIT" \
-            --rpm app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm \
-            --rpm app/SRPMS/lto-archiver-0.11.29-155.el9.src.rpm \
+            --rpm app/RPMS/noarch/lto-archiver-0.11.30-155.el9.noarch.rpm \
+            --rpm app/SRPMS/lto-archiver-0.11.30-155.el9.src.rpm \
             --rpm runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm \
             --rpm runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm \
             --report comparison-report.json
@@ -245,8 +247,8 @@ jobs:
           python3.11 packaging/rpm/verify-public-artifacts.py \
             --first incoming/unsigned --second incoming/unsigned \
             --tag "$RELEASE_TAG" --commit "$REVIEWED_COMMIT" \
-            --rpm app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm \
-            --rpm app/SRPMS/lto-archiver-0.11.29-155.el9.src.rpm \
+            --rpm app/RPMS/noarch/lto-archiver-0.11.30-155.el9.noarch.rpm \
+            --rpm app/SRPMS/lto-archiver-0.11.30-155.el9.src.rpm \
             --rpm runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm \
             --rpm runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm \
             --report current-report.json

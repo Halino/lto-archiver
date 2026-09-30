@@ -6,7 +6,7 @@
 %global __pythondist_requires %{nil}
 
 Name:           lto-archiver
-Version:        0.11.29
+Version:        0.11.30
 Release:        155%{?dist}
 Summary:        Native RHEL service for append-only LTFS archives
 License:        Apache-2.0
@@ -51,7 +51,7 @@ BuildRequires:  /usr/sbin/matchpathcon
 BuildRequires:  /usr/sbin/restorecon
 Requires:       python3.11
 Requires:       lto-archiver-python-runtime = 0.11.27-3%{?dist}
-Requires:       lto-ltfs = 0.1.1-22%{?dist}
+Requires:       lto-ltfs = 0.1.2-22%{?dist}
 Requires:       /usr/bin/cpio
 Requires:       /usr/bin/dnf-3
 Requires:       /usr/bin/firewall-cmd
@@ -245,6 +245,10 @@ fi
 %ghost %config(noreplace) %attr(0400,root,root) %{_sysconfdir}/lto-archiver/qualification-artifacts.json
 
 %changelog
+* Wed Sep 30 2026 LTO Archiver Engineering <noreply@example.invalid> - 0.11.30-155
+- Trust only the exact build-container workspace before source admission.
+- Pair with driver 0.1.2-22; keep runtime 0.11.27-3 and catalog schema 41.
+
 * Wed Sep 30 2026 LTO Archiver Engineering <noreply@example.invalid> - 0.11.29-155
 - Prepare a new candidate identity after public CI and build-gate fixes.
 - Pair with driver 0.1.1-22; keep runtime 0.11.27-3 and catalog schema 41.

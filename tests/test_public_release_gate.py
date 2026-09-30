@@ -10,11 +10,11 @@ import unittest
 from pathlib import Path
 
 TOOL = Path(__file__).resolve().parents[1] / "packaging/rpm/verify-public-artifacts.py"
-TAG = "v0.11.29"
+TAG = "v0.11.30"
 COMMIT = "a" * 40
 EXPECTED_RPMS = {
-    "app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm",
-    "app/SRPMS/lto-archiver-0.11.29-155.el9.src.rpm",
+    "app/RPMS/noarch/lto-archiver-0.11.30-155.el9.noarch.rpm",
+    "app/SRPMS/lto-archiver-0.11.30-155.el9.src.rpm",
     "runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
     "runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm",
 }
@@ -60,7 +60,7 @@ def fixture(root: Path, *, commit: str = COMMIT) -> None:
         (root / package / "SOURCES").mkdir()
         (root / package / "SPECS").mkdir()
         rpm_name = "lto-archiver" if package == "app" else "lto-archiver-python-runtime"
-        version = "0.11.29" if package == "app" else "0.11.27"
+        version = "0.11.30" if package == "app" else "0.11.27"
         archive = f"{rpm_name}-{version}.tar.gz"
         (root / package / "SOURCES" / archive).write_bytes(b"source")
         (root / package / "SPECS" / f"{rpm_name}.spec").write_bytes(b"spec")
@@ -70,7 +70,7 @@ def fixture(root: Path, *, commit: str = COMMIT) -> None:
             (root / package / "SOURCES" / "runtime-payload-authority.json").write_bytes(
                 b"{}"
             )
-    app_binary = root / "app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm"
+    app_binary = root / "app/RPMS/noarch/lto-archiver-0.11.30-155.el9.noarch.rpm"
     (root / "MAIN-RPM.json").write_text(
         json.dumps(
             {
@@ -78,7 +78,7 @@ def fixture(root: Path, *, commit: str = COMMIT) -> None:
                 "status": "verified",
                 "name": "lto-archiver",
                 "architecture": "noarch",
-                "version_release": "0.11.29-155.el9",
+                "version_release": "0.11.30-155.el9",
                 "rpm_sha256": sha(app_binary),
             }
         )
@@ -92,7 +92,7 @@ def fixture(root: Path, *, commit: str = COMMIT) -> None:
                 "tag": TAG,
                 "commit": commit,
                 "app_source0_sha256": sha(
-                    root / "app/SOURCES/lto-archiver-0.11.29.tar.gz"
+                    root / "app/SOURCES/lto-archiver-0.11.30.tar.gz"
                 ),
                 "runtime_source0_sha256": sha(
                     root / "runtime/SOURCES/lto-archiver-python-runtime-0.11.27.tar.gz"

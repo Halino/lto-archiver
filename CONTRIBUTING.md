@@ -8,7 +8,7 @@ explicit handling of destructive and privileged operations.
 
 - Use Python 3.11.
 - Develop and run the test suite on Linux. The current source candidate is
-  application 0.11.29-155, runtime 0.11.27-3, driver 0.1.1-22 and schema 41.
+  application 0.11.30-155, runtime 0.11.27-3, driver 0.1.2-22 and schema 41.
   Linux-side import of existing legacy catalogs and cross-platform filenames
   are compatibility features. Former Windows builds and operator guidance are
   in the [Windows archive](docs/windows-archive.md).

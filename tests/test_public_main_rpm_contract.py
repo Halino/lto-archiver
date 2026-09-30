@@ -18,7 +18,7 @@ CONTRACT = ROOT / "packaging/rpm/main-rpm-contract.json"
 SPEC = ROOT / "packaging/rpm/lto-archiver.spec"
 VERIFIER = ROOT / "packaging/rpm/verify-main-rpm.py"
 PUBLISHER = ROOT / "packaging/rpm/publish-rpm-tree.py"
-EXPECTED_DRIVER = "lto-ltfs = 0.1.1-22.el9"
+EXPECTED_DRIVER = "lto-ltfs = 0.1.2-22.el9"
 HISTORICAL_RUNNERS = (
     "deploy-rhel9.py", "rollback-rhel9.py", "verify-deployment-rhel9.py"
 )
@@ -48,7 +48,7 @@ class PublicMainRpmContractTests(unittest.TestCase):
             r"(?m)^Requires:\s+(lto-ltfs = \S+)$", SPEC.read_text(encoding="utf-8")
         )
         self.assertIsNotNone(requirement)
-        self.assertEqual("lto-ltfs = 0.1.1-22%{?dist}", requirement.group(1))
+        self.assertEqual("lto-ltfs = 0.1.2-22%{?dist}", requirement.group(1))
         snapshot = SimpleNamespace(
             requirements=frozenset(
                 {EXPECTED_DRIVER, "lto-archiver-python-runtime = 0.11.27-3.el9"}

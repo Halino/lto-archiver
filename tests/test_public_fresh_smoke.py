@@ -13,9 +13,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 GATE = ROOT / "packaging/rpm/verify-public-fresh-smoke.py"
-APP = "lto-archiver-0.11.29-155.el9.noarch.rpm"
+APP = "lto-archiver-0.11.30-155.el9.noarch.rpm"
 RUNTIME = "lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm"
-DRIVER = "lto-ltfs-0.1.1-22.el9.x86_64.rpm"
+DRIVER = "lto-ltfs-0.1.2-22.el9.x86_64.rpm"
 CHECKS = (
     "disposable_marker", "snapshot_created", "fresh_host", "signed_tuple",
     "install_order", "installed_nevras", "rpm_verify", "unit_syntax",

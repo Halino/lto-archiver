@@ -4,8 +4,8 @@ The active application repository is
 [Halino/lto-archiver, branch `linux`](https://github.com/Halino/lto-archiver/tree/linux);
 the separate driver repository is
 [Halino/lto-ltfs-driver](https://github.com/Halino/lto-ltfs-driver).
-Previously reviewed Linux source and candidate tags are public. This working
-source prepares application `0.11.29` with driver `0.1.1`; approval and
+Published source tags `v0.11.29` and driver `v0.1.1` remain immutable. This working
+source prepares application `0.11.30` with driver `0.1.2`; approval and
 publication of their new source and tags are pending. GitHub qualification has
 not completed successfully and signed Linux RPM releases are not yet available.
 Historical Windows ZIPs are [archived](../windows-archive.md), not a Linux
@@ -82,12 +82,12 @@ assets manually.
 ## Verify a published direct download
 
 Only after an actual approved Linux release exists, use its exact tag (the
-current source candidate is `v0.11.29`), reviewed 40-character commit and
+current source candidate is `v0.11.30`), reviewed 40-character commit and
 independently approved fingerprints below. A public source tag alone is not
 evidence that these downloadable assets exist:
 
 ```sh
-gh release download v0.11.29 --repo Halino/lto-archiver --dir verified-rpms
+gh release download v0.11.30 --repo Halino/lto-archiver --dir verified-rpms
 cd verified-rpms
 sha256sum FINAL-RPM-SHA256SUMS FINAL-RPM-SHA256SUMS.asc RPM-PUBLIC-KEY.asc ATTESTATION.json
 # Compare all four digests with the separately approved exact-asset record.
@@ -106,7 +106,7 @@ for package in ./*.rpm; do
   rpm --dbpath "$rpmdb" -K "$package"
   gh attestation verify "$package" --repo Halino/lto-archiver \
     --signer-workflow Halino/lto-archiver/.github/workflows/build-release.yml \
-    --source-ref refs/tags/v0.11.29 \
+    --source-ref refs/tags/v0.11.30 \
     --source-digest REVIEWED_PUBLIC_COMMIT \
     --signer-digest REVIEWED_PUBLIC_COMMIT \
     --deny-self-hosted-runners --bundle ATTESTATION.json
@@ -123,9 +123,9 @@ public tag *before* publication. GitHub's automatically generated source
 archive is not a substitute for checking the SRPM source members.
 
 These are direct GitHub Release downloads, **not** a DNF repository.
-Installing requires the compatible external `lto-ltfs 0.1.1-22.el9`
+Installing requires the compatible external `lto-ltfs 0.1.2-22.el9`
 driver, then `lto-archiver-python-runtime 0.11.27-3.el9`, then
-`lto-archiver 0.11.29-155.el9`. Verify exact NEVRAs and dependency
+`lto-archiver 0.11.30-155.el9`. Verify exact NEVRAs and dependency
 resolution on a clean, snapshotted disposable RHEL 9 VM with no tape first.
 For this release only a fresh first install is being qualified. No private
 144/21 upgrade, catalog migration, active-backup restart, media operation or

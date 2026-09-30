@@ -14,13 +14,13 @@ NAMES = (
     "FINAL-RPM-SHA256SUMS",
     "FINAL-RPM-SHA256SUMS.asc",
     "RPM-PUBLIC-KEY.asc",
-    "lto-archiver-0.11.29-155.el9.noarch.rpm",
-    "lto-archiver-0.11.29-155.el9.src.rpm",
+    "lto-archiver-0.11.30-155.el9.noarch.rpm",
+    "lto-archiver-0.11.30-155.el9.src.rpm",
     "lto-archiver-python-runtime-0.11.27-3.el9.src.rpm",
     "lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
 )
 # Independently calculated from sorted ASCII names + NUL + 64 literal 'a' bytes + LF.
-ASSET_DIGEST = "e67b413db87592da603105e284cf6e4d84f8b1fc001881b4a41b7790fc207f1b"
+ASSET_DIGEST = "0fe6ea8019f1aa0992ffce647ad48369161d1f52479f541c03fd3bc3ed294f2d"
 
 
 class FinalProofTests(unittest.TestCase):
@@ -31,7 +31,7 @@ class FinalProofTests(unittest.TestCase):
     def identity(self) -> dict[str, object]:
         return {
             "repo": "owner/lto-archiver-rhel9",
-            "tag": "v0.11.29",
+            "tag": "v0.11.30",
             "commit": "c" * 40,
             "draft_id": 17,
             "manifest_sha256": "b" * 64,
@@ -83,6 +83,9 @@ class FinalProofTests(unittest.TestCase):
             digest({name: value for name, value in files.items() if name != NAMES[0]})
         with self.assertRaises(error):
             digest(files | {"extra.rpm": "a" * 64})
+        with self.assertRaises(error):
+            digest({name.replace("0.11.30-155", "0.11.29-155"): value
+                    for name, value in files.items()})
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 # Third-Party Notices — Linux application
 
 This notice covers the LTO Archiver Linux application source and its
-0.11.29-155 packaging contract. It does not describe the separately
+0.11.30-155 packaging contract. It does not describe the separately
 versioned Python runtime or LTFS driver as though they were embedded in the
 application RPM.
 
@@ -24,7 +24,7 @@ and RPM have their own source and package verification gates.
 
 ## Separate LTFS driver RPM
 
-The application depends on `lto-ltfs-0.1.1-22` from the separate
+The application depends on `lto-ltfs-0.1.2-22` from the separate
 [driver project](https://github.com/Halino/lto-ltfs-driver), which is not embedded in
 the application source or RPM. The driver has a separate LGPL-2.1-only
 license inventory and seven disclosed conditional, unverified file origins.

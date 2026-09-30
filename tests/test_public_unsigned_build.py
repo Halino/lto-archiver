@@ -82,6 +82,107 @@ class PublicUnsignedBuildTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.builder = runpy.run_path(str(TOOL))
 
+    def test_container_admission_trusts_only_workspace_and_preserves_refusals(self) -> None:
+        """Missing persistent workspace trust breaks real Git admission in containers."""
+        source = (TOOL.parents[2] / ".github/workflows/build-release.yml").read_text()
+        blocks = re.split(r"(?m)^  ([\w-]+):\s*\n", source.split("\njobs:\n", 1)[1])
+        jobs = dict(zip(blocks[1::2], blocks[2::2], strict=True))
+        cases = (
+            "clean", "malformed-tag", "malformed-commit", "wrong-ref",
+            "missing-tag", "wrong-tag-commit", "wrong-commit", "dirty", "untracked",
+        )
+        for job in ("build-a", "build-b"):
+            admission = jobs[job].split(
+                "      - name: Admit exact reviewed tag and source\n", 1
+            )[1].split("      - name:", 1)[0]
+            script = textwrap.dedent(re.search(
+                r"(?m)^        run: \|\n((?:^          .*\n)+)", admission
+            ).group(1))
+            for case in cases:
+                with self.subTest(job=job, case=case), tempfile.TemporaryDirectory() as raw:
+                    root = Path(raw)
+                    home = root / "isolated-home"
+                    home.mkdir()
+                    environment = {
+                        key: value for key, value in os.environ.items()
+                        if not key.startswith("GIT_")
+                    }
+                    environment.update(
+                        HOME=str(home), XDG_CONFIG_HOME=str(home / "xdg"),
+                        GIT_CONFIG_GLOBAL=str(home / ".gitconfig"), GIT_CONFIG_NOSYSTEM="1",
+                    )
+
+                    def fixture_git(repo: Path, *args: str) -> subprocess.CompletedProcess:
+                        return subprocess.run(
+                            ["git", "-C", str(repo), *args], env=environment,
+                            capture_output=True, text=True, timeout=10,
+                        )
+
+                    repo = root / "workspace with spaces"
+                    repo.mkdir()
+                    for args in (("init", "-q"), ("-c", "user.name=Fixture", "-c",
+                                 "user.email=fixture@example.invalid", "commit", "--allow-empty",
+                                 "-qm", "Reviewed source"), ("tag", "v0.11.27")):
+                        result = fixture_git(repo, *args)
+                        self.assertEqual(result.returncode, 0, result.stderr)
+                    commit = fixture_git(repo, "rev-parse", "HEAD").stdout.strip()
+                    (repo / "tracked.txt").write_text("reviewed\n")
+                    self.assertEqual(fixture_git(repo, "add", "tracked.txt").returncode, 0)
+                    self.assertEqual(fixture_git(
+                        repo, "-c", "user.name=Fixture", "-c",
+                        "user.email=fixture@example.invalid", "commit", "-qm", "Tracked source",
+                    ).returncode, 0)
+                    reviewed = fixture_git(repo, "rev-parse", "HEAD").stdout.strip()
+                    self.assertEqual(fixture_git(repo, "tag", "-f", "v0.11.27").returncode, 0)
+                    self.assertEqual(fixture_git(repo, "tag", "v0.11.28", commit).returncode, 0)
+                    # Sibling and nested repositories detect parent and subtree trust.
+                    others = (root / "other", repo / "nested")
+                    for other in others:
+                        other.mkdir()
+                        self.assertEqual(fixture_git(other, "init", "-q").returncode, 0)
+                    environment.update(
+                        GIT_TEST_ASSUME_DIFFERENT_OWNER="1", GITHUB_WORKSPACE=str(repo),
+                        RELEASE_TAG="v0.11.27", REVIEWED_COMMIT=reviewed,
+                        GITHUB_REF="refs/tags/v0.11.27",
+                    )
+                    refused = fixture_git(repo, "rev-parse", "HEAD")
+                    self.assertNotEqual(refused.returncode, 0)
+                    self.assertIn("dubious ownership", refused.stderr)
+                    # Hide the nested fixture from the admission cleanliness check.
+                    (repo / ".git/info/exclude").write_text("nested/\n")
+                    if case == "malformed-tag":
+                        environment["RELEASE_TAG"] = "v0.11.27;false"
+                    elif case == "malformed-commit":
+                        environment["REVIEWED_COMMIT"] = "not-a-commit"
+                    elif case == "wrong-ref":
+                        environment["GITHUB_REF"] = "refs/heads/main"
+                    elif case in ("missing-tag", "wrong-tag-commit"):
+                        tag = "v0.11.99" if case == "missing-tag" else "v0.11.28"
+                        environment.update(RELEASE_TAG=tag, GITHUB_REF=f"refs/tags/{tag}")
+                    elif case == "wrong-commit":
+                        environment["REVIEWED_COMMIT"] = "0" * 40
+                    elif case == "dirty":
+                        (repo / "tracked.txt").write_text("changed\n")
+                    elif case == "untracked":
+                        (repo / "untracked.txt").write_text("not reviewed\n")
+                    result = subprocess.run(
+                        ["bash", "-euo", "pipefail", "-c", script], cwd=repo,
+                        env=environment, capture_output=True, text=True, timeout=10,
+                    )
+                    if case == "clean":
+                        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    else:
+                        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+                    self.assertNotIn("dubious ownership", result.stderr)
+                    # A new process models later build Git calls using the same HOME.
+                    later = fixture_git(repo, "rev-parse", "HEAD")
+                    self.assertEqual(later.returncode, 0, later.stderr)
+                    self.assertEqual(later.stdout.strip(), reviewed)
+                    for other in others:
+                        refused = fixture_git(other, "status", "--porcelain")
+                        self.assertNotEqual(refused.returncode, 0)
+                        self.assertIn("dubious ownership", refused.stderr)
+
     def test_build_bootstrap_makes_git_available_before_checkout(self) -> None:
         """A minimal runner must use Git checkout, not archive fallback."""
         source = (TOOL.parents[2] / ".github/workflows/build-release.yml").read_text()
@@ -125,7 +226,7 @@ class PublicUnsignedBuildTests(unittest.TestCase):
             specs = repo / "packaging/rpm"
             specs.mkdir(parents=True, exist_ok=True)
             (specs / "lto-archiver.spec").write_text(
-                "Name: lto-archiver\nVersion: 0.11.29\nRelease: 155%{?dist}\n"
+                "Name: lto-archiver\nVersion: 0.11.30\nRelease: 155%{?dist}\n"
             )
             (specs / "lto-archiver-python-runtime.spec").write_text(
                 "Name: lto-archiver-python-runtime\nVersion: 0.11.27\nRelease: 3%{?dist}\n"
@@ -136,10 +237,13 @@ class PublicUnsignedBuildTests(unittest.TestCase):
             commit = git(repo, "rev-parse", "HEAD")
             git(repo, "tag", "-f", "v0.11.27")
             git(repo, "tag", "v0.11.29")
+            git(repo, "tag", "v0.11.30")
             validate = self.builder["validate_source"]
             with self.assertRaises(self.builder["PublicBuildError"]):
                 validate(repo, "v0.11.27", commit)
-            validate(repo, "v0.11.29", commit)
+            with self.assertRaises(self.builder["PublicBuildError"]):
+                validate(repo, "v0.11.29", commit)
+            validate(repo, "v0.11.30", commit)
 
     def test_runtime_installed_license_payload_matches_tagged_source(self) -> None:
         verify = self.builder.get("verify_runtime_license_payload")
