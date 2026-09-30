@@ -197,14 +197,14 @@ jobs:
             --report "$RUNNER_TEMP/smoke-report.json" \
             --approved-sha256 "$SMOKE_REPORT_SHA256" \
             --app-commit "$REVIEWED_COMMIT" \
-            --app-rpm candidate/signed/app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm \
+            --app-rpm candidate/signed/app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm \
             --runtime-rpm candidate/signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm
       - name: Stage only the approved release assets
         run: |
           set -euo pipefail
           mkdir assets
-          cp candidate/signed/app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm assets/
-          cp candidate/signed/app/SRPMS/lto-archiver-0.11.28-155.el9.src.rpm assets/
+          cp candidate/signed/app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm assets/
+          cp candidate/signed/app/SRPMS/lto-archiver-0.11.29-155.el9.src.rpm assets/
           cp candidate/signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm assets/
           cp candidate/signed/runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm assets/
           cp candidate/FINAL-RPM-SHA256SUMS candidate/FINAL-RPM-SHA256SUMS.asc candidate/RPM-PUBLIC-KEY.asc \

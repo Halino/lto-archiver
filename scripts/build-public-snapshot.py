@@ -38,7 +38,7 @@ _REVIEWED_PUBLIC_LITERAL_SHA256 = {
 # media-identity, private-network and key scanners still run over both files.
 _REVIEWED_WEB_TEST_SHA256 = {
     "tests/web/test_management_views.py": "054b900bae95a9c896fcfa2d123b77457f6354d1a540e7b1165fbfcbe9871f20",
-    "tests/web/test_layout_chromium.py": "961701cce769bbf7cb07935e3a429cfcb666e796ef86b11404cbb93ac3a10af0",
+    "tests/web/test_layout_chromium.py": "c4eb2a28e97bdef34718eba4fce6e52210e5c5c1bcbaa88c691bb8e994c815dc",
 }
 
 

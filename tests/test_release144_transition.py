@@ -36,9 +36,9 @@ class Release144PackagingTests(unittest.TestCase):
             "lto-archiver-python-runtime = 0.11.27-3.el9",
             contract["runtime_requirement"],
         )
-        self.assertEqual("lto-ltfs = 0.1.0-22.el9", contract["driver_requirement"])
+        self.assertEqual("lto-ltfs = 0.1.1-22.el9", contract["driver_requirement"])
         self.assertRegex(
-            spec, r"(?m)^Requires:\s+lto-ltfs = 0\.1\.0-22%\{\?dist\}$"
+            spec, r"(?m)^Requires:\s+lto-ltfs = 0\.1\.1-22%\{\?dist\}$"
         )
 
     def test_driver21_verification_policy_bytes_are_unchanged(self):

@@ -53,8 +53,16 @@ class SigningFixture:
             for path in self.unsigned.rglob("*")
             if path.is_file()
         }
-        self.public_key = ROOT / "packaging/signing/lto-archiver-task9-rpm-public.asc"
-        self.policy = ROOT / "packaging/deployment/app-runtime-signing-policy.json"
+        self.public_key = root / "public-key.asc"
+        self.public_key.write_bytes(
+            (ROOT / "packaging/signing/lto-archiver-task9-rpm-public.asc").read_bytes()
+        )
+        self.public_key.chmod(0o644)
+        self.policy = root / "signing-policy.json"
+        self.policy.write_bytes(
+            (ROOT / "packaging/deployment/app-runtime-signing-policy.json").read_bytes()
+        )
+        self.policy.chmod(0o600)
         for name in ("gpg", "rpm", "rpmkeys", "rpmsign"):
             tool = self.tools_dir / name
             tool.write_text("#!/bin/sh\nexit 99\n")

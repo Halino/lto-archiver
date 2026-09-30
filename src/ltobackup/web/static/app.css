@@ -573,6 +573,7 @@ fieldset { width: 100%; }
 }
 .table-scroll table { min-width: max-content; }
 .table-scroll .libraries-table { min-width: 0; table-layout: fixed; }
+.table-scroll .restore-results { min-width: 0; table-layout: fixed; }
 .libraries-table th,
 .libraries-table td { vertical-align: top; }
 .libraries-table td[data-label="Files"],

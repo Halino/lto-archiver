@@ -14,9 +14,9 @@ through the daemon and separate brokers.
 
 ## Source version and compatibility
 
-This source tree targets application **0.11.28-155**, Python runtime **3**
+This source tree targets application **0.11.29-155**, Python runtime **3**
 (`lto-archiver-python-runtime 0.11.27-3.el9`),
-external LTFS driver **22** (`lto-ltfs 0.1.0-22.el9`), and catalog **schema 41**.
+external LTFS driver **22** (`lto-ltfs 0.1.1-22.el9`), and catalog **schema 41**.
 These are package/source identities, not a claim that public RPMs or a public
 release already exist. Verify installed versions on the target host before an
 installation; release 155 is a fresh disposable-host path, not a qualified
@@ -26,12 +26,14 @@ this application does not embed or rebuild it.
 
 ## Availability
 
-Reviewed Linux source is public. The application and driver source tags identify
-candidates; they are not installable RPM release evidence. GitHub build and CI
+Previously reviewed Linux source is public. This working source prepares the
+next application `0.11.29` and driver `0.1.1` identities; their new source and
+tags still require separate review. Source tags identify candidates, not
+installable RPM release evidence. GitHub build and CI
 qualification has not completed successfully, and final signing, attestation,
 disposable-host acceptance and publication remain pending. Do not install a
 historical Windows ZIP or unsigned build artifact as the current Linux release.
-See the [current release notes](docs/release-notes-0.11.28-155.md) and
+See the [current release notes](docs/release-notes-0.11.29-155.md) and
 [RPM verification guide](docs/en/github-rpm-verification.md) before downloading
 or installing packages.
 

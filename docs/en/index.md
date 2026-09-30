@@ -1,12 +1,12 @@
 # LTO Archiver Linux operator manuals
 
-This source tree targets application **0.11.28-155**, Python runtime **3**,
+This source tree targets application **0.11.29-155**, Python runtime **3**,
 external LTFS driver **22**, catalog **schema 41**, and RHEL 9. The exact
 installed versions and release signatures must be verified on the host; a
 source snapshot is not an installed or physically qualified release. The active
 source branch is [`linux`](https://github.com/Halino/lto-archiver/tree/linux).
 Linux RPM publication and qualification remain pending; see the
-[current candidate notes](../release-notes-0.11.28-155.md).
+[current candidate notes](../release-notes-0.11.29-155.md).
 
 ## Choose a path
 

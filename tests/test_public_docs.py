@@ -14,17 +14,17 @@ class PublicDocumentationTests(unittest.TestCase):
     def test_current_tuple_matches_package_and_schema(self) -> None:
         spec = (ROOT / "packaging/rpm/lto-archiver.spec").read_text()
         catalog = (ROOT / "src/ltobackup/catalog.py").read_text()
-        self.assertRegex(spec, r"(?m)^Version:\s+0\.11\.28$")
+        self.assertRegex(spec, r"(?m)^Version:\s+0\.11\.29$")
         self.assertRegex(spec, r"(?m)^Release:\s+155%")
         self.assertIn("lto-archiver-python-runtime = 0.11.27-3", spec)
-        self.assertTrue("lto-ltfs = 0.1.0-22" in spec, "current spec requires driver 22")
+        self.assertTrue("lto-ltfs = 0.1.1-22" in spec, "current spec requires driver 22")
         self.assertRegex(catalog, r"(?m)^SCHEMA_VERSION = 41$")
         for relative in ("README.md", "docs/en/index.md", "docs/en/installation.md"):
             with self.subTest(path=relative):
                 text = re.sub(
                     r"\s+", " ", (ROOT / relative).read_text().replace("*", "")
                 )
-                for expected in ("0.11.28-155", "runtime 3", "driver 22", "schema 41"):
+                for expected in ("0.11.29-155", "runtime 3", "driver 22", "schema 41"):
                     self.assertIn(expected, text)
 
     def test_public_support_and_security_do_not_route_to_private_gitlab(self) -> None:
@@ -43,7 +43,7 @@ class PublicDocumentationTests(unittest.TestCase):
     def test_public_install_manual_does_not_present_historical_runner_as_155_upgrade(self) -> None:
         manual = re.sub(r"\s+", " ", (ROOT / "docs/linux/installation-rhel9.md").read_text())
         self.assertIn("0.11.27-144/driver 21", manual)
-        self.assertIn("not a supported 0.11.28-155/driver 22 upgrade path", manual)
+        self.assertIn("not a supported 0.11.29-155/driver 22 upgrade path", manual)
         self.assertIn("fresh, restorable disposable RHEL 9 VM only", manual[:1500])
         self.assertIn("No upgrade, catalog migration, backup/restore or physical-tape claim", manual[:1600])
         self.assertNotIn("sudo systemctl reset-failed", manual)
@@ -54,7 +54,7 @@ class PublicDocumentationTests(unittest.TestCase):
         cli = (ROOT / "docs/en/cli-reference.md").read_text()
         security = (ROOT / "docs/en/security.md").read_text()
         self.assertIn("schema 41", development)
-        self.assertIn("0.11.28-155", cli)
+        self.assertIn("0.11.29-155", cli)
         for relative, text in (
             ("development", development),
             ("cli", cli),
@@ -118,7 +118,7 @@ class PublicDocumentationTests(unittest.TestCase):
     def test_operator_guides_do_not_present_historical_release_as_current(self) -> None:
         admin = (ROOT / "docs/en/administration.md").read_text()
         current_admin = admin.split("## Constrained operational-log reader", 1)[0]
-        self.assertIn("0.11.28-155", current_admin)
+        self.assertIn("0.11.29-155", current_admin)
         self.assertIn("schema 41", current_admin)
         self.assertNotIn("Installed release141", current_admin)
         self.assertIn("quiescent", current_admin)

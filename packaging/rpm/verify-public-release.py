@@ -23,8 +23,8 @@ REPO = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
 TAG_REF = re.compile(r"refs/tags/v[0-9]+\.[0-9]+\.[0-9]+\Z")
 APPROVED_RPMS = frozenset(
     {
-        "signed/app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm",
-        "signed/app/SRPMS/lto-archiver-0.11.28-155.el9.src.rpm",
+        "signed/app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm",
+        "signed/app/SRPMS/lto-archiver-0.11.29-155.el9.src.rpm",
         "signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
         "signed/runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm",
     }
@@ -418,12 +418,12 @@ def verify_fresh_install_inputs(
     )
     _verify_driver_candidate(driver_candidate, driver_tag_source, approved)
     packages = (
-        (driver_candidate / "lto-ltfs-0.1.0-22.el9.x86_64.rpm",
-         "lto-ltfs-0.1.0-22.el9.x86_64"),
+        (driver_candidate / "lto-ltfs-0.1.1-22.el9.x86_64.rpm",
+         "lto-ltfs-0.1.1-22.el9.x86_64"),
         (app_candidate / "signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
          "lto-archiver-python-runtime-0.11.27-3.el9.x86_64"),
-        (app_candidate / "signed/app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm",
-         "lto-archiver-0.11.28-155.el9.noarch"),
+        (app_candidate / "signed/app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm",
+         "lto-archiver-0.11.29-155.el9.noarch"),
     )
     for path, expected in packages:
         actual = _run(["rpm", "-qp", "--qf", "%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n", str(path)])
@@ -431,7 +431,7 @@ def verify_fresh_install_inputs(
             raise PublicReleaseError("signed fresh-install RPM NEVRA differs from exact tuple")
     requires = _run(["rpm", "-qp", "--requires", str(packages[2][0])]).decode("utf-8").splitlines()
     for name, exact in (
-        ("lto-ltfs", "lto-ltfs = 0.1.0-22.el9"),
+        ("lto-ltfs", "lto-ltfs = 0.1.1-22.el9"),
         ("lto-archiver-python-runtime", "lto-archiver-python-runtime = 0.11.27-3.el9"),
     ):
         matches = [line for line in requires if line == name or line.startswith(name + " ")]
@@ -489,7 +489,7 @@ def _verify_srpm_sources(candidate: Path, tag: str, commit: str) -> None:
     _verify_tag(ROOT, tag, commit)
     with tempfile.TemporaryDirectory(prefix="lto-public-release-sources-") as raw:
         scratch = Path(raw)
-        app_archive = scratch / "lto-archiver-0.11.28.tar.gz"
+        app_archive = scratch / "lto-archiver-0.11.29.tar.gz"
         _run(
             [
                 "git",
@@ -497,7 +497,7 @@ def _verify_srpm_sources(candidate: Path, tag: str, commit: str) -> None:
                 str(ROOT),
                 "archive",
                 "--format=tar.gz",
-                "--prefix=lto-archiver-0.11.28/",
+                "--prefix=lto-archiver-0.11.29/",
                 f"--output={app_archive}",
                 "HEAD",
                 "--",
@@ -527,7 +527,7 @@ def _verify_srpm_sources(candidate: Path, tag: str, commit: str) -> None:
                 runtime / "SOURCES" / name, ROOT / "packaging/python-runtime" / name
             )
         builder["verify_srpm_sources"](
-            app / "SRPMS/lto-archiver-0.11.28-155.el9.src.rpm",
+            app / "SRPMS/lto-archiver-0.11.29-155.el9.src.rpm",
             {
                 app_archive.name: app_archive,
                 "lto-archiver.spec": ROOT / "packaging/rpm/lto-archiver.spec",

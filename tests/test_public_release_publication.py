@@ -18,8 +18,8 @@ SUBFPR = "C" * 40
 REPO = "example/lto-archiver"
 WORKFLOW = f"{REPO}/.github/workflows/build-release.yml"
 PACKAGES = (
-    "signed/app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm",
-    "signed/app/SRPMS/lto-archiver-0.11.28-155.el9.src.rpm",
+    "signed/app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm",
+    "signed/app/SRPMS/lto-archiver-0.11.29-155.el9.src.rpm",
     "signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
     "signed/runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm",
 )
@@ -75,20 +75,20 @@ class PublicReleasePublicationTests(unittest.TestCase):
     def test_wrong_attestation_identity_cannot_be_requested(self) -> None:
         make = self.gate["attestation_command"]
         command = make(
-            Path("package.rpm"), REPO, WORKFLOW, "refs/tags/v0.11.28", COMMIT
+            Path("package.rpm"), REPO, WORKFLOW, "refs/tags/v0.11.29", COMMIT
         )
         self.assertEqual(command[0:3], ["gh", "attestation", "verify"])
         self.assertIn("--repo", command)
         self.assertIn(REPO, command)
         self.assertIn(WORKFLOW, command)
-        self.assertIn("refs/tags/v0.11.28", command)
+        self.assertIn("refs/tags/v0.11.29", command)
         self.assertIn(COMMIT, command)
         for wrong in (
             "refs/tags/v0.11.26",
             "other/repo/.github/workflows/build-release.yml",
         ):
             with self.assertRaises(self.gate["PublicReleaseError"]):
-                make(Path("package.rpm"), REPO, wrong, "refs/tags/v0.11.28", COMMIT)
+                make(Path("package.rpm"), REPO, wrong, "refs/tags/v0.11.29", COMMIT)
 
     def test_wrong_gpg_fingerprint_fails(self) -> None:
         check = self.gate["verify_signature_output"]
@@ -123,19 +123,19 @@ class PublicReleasePublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
             approved = {
-                "app_repo": REPO, "app_tag": "v0.11.28", "app_commit": COMMIT,
+                "app_repo": REPO, "app_tag": "v0.11.29", "app_commit": COMMIT,
                 "app_primary_fingerprint": FPR, "app_signing_subkey_fingerprint": SUBFPR,
                 "app_manifest_sha256": "a" * 64, "app_signature_sha256": "b" * 64,
                 "app_key_sha256": "c" * 64, "app_attestation_sha256": "d" * 64,
-                "driver_repo": "example/lto-ltfs", "driver_tag": "v0.1.0",
+                "driver_repo": "example/lto-ltfs", "driver_tag": "v0.1.1",
                 "driver_commit": COMMIT, "driver_approval_file": str(root / "approval.json"),
                 "driver_approval_sha256": "e" * 64,
                 "driver_verifier_sha256": "f" * 64,
             }
             responses = {
-                "lto-ltfs-0.1.0-22.el9.x86_64.rpm": b"lto-ltfs-0.1.0-22.el9.x86_64\n",
+                "lto-ltfs-0.1.1-22.el9.x86_64.rpm": b"lto-ltfs-0.1.1-22.el9.x86_64\n",
                 "lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm": b"lto-archiver-python-runtime-0.11.27-3.el9.x86_64\n",
-                "lto-archiver-0.11.28-155.el9.noarch.rpm": b"lto-archiver-0.11.28-155.el9.noarch\n",
+                "lto-archiver-0.11.29-155.el9.noarch.rpm": b"lto-archiver-0.11.29-155.el9.noarch\n",
             }
             commands: list[list[str]] = []
 
@@ -143,7 +143,7 @@ class PublicReleasePublicationTests(unittest.TestCase):
                 commands.append(command)
                 self.assertEqual(command[:2], ["rpm", "-qp"])
                 if "--requires" in command:
-                    return (b"lto-ltfs = 0.1.0-22.el9\n"
+                    return (b"lto-ltfs = 0.1.1-22.el9\n"
                             b"lto-archiver-python-runtime = 0.11.27-3.el9\n")
                 return responses[Path(command[-1]).name]
 
@@ -154,14 +154,14 @@ class PublicReleasePublicationTests(unittest.TestCase):
             }):
                 paths = verify(root / "app", root / "driver", root / "driver-source", approved)
                 self.assertEqual(tuple(path.name for path in paths), (
-                    "lto-ltfs-0.1.0-22.el9.x86_64.rpm",
+                    "lto-ltfs-0.1.1-22.el9.x86_64.rpm",
                     "lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
-                    "lto-archiver-0.11.28-155.el9.noarch.rpm",
+                    "lto-archiver-0.11.29-155.el9.noarch.rpm",
                 ))
-                responses["lto-ltfs-0.1.0-22.el9.x86_64.rpm"] = b"lto-ltfs-0.1.0-21.el9.x86_64\n"
+                responses["lto-ltfs-0.1.1-22.el9.x86_64.rpm"] = b"lto-ltfs-0.1.0-21.el9.x86_64\n"
                 with self.assertRaises(self.gate["PublicReleaseError"]):
                     verify(root / "app", root / "driver", root / "driver-source", approved)
-                responses["lto-ltfs-0.1.0-22.el9.x86_64.rpm"] = b"lto-ltfs-0.1.0-22.el9.x86_64\n"
+                responses["lto-ltfs-0.1.1-22.el9.x86_64.rpm"] = b"lto-ltfs-0.1.1-22.el9.x86_64\n"
                 with self.assertRaises(self.gate["PublicReleaseError"]):
                     verify(root / "app", root / "driver", root / "driver-source", approved | {"extra": "wrong"})
             self.assertTrue(commands)
@@ -176,7 +176,7 @@ class PublicReleasePublicationTests(unittest.TestCase):
             approval = root / "approval.json"
             approval.write_text("{}", encoding="utf-8")
             approved = {
-                "driver_tag": "v0.1.0", "driver_commit": COMMIT,
+                "driver_tag": "v0.1.1", "driver_commit": COMMIT,
                 "driver_approval_file": str(approval),
                 "driver_approval_sha256": "a" * 64,
                 "driver_verifier_sha256": "b" * 64,
@@ -306,7 +306,7 @@ class PublicReleasePublicationTests(unittest.TestCase):
 
     def test_stale_or_changed_draft_never_reaches_draft_false(self) -> None:
         proof = self.gate["make_final_proof"](
-            REPO, "v0.11.28", COMMIT, 99, "b" * 64, "c" * 64, 57, 1000
+            REPO, "v0.11.29", COMMIT, 99, "b" * 64, "c" * 64, 57, 1000
         )
         expected = {key: value for key, value in proof.items() if key != "checked_at"}
         validate = self.gate["validate_final_proof"]

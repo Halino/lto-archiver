@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import os
+import re
 import runpy
 import shutil
 import subprocess
+import sys
 import tempfile
+import textwrap
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -78,13 +82,50 @@ class PublicUnsignedBuildTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.builder = runpy.run_path(str(TOOL))
 
+    def test_build_bootstrap_makes_git_available_before_checkout(self) -> None:
+        """A minimal runner must use Git checkout, not archive fallback."""
+        source = (TOOL.parents[2] / ".github/workflows/build-release.yml").read_text()
+        blocks = re.split(r"(?m)^  ([\w-]+):\s*\n", source.split("\njobs:\n", 1)[1])
+        jobs = dict(zip(blocks[1::2], blocks[2::2], strict=True))
+        real_git, bash = shutil.which("git"), shutil.which("bash")
+        self.assertIsNotNone(real_git)
+        self.assertIsNotNone(bash)
+        for job in ("build-a", "build-b"):
+            before_checkout = jobs[job].split("      - uses: actions/checkout@", 1)[0]
+            scripts = re.findall(
+                r"(?m)^        run: \|\n((?:^          .*\n)+)", before_checkout
+            )
+            with self.subTest(job=job), tempfile.TemporaryDirectory() as raw:
+                binary_dir = Path(raw)
+                # DNF is the external package boundary. Its double installs the
+                # real Git executable only when git-core is actually requested.
+                dnf = binary_dir / "dnf"
+                dnf.write_text(
+                    f"#!{sys.executable}\n"
+                    "import os, pathlib, sys\n"
+                    "if sys.argv[1:] != ['-y', 'install', 'git-core']: sys.exit(2)\n"
+                    "pathlib.Path(__file__).with_name('git').symlink_to(os.environ['REAL_GIT'])\n"
+                )
+                dnf.chmod(0o755)
+                environment = {**os.environ, "PATH": raw, "REAL_GIT": real_git}
+                self.assertIsNone(shutil.which("git", path=raw))
+                result = subprocess.run(
+                    [bash, "-euo", "pipefail", "-c",
+                     "\n".join(textwrap.dedent(script) for script in scripts)
+                     + "\ncommand -v git\ngit --version\n"],
+                    env=environment, cwd=raw, capture_output=True, text=True,
+                    timeout=10,
+                )
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertIn("git version ", result.stdout)
+
     def test_release_tag_must_match_app_version_not_runtime_version(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             repo, _ = committed_repo(Path(raw))
             specs = repo / "packaging/rpm"
             specs.mkdir(parents=True, exist_ok=True)
             (specs / "lto-archiver.spec").write_text(
-                "Name: lto-archiver\nVersion: 0.11.28\nRelease: 155%{?dist}\n"
+                "Name: lto-archiver\nVersion: 0.11.29\nRelease: 155%{?dist}\n"
             )
             (specs / "lto-archiver-python-runtime.spec").write_text(
                 "Name: lto-archiver-python-runtime\nVersion: 0.11.27\nRelease: 3%{?dist}\n"
@@ -94,11 +135,11 @@ class PublicUnsignedBuildTests(unittest.TestCase):
                 "commit", "-qm", "Independent component versions")
             commit = git(repo, "rev-parse", "HEAD")
             git(repo, "tag", "-f", "v0.11.27")
-            git(repo, "tag", "v0.11.28")
+            git(repo, "tag", "v0.11.29")
             validate = self.builder["validate_source"]
             with self.assertRaises(self.builder["PublicBuildError"]):
                 validate(repo, "v0.11.27", commit)
-            validate(repo, "v0.11.28", commit)
+            validate(repo, "v0.11.29", commit)
 
     def test_runtime_installed_license_payload_matches_tagged_source(self) -> None:
         verify = self.builder.get("verify_runtime_license_payload")

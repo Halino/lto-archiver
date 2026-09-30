@@ -16,7 +16,9 @@ permissions:
   contents: read
 
 # Configure the public-rpm-signing Environment with required reviewers,
-# prevent-self-review, and a selected-tag rule before ever dispatching this.
+# administrator bypass disabled, and a selected-tag rule before dispatch.
+# The approved single-owner policy allows that owner to review their own run;
+# agents must not approve for the human reviewer.
 # Its secrets are never visible to the two build jobs or the comparison job.
 jobs:
   build-a:
@@ -28,6 +30,11 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Bootstrap Git before checkout
+        run: |
+          set -euo pipefail
+          dnf -y install git-core
+          git --version
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.ref }}
@@ -96,6 +103,11 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Bootstrap Git before checkout
+        run: |
+          set -euo pipefail
+          dnf -y install git-core
+          git --version
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.ref }}
@@ -187,8 +199,8 @@ jobs:
           python3.11 packaging/rpm/verify-public-artifacts.py \
             --first build-a --second build-b --tag "$RELEASE_TAG" \
             --commit "$REVIEWED_COMMIT" \
-            --rpm app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm \
-            --rpm app/SRPMS/lto-archiver-0.11.28-155.el9.src.rpm \
+            --rpm app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm \
+            --rpm app/SRPMS/lto-archiver-0.11.29-155.el9.src.rpm \
             --rpm runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm \
             --rpm runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm \
             --report comparison-report.json
@@ -233,8 +245,8 @@ jobs:
           python3.11 packaging/rpm/verify-public-artifacts.py \
             --first incoming/unsigned --second incoming/unsigned \
             --tag "$RELEASE_TAG" --commit "$REVIEWED_COMMIT" \
-            --rpm app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm \
-            --rpm app/SRPMS/lto-archiver-0.11.28-155.el9.src.rpm \
+            --rpm app/RPMS/noarch/lto-archiver-0.11.29-155.el9.noarch.rpm \
+            --rpm app/SRPMS/lto-archiver-0.11.29-155.el9.src.rpm \
             --rpm runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm \
             --rpm runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm \
             --report current-report.json

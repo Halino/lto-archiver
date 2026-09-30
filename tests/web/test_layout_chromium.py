@@ -896,8 +896,13 @@ class ChromiumLayoutTests(WebAppTestCase):
             devtools = _DevToolsPipe(str(_CHROMIUM), test_dir / "profile")
             try:
                 session_id = self._attach_page(devtools)
-                for width, height in ((1280, 720), (390, 844)):
-                    with self.subTest(width=width):
+                # Linux hosts may resolve system-ui to wider DejaVu glyphs.
+                for width, height, font in (
+                    (1280, 720, None), (390, 844, None),
+                    (1280, 720, '"DejaVu Sans", sans-serif'),
+                    (390, 844, '"DejaVu Sans", sans-serif'),
+                ):
+                    with self.subTest(width=width, font=font):
                         self._navigate_fixture(
                             devtools,
                             session_id,
@@ -905,6 +910,15 @@ class ChromiumLayoutTests(WebAppTestCase):
                             width=width,
                             height=height,
                         )
+                        if font is not None:
+                            devtools.request(
+                                "Runtime.evaluate",
+                                {"expression": (
+                                    "document.documentElement.style.fontFamily = "
+                                    + json.dumps(font)
+                                )},
+                                session_id=session_id,
+                            )
                         result = devtools.request(
                             "Runtime.evaluate",
                             {
@@ -929,6 +943,14 @@ class ChromiumLayoutTests(WebAppTestCase):
                                       labelsInsideChart: labels.every(label =>
                                         inside(label, chart)
                                       ),
+                                      overflowingLabels: labels.filter(label =>
+                                        !inside(label, chart)
+                                      ).map(label => ({
+                                        text: label.textContent,
+                                        bounds: label.getBoundingClientRect().toJSON(),
+                                        font: getComputedStyle(label).font,
+                                      })),
+                                      chartBounds: chart.getBoundingClientRect().toJSON(),
                                       legendsInsidePanel: legends.every(legend =>
                                         inside(legend, panel)
                                       ),
@@ -1520,8 +1542,14 @@ class ChromiumManagementContentTargetTests(unittest.TestCase):
             devtools = _DevToolsPipe(str(_CHROMIUM), test_dir / "profile")
             try:
                 session_id = ChromiumLayoutTests._attach_page(devtools)
-                for width, height in ((390, 844), (768, 900), (1280, 720)):
-                    with self.subTest(width=width):
+                # Keep identity bounds independent of the host's default font.
+                for width, height, font in (
+                    (390, 844, None), (768, 900, None), (1280, 720, None),
+                    (390, 844, '"DejaVu Sans", sans-serif'),
+                    (768, 900, '"DejaVu Sans", sans-serif'),
+                    (1280, 720, '"DejaVu Sans", sans-serif'),
+                ):
+                    with self.subTest(width=width, font=font):
                         ChromiumLayoutTests._navigate_fixture(
                             self,
                             devtools,
@@ -1530,6 +1558,15 @@ class ChromiumManagementContentTargetTests(unittest.TestCase):
                             width=width,
                             height=height,
                         )
+                        if font is not None:
+                            devtools.request(
+                                "Runtime.evaluate",
+                                {"expression": (
+                                    "document.documentElement.style.fontFamily = "
+                                    + json.dumps(font)
+                                )},
+                                session_id=session_id,
+                            )
                         result = devtools.request(
                             "Runtime.evaluate",
                             {"expression": """(() => {
@@ -1551,6 +1588,10 @@ class ChromiumManagementContentTargetTests(unittest.TestCase):
                                 cassetteBounded: bounded(cassette),
                                 identityCount: identity.length,
                                 identityBounded: identity.every(bounded),
+                                overflowingIdentity: identity.filter(element => !bounded(element))
+                                  .map(element => ({label: element.dataset.label,
+                                    bounds: element.getBoundingClientRect().toJSON(),
+                                    tableWidth: element.closest('table').getBoundingClientRect().width})),
                                 overflowElements: [...document.querySelectorAll('*')]
                                   .filter(element => element.getBoundingClientRect().right > innerWidth)
                                   .map(element => `${element.tagName}.${element.className}`)

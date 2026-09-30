@@ -1,6 +1,6 @@
 # Installation on RHEL 9
 
-The current source contract is application **0.11.28-155**, Python runtime
+The current source contract is application **0.11.29-155**, Python runtime
 **3**, external LTFS driver **22**, and catalog **schema 41**. This identifies
 the source and package dependencies; it does not assert that a public release
 has been signed or installed on a particular host. The active source branch is

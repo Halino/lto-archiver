@@ -21,6 +21,6 @@ that does not distribute or maintain a Windows archiver application. Historical
 Windows-side preparation and operating procedures belong to the archive branch.
 
 Return to the [Linux documentation index](en/index.md),
-[current source candidate notes](release-notes-0.11.28-155.md), or
+[current source candidate notes](release-notes-0.11.29-155.md), or
 [Linux installation guide](linux/installation-rhel9.md). Linux RPM build,
 signing, disposable-host qualification and publication are still pending.
