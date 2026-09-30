@@ -47,9 +47,11 @@ on:
 permissions:
   contents: read
 
-# Configure public-rpm-publication with required external reviewers,
-# prevent-self-review, and a selected protected-tag rule. Set its approval
-# variables only after exact-asset and disposable-host evidence is reviewed.
+# Configure public-rpm-publication with required human review, administrator
+# bypass disabled, and a selected protected-tag rule. The approved single-owner
+# policy permits self-review; agents must never approve for the human reviewer.
+# Set approval variables only after exact-asset and disposable-host evidence
+# is reviewed.
 # Configure public-rpm-admin-read with an Administration:read-only token scoped
 # to this repository, required reviewers and no bypass. It has no release-write
 # permission and is never exposed to the jobs that create or publish a Release.

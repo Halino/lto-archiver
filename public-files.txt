@@ -31,6 +31,7 @@ docs/linux/development.md
 docs/linux/installation-rhel9.md
 docs/linux/migration.md
 docs/linux/public-fresh-install-smoke.md
+docs/linux/public-fresh-vm-runner.md
 docs/linux/webui.md
 docs/qualification/physical-ltfs-runbook.md
 docs/release-notes-0.11.27-155.md
@@ -91,10 +92,13 @@ packaging/rpm/driver-rpm-verify-policy.json
 packaging/rpm/lto-archiver-python-runtime.spec
 packaging/rpm/lto-archiver.spec
 packaging/rpm/main-rpm-contract.json
+packaging/rpm/public_fresh_guest.py
 packaging/rpm/publish-rpm-tree.py
 packaging/rpm/release-rhel9-rpm.sh
 packaging/rpm/run-packaging-gate.py
+packaging/rpm/run-public-fresh-vm-smoke.py
 packaging/rpm/sign-rpm-tree.py
+packaging/rpm/smoke-public-fresh-rhel9.sh
 packaging/rpm/verify-main-rpm.py
 packaging/rpm/verify-packaging-gate.py
 packaging/rpm/verify-public-artifacts.py
@@ -382,6 +386,7 @@ tests/test_project_metadata.py
 tests/test_public_docs.py
 tests/test_public_fresh_host.py
 tests/test_public_fresh_smoke.py
+tests/test_public_fresh_vm_runner.py
 tests/test_public_main_rpm_contract.py
 tests/test_public_release_auxiliary.py
 tests/test_public_release_gate.py

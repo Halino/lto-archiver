@@ -29,6 +29,9 @@ _REVIEWED_PUBLIC_LITERAL_SHA256 = {
         "eec105b1ce9e5072a351b74b12a0553d29c3be2ddbe03d5502f275fd89aa71ae",
     ("src/ltobackup/web/app.py", "password"):
         "05e5cdbae9437afc2dc248302223a0499bba03fcf240a36792784c6d03ef87c7",
+    # Disposable guest account name, never a password or operator credential.
+    ("packaging/rpm/public_fresh_guest.py", "username"):
+        "da04a31e9a531c2ddda4d89b46863ff9700eb96c3407a976b92e435fbd1a29b6",
 }
 
 

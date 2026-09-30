@@ -63,13 +63,18 @@ class PublicSnapshotTests(unittest.TestCase):
             ".github/workflows/publish-release.yml",
             "docs/en/github-rpm-verification.md",
             "docs/linux/public-fresh-install-smoke.md",
+            "docs/linux/public-fresh-vm-runner.md",
             "packaging/rpm/build-public-unsigned.py",
             "packaging/rpm/check-public-fresh-host.py",
+            "packaging/rpm/public_fresh_guest.py",
+            "packaging/rpm/run-public-fresh-vm-smoke.py",
+            "packaging/rpm/smoke-public-fresh-rhel9.sh",
             "packaging/rpm/verify-public-artifacts.py",
             "packaging/rpm/verify-public-fresh-smoke.py",
             "packaging/rpm/verify-public-release.py",
             "tests/test_public_fresh_host.py",
             "tests/test_public_fresh_smoke.py",
+            "tests/test_public_fresh_vm_runner.py",
             "tests/test_public_main_rpm_contract.py",
             "tests/test_public_release_auxiliary.py",
             "tests/test_public_release_gate.py",
@@ -353,6 +358,18 @@ class PublicSnapshotTests(unittest.TestCase):
                 self.assertFalse(
                     check(text + "\n# changed fixture\n", auditor, relative)
                 )
+
+    def test_disposable_guest_username_review_is_path_and_literal_bound(self) -> None:
+        namespace = runpy.run_path(str(EXPORTER))
+        auditor = namespace["_auditor"]()
+        check = namespace["_safe_python_literals"]
+        relative = "packaging/rpm/public_fresh_guest.py"
+        reviewed = 'body = {"username": "lto-smoke"}\n'
+        self.assertTrue(check(reviewed, auditor, relative))
+        self.assertTrue(check((ROOT / relative).read_text(), auditor, relative))
+        self.assertFalse(check(reviewed, auditor, "src/other.py"))
+        self.assertFalse(check(reviewed.replace("lto-smoke", "unreviewed-name"), auditor, relative))
+        self.assertFalse(check(reviewed.replace("username", "password"), auditor, relative))
 
     def test_changed_product_credential_scope_literal_is_rejected(self) -> None:
         path = self.source / "src" / "ltobackup" / "daemon" / "service.py"

@@ -6,6 +6,10 @@ and the limited WebUI/hardware-absent smoke. A local package test, a synthetic J
 or a successful `rpm -V` alone is not runtime evidence. Do not use a production
 host, existing catalog, real tape or active backup for this test.
 
+Use the [disposable-VM controller instructions](public-fresh-vm-runner.md)
+for the supported guest profile, pinned inputs and retained restoration
+evidence. Local runner tests do not constitute a real installation result.
+
 The VM controller must first verify the explicit
 `lto-disposable-test=true` domain marker, capture a restorable snapshot and
 the initial host-state digest, and run the read-only fresh-host preflight.
