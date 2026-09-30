@@ -290,7 +290,7 @@ force; confirming a password does not bypass them.
 
 ### Next-cassette source checks
 
-Current application source **0.11.30-155** uses runtime **3**, driver **22**,
+Current application source **0.11.31-155** uses runtime **3**, driver **22**,
 and catalog **schema 41**. These are source identities, not proof of
 installation or physical qualification.
 

@@ -2,7 +2,7 @@
 
 ## Upgrade, rollback and catalog safety
 
-The source contract is application **0.11.30-155**, Python runtime **3**,
+The source contract is application **0.11.31-155**, Python runtime **3**,
 external LTFS driver **22**, and catalog **schema 41**. It is not a statement
 about what a particular host has installed. Read the exact signed release
 notes and package identities before any installation or rollback. Application,

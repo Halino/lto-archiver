@@ -1,6 +1,6 @@
 # RHEL 9 installation and activation
 
-The current source contract is application **0.11.30-155**, Python runtime
+The current source contract is application **0.11.31-155**, Python runtime
 **3**, external LTFS driver **22**, and catalog **schema 41**. A source
 snapshot does not prove that a public RPM is signed or installed on a host.
 Verify the exact package versions, signatures and dependency tuple before
@@ -12,7 +12,7 @@ does not rebuild or embed the driver.
 catalog migration, backup/restore or physical-tape claim follows from this
 guide. The historical source scripts `deploy-rhel9.py`, `rollback-rhel9.py`
 and `verify-deployment-rhel9.py` encode the 0.11.27-144/driver 21 transition;
-they are not a supported 0.11.30-155/driver 22 upgrade path and are excluded
+they are not a supported 0.11.31-155/driver 22 upgrade path and are excluded
 from the current binary package. Do not execute them for release 155.
 
 Before a first package operation, capture a restorable VM snapshot and run

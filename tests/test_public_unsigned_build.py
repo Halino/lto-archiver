@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import json
 import re
 import runpy
 import shutil
@@ -13,6 +14,7 @@ import textwrap
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 TOOL = Path(__file__).resolve().parents[1] / "packaging/rpm/build-public-unsigned.py"
 RUNTIME_SOURCE = TOOL.parents[2] / "packaging/python-runtime"
@@ -226,7 +228,7 @@ class PublicUnsignedBuildTests(unittest.TestCase):
             specs = repo / "packaging/rpm"
             specs.mkdir(parents=True, exist_ok=True)
             (specs / "lto-archiver.spec").write_text(
-                "Name: lto-archiver\nVersion: 0.11.30\nRelease: 155%{?dist}\n"
+                "Name: lto-archiver\nVersion: 0.11.31\nRelease: 155%{?dist}\n"
             )
             (specs / "lto-archiver-python-runtime.spec").write_text(
                 "Name: lto-archiver-python-runtime\nVersion: 0.11.27\nRelease: 3%{?dist}\n"
@@ -237,13 +239,13 @@ class PublicUnsignedBuildTests(unittest.TestCase):
             commit = git(repo, "rev-parse", "HEAD")
             git(repo, "tag", "-f", "v0.11.27")
             git(repo, "tag", "v0.11.29")
-            git(repo, "tag", "v0.11.30")
+            git(repo, "tag", "v0.11.31")
             validate = self.builder["validate_source"]
             with self.assertRaises(self.builder["PublicBuildError"]):
                 validate(repo, "v0.11.27", commit)
             with self.assertRaises(self.builder["PublicBuildError"]):
                 validate(repo, "v0.11.29", commit)
-            validate(repo, "v0.11.30", commit)
+            validate(repo, "v0.11.31", commit)
 
     def test_runtime_installed_license_payload_matches_tagged_source(self) -> None:
         verify = self.builder.get("verify_runtime_license_payload")
@@ -369,6 +371,56 @@ class PublicUnsignedBuildTests(unittest.TestCase):
             (repo / "untracked.txt").write_text("not reviewed\n", encoding="utf-8")
             with self.assertRaises(error):
                 validate(repo, "v0.11.27", commit)
+
+    def test_rpmbuild_pins_buildhost_across_host_contexts(self) -> None:
+        """Unpinned host metadata changes otherwise identical RPM headers."""
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            repo = root / "repo"
+            specs = repo / "packaging/rpm"
+            specs.mkdir(parents=True)
+            authority = repo / "packaging/python-runtime"
+            authority.mkdir()
+            fake = root / "record-rpmbuild"
+            fake.write_text(
+                f"#!{sys.executable}\n"
+                "import json, os, pathlib, sys\n"
+                "pathlib.Path(os.environ['CAPTURE']).write_text(json.dumps({"
+                "'argv': sys.argv[1:], 'epoch': os.environ['SOURCE_DATE_EPOCH'],"
+                "'home': os.environ['HOME'], 'host': os.environ['HOSTNAME']}))\n"
+            )
+            fake.chmod(0o755)
+            for package, name, version in (
+                ("app", "lto-archiver", "0.11.31"),
+                ("runtime", "lto-archiver-python-runtime", "0.11.27"),
+            ):
+                spec = specs / f"{name}.spec"
+                spec.write_text(f"Name: {name}\nVersion: {version}\nRelease: 155%{{?dist}}\n")
+                archive = root / f"{name}-{version}.tar.gz"
+                archive.write_bytes(b"fixed source")
+                if package == "runtime":
+                    for filename in (f"{archive.name}.sha256", "runtime_install.py",
+                                     "runtime-payload-authority.json"):
+                        (authority / filename).write_bytes(b"fixed authority")
+                for host in ("container-a", "container-b"):
+                    with self.subTest(package=package, host=host):
+                        top = root / f"{package}-{host}"
+                        capture = root / f"{package}-{host}.json"
+                        with patch.dict(os.environ, HOSTNAME=host, CAPTURE=str(capture)):
+                            self.builder["build_rpm_once"](
+                                repo, package, archive, top, 1790782911, rpmbuild=str(fake)
+                            )
+                        recorded = json.loads(capture.read_text())
+                        self.assertEqual(recorded["argv"], [
+                            "-ba", "--define", f"_topdir {top}",
+                            "--define", "_buildhost public-build.invalid",
+                            str(top / "SPECS" / spec.name),
+                        ])
+                        self.assertEqual(recorded["epoch"], "1790782911")
+                        self.assertEqual(recorded["home"], str(top / "BUILD/home"))
+                        self.assertEqual(recorded["host"], host)
+                        self.assertEqual((top / "SPECS" / spec.name).read_bytes(), spec.read_bytes())
+                        self.assertEqual((top / "SOURCES" / archive.name).read_bytes(), b"fixed source")
 
     def test_fake_rpmbuild_extra_rpm_breaks_closed_artifact_set(self) -> None:
         build_once = self.builder["build_rpm_once"]

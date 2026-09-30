@@ -38,6 +38,7 @@ docs/release-notes-0.11.27-155.md
 docs/release-notes-0.11.28-155.md
 docs/release-notes-0.11.29-155.md
 docs/release-notes-0.11.30-155.md
+docs/release-notes-0.11.31-155.md
 docs/windows-archive.md
 packaging/deployment/app-runtime-signing-policy.json
 packaging/deployment/rpm-verify-policy.json
@@ -394,6 +395,7 @@ tests/test_public_release_gate.py
 tests/test_public_release_immutability_proof.py
 tests/test_public_release_pipeline.py
 tests/test_public_release_publication.py
+tests/test_public_runtime_artifact_publication.py
 tests/test_public_unsigned_build.py
 tests/test_public_workflow_policy.py
 tests/test_publication.py

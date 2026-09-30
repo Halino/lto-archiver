@@ -243,6 +243,15 @@ def _open_build_payload(
         payload[("SPECS", spec_name)] = _open_regular_beneath(
             root_fd, ("SPECS", spec_name)
         )
+        if spec_name == "lto-archiver-python-runtime.spec":
+            for name in (
+                f"{source_archive}.sha256",
+                "runtime_install.py",
+                "runtime-payload-authority.json",
+            ):
+                payload[("SOURCES", name)] = _open_regular_beneath(
+                    root_fd, ("SOURCES", name)
+                )
         payload.update(_open_artifacts(root_fd))
         optional_present = any(
             _entry_status(root_fd, directory) is not None

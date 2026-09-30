@@ -14,7 +14,7 @@ through the daemon and separate brokers.
 
 ## Source version and compatibility
 
-This source tree targets application **0.11.30-155**, Python runtime **3**
+This source tree targets application **0.11.31-155**, Python runtime **3**
 (`lto-archiver-python-runtime 0.11.27-3.el9`),
 external LTFS driver **22** (`lto-ltfs 0.1.2-22.el9`), and catalog **schema 41**.
 These are package/source identities, not a claim that public RPMs or a public
@@ -26,15 +26,15 @@ this application does not embed or rebuild it.
 
 ## Availability
 
-Published source tags `v0.11.29` and driver `v0.1.1` remain immutable.
-This working source prepares the
-next application `0.11.30` and driver `0.1.2` identities; their new source and
-tags still require separate review. Source tags identify candidates, not
-installable RPM release evidence. GitHub build and CI
-qualification has not completed successfully, and final signing, attestation,
-disposable-host acceptance and publication remain pending. Do not install a
+Published application source `v0.11.30` remains immutable: its source CI passed,
+but its artifact comparison gate failed. This working tree prepares application
+`0.11.31`; source/tag approval and hosted RPM acceptance remain pending.
+Driver `v0.1.2` build, comparison and no-tape UBI container smoke gates passed; its signing and
+release acceptance remain pending. Source tags are not installable RPM release
+evidence. Final signing, attestation, disposable-host acceptance and publication
+remain pending for the application. Do not install a
 historical Windows ZIP or unsigned build artifact as the current Linux release.
-See the [current release notes](docs/release-notes-0.11.30-155.md) and
+See the [current release notes](docs/release-notes-0.11.31-155.md) and
 [RPM verification guide](docs/en/github-rpm-verification.md) before downloading
 or installing packages.
 

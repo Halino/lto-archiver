@@ -1,7 +1,7 @@
 # Security policy
 
 Security reports for the active Linux source target the `linux` branch and
-the current `0.11.30` candidate. Include the exact commit and affected package
+the current `0.11.31` candidate. Include the exact commit and affected package
 version. Historical Windows material is archived, not an active supported
 distribution; see the [Windows archive](docs/windows-archive.md).
 

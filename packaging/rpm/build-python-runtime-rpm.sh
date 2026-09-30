@@ -184,7 +184,7 @@ if (
     raise SystemExit(2)
 with os.fdopen(os.dup(helper), "rb") as source:
     digest = hashlib.file_digest(source, "sha256").hexdigest()
-if digest != "fcc1d8e63df7baee897dbb4042c5944c1f0e557555a6e6c88af586b4a34a28f5":
+if digest != "9685a1fcaec9948197585ad965770dcda4175899ac28f5c71e1afaef505b211d":
     raise SystemExit(2)
 os.lseek(helper, 0, os.SEEK_SET)
 os.set_inheritable(helper, True)

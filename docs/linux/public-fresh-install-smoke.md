@@ -34,7 +34,7 @@ these fields:
 | `schema_version`, `profile`, `qualified` | `2`, `fresh-rhel9-webui-hardware-absent`, `true` only after every required check |
 | `unverified_features` | Exactly `["backup_restore", "daemon_import", "physical_ltfs"]`; qualification applies only to this limited profile |
 | `app_commit`, `driver_commit` | Reviewed 40-character lowercase source commits |
-| `rpm_sha256` | Exactly the SHA-256 of `lto-ltfs-0.1.2-22.el9.x86_64.rpm`, `lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm`, and `lto-archiver-0.11.30-155.el9.noarch.rpm` |
+| `rpm_sha256` | Exactly the SHA-256 of `lto-ltfs-0.1.2-22.el9.x86_64.rpm`, `lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm`, and `lto-archiver-0.11.31-155.el9.noarch.rpm` |
 | `baseline_sha256`, `restored_sha256` | Equal digests of the controller's defined host-state baseline |
 | `uninstall_generated_state_count` | Nonnegative count; generated state is observed, not silently erased |
 | `checks` | Exactly the Boolean checks below; all must be `true` |

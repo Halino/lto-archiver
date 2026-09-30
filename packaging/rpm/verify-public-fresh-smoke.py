@@ -18,7 +18,7 @@ from pathlib import Path
 
 SHA = re.compile(r"[0-9a-f]{64}\Z")
 COMMIT = re.compile(r"[0-9a-f]{40}\Z")
-APP = "lto-archiver-0.11.30-155.el9.noarch.rpm"
+APP = "lto-archiver-0.11.31-155.el9.noarch.rpm"
 RUNTIME = "lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm"
 DRIVER = "lto-ltfs-0.1.2-22.el9.x86_64.rpm"
 FIELDS = frozenset({

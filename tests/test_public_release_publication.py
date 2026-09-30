@@ -18,8 +18,8 @@ SUBFPR = "C" * 40
 REPO = "example/lto-archiver"
 WORKFLOW = f"{REPO}/.github/workflows/build-release.yml"
 PACKAGES = (
-    "signed/app/RPMS/noarch/lto-archiver-0.11.30-155.el9.noarch.rpm",
-    "signed/app/SRPMS/lto-archiver-0.11.30-155.el9.src.rpm",
+    "signed/app/RPMS/noarch/lto-archiver-0.11.31-155.el9.noarch.rpm",
+    "signed/app/SRPMS/lto-archiver-0.11.31-155.el9.src.rpm",
     "signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
     "signed/runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm",
 )
@@ -75,20 +75,20 @@ class PublicReleasePublicationTests(unittest.TestCase):
     def test_wrong_attestation_identity_cannot_be_requested(self) -> None:
         make = self.gate["attestation_command"]
         command = make(
-            Path("package.rpm"), REPO, WORKFLOW, "refs/tags/v0.11.30", COMMIT
+            Path("package.rpm"), REPO, WORKFLOW, "refs/tags/v0.11.31", COMMIT
         )
         self.assertEqual(command[0:3], ["gh", "attestation", "verify"])
         self.assertIn("--repo", command)
         self.assertIn(REPO, command)
         self.assertIn(WORKFLOW, command)
-        self.assertIn("refs/tags/v0.11.30", command)
+        self.assertIn("refs/tags/v0.11.31", command)
         self.assertIn(COMMIT, command)
         for wrong in (
             "refs/tags/v0.11.26",
             "other/repo/.github/workflows/build-release.yml",
         ):
             with self.assertRaises(self.gate["PublicReleaseError"]):
-                make(Path("package.rpm"), REPO, wrong, "refs/tags/v0.11.30", COMMIT)
+                make(Path("package.rpm"), REPO, wrong, "refs/tags/v0.11.31", COMMIT)
 
     def test_wrong_gpg_fingerprint_fails(self) -> None:
         check = self.gate["verify_signature_output"]
@@ -123,7 +123,7 @@ class PublicReleasePublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
             approved = {
-                "app_repo": REPO, "app_tag": "v0.11.30", "app_commit": COMMIT,
+                "app_repo": REPO, "app_tag": "v0.11.31", "app_commit": COMMIT,
                 "app_primary_fingerprint": FPR, "app_signing_subkey_fingerprint": SUBFPR,
                 "app_manifest_sha256": "a" * 64, "app_signature_sha256": "b" * 64,
                 "app_key_sha256": "c" * 64, "app_attestation_sha256": "d" * 64,
@@ -135,7 +135,7 @@ class PublicReleasePublicationTests(unittest.TestCase):
             responses = {
                 "lto-ltfs-0.1.2-22.el9.x86_64.rpm": b"lto-ltfs-0.1.2-22.el9.x86_64\n",
                 "lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm": b"lto-archiver-python-runtime-0.11.27-3.el9.x86_64\n",
-                "lto-archiver-0.11.30-155.el9.noarch.rpm": b"lto-archiver-0.11.30-155.el9.noarch\n",
+                "lto-archiver-0.11.31-155.el9.noarch.rpm": b"lto-archiver-0.11.31-155.el9.noarch\n",
             }
             commands: list[list[str]] = []
 
@@ -156,7 +156,7 @@ class PublicReleasePublicationTests(unittest.TestCase):
                 self.assertEqual(tuple(path.name for path in paths), (
                     "lto-ltfs-0.1.2-22.el9.x86_64.rpm",
                     "lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
-                    "lto-archiver-0.11.30-155.el9.noarch.rpm",
+                    "lto-archiver-0.11.31-155.el9.noarch.rpm",
                 ))
                 responses["lto-ltfs-0.1.2-22.el9.x86_64.rpm"] = b"lto-ltfs-0.1.0-21.el9.x86_64\n"
                 with self.assertRaises(self.gate["PublicReleaseError"]):
@@ -309,7 +309,7 @@ class PublicReleasePublicationTests(unittest.TestCase):
 
     def test_stale_or_changed_draft_never_reaches_draft_false(self) -> None:
         proof = self.gate["make_final_proof"](
-            REPO, "v0.11.30", COMMIT, 99, "b" * 64, "c" * 64, 57, 1000
+            REPO, "v0.11.31", COMMIT, 99, "b" * 64, "c" * 64, 57, 1000
         )
         expected = {key: value for key, value in proof.items() if key != "checked_at"}
         validate = self.gate["validate_final_proof"]

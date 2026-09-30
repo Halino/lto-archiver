@@ -6,7 +6,7 @@
 %global __pythondist_requires %{nil}
 
 Name:           lto-archiver
-Version:        0.11.30
+Version:        0.11.31
 Release:        155%{?dist}
 Summary:        Native RHEL service for append-only LTFS archives
 License:        Apache-2.0
@@ -245,6 +245,10 @@ fi
 %ghost %config(noreplace) %attr(0400,root,root) %{_sysconfdir}/lto-archiver/qualification-artifacts.json
 
 %changelog
+* Wed Sep 30 2026 LTO Archiver Engineering <noreply@example.invalid> - 0.11.31-155
+- Publish the complete runtime source closure and pin the public RPM build host.
+- Preserve runtime 0.11.27-3, driver 0.1.2-22 and catalog schema 41.
+
 * Wed Sep 30 2026 LTO Archiver Engineering <noreply@example.invalid> - 0.11.30-155
 - Trust only the exact build-container workspace before source admission.
 - Pair with driver 0.1.2-22; keep runtime 0.11.27-3 and catalog schema 41.

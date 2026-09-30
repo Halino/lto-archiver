@@ -22,7 +22,7 @@ from typing import Any
 
 PRIVATE_RUNTIME_ROOT = "/usr/lib64/lto-archiver/python-runtime/3.11/site-packages"
 GLOBAL_SITE_ROOT = "/usr/lib/python3.11/site-packages/"
-APPLICATION_DIST_INFO = "lto_archiver-0.11.30.dist-info"
+APPLICATION_DIST_INFO = "lto_archiver-0.11.31.dist-info"
 DEVICE_RELABELER = "/usr/libexec/lto-archiver/relabel-device-aliases.py"
 HISTORICAL_RUNNER_NAMES = frozenset(
     {"deploy-rhel9.py", "rollback-rhel9.py", "verify-deployment-rhel9.py"}

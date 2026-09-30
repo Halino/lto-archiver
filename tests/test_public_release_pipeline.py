@@ -12,8 +12,8 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 GATE = runpy.run_path(str(ROOT / "packaging/rpm/verify-public-release.py"))
 PACKAGES = (
-    "signed/app/RPMS/noarch/lto-archiver-0.11.30-155.el9.noarch.rpm",
-    "signed/app/SRPMS/lto-archiver-0.11.30-155.el9.src.rpm",
+    "signed/app/RPMS/noarch/lto-archiver-0.11.31-155.el9.noarch.rpm",
+    "signed/app/SRPMS/lto-archiver-0.11.31-155.el9.src.rpm",
     "signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm",
     "signed/runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm",
 )
@@ -84,7 +84,7 @@ class PublicReleasePipelineTests(unittest.TestCase):
                     root / "RPM-PUBLIC-KEY.asc",
                     PRIMARY,
                     "example/lto-archiver",
-                    "v0.11.30",
+                    "v0.11.31",
                     "a" * 40,
                     digest((root / "FINAL-RPM-SHA256SUMS.asc").read_bytes()),
                     digest((root / "RPM-PUBLIC-KEY.asc").read_bytes()),

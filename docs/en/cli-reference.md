@@ -1,6 +1,6 @@
 # Linux command-line boundaries
 
-Source candidate **0.11.30-155** uses the authenticated [Linux WebUI](../linux/webui.md)
+Source candidate **0.11.31-155** uses the authenticated [Linux WebUI](../linux/webui.md)
 as the operator surface. The legacy `lto-backup` job and catalog workflow is not
 a supported Linux operator path. Do not use it to open the authoritative catalog
 or bypass daemon ownership.

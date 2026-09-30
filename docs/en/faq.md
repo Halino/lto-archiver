@@ -1,6 +1,6 @@
 # Linux operator FAQ
 
-The current source candidate **0.11.30-155** is Linux/WebUI-only, paired with
+The current source candidate **0.11.31-155** is Linux/WebUI-only, paired with
 runtime **0.11.27-3**, driver **0.1.2-22**, and catalog **schema 41**. Linux RPM
 publication and qualification are pending. See the
 [WebUI guide](../linux/webui.md) for the complete workflow.

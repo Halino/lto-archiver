@@ -344,5 +344,5 @@
     "/usr/share/lto-archiver/signing/"
   ],
   "signing_policy_sha256": "1b5f58e5df407b26dec9609c2081a90a8f77ad5fdea0b7d50a0e641205c50e84",
-  "version": "0.11.30"
+  "version": "0.11.31"
 }

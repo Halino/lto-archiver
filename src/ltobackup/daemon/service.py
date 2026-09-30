@@ -629,7 +629,7 @@ class DaemonService:
         self._logs_lock = RLock()
         self._next_log_id = 1
         self._diagnostics = RuntimeDiagnostics(
-            version="0.11.30",
+            version="0.11.31",
             monotonic=time.monotonic,
             utc_now=lambda: datetime.now(UTC),
             on_snapshot=self._publish_telemetry_snapshot,

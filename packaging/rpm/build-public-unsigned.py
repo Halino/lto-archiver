@@ -207,6 +207,8 @@ def build_rpm_once(
             "-ba",
             "--define",
             f"_topdir {topdir}",
+            "--define",
+            "_buildhost public-build.invalid",
             str(topdir / "SPECS" / spec.name),
         ],
         cwd=repo,

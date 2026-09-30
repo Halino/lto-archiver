@@ -1,7 +1,7 @@
 # Third-Party Notices — Linux application
 
 This notice covers the LTO Archiver Linux application source and its
-0.11.30-155 packaging contract. It does not describe the separately
+0.11.31-155 packaging contract. It does not describe the separately
 versioned Python runtime or LTFS driver as though they were embedded in the
 application RPM.
 
