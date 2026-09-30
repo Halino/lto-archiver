@@ -1,0 +1,1 @@
+{"command":["/usr/bin/rpm","-V","lto-ltfs"],"package_nevra":"lto-ltfs-0.1.0-21.el9.x86_64","permitted_rows":["S.5....T.  c /etc/lto-ltfs/device.json"],"schema":1,"stderr":"","success_exit_codes":[1]}

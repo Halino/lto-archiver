@@ -1,0 +1,33 @@
+[Unit]
+Description=LTO Archiver constrained journal log reader
+Requires=lto-archiver-log-reader.socket
+After=lto-archiver-log-reader.socket
+
+[Service]
+Type=exec
+User=root
+Group=root
+ExecStart=/usr/bin/lto-archiver-log-reader --socket-fd 3
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+DevicePolicy=closed
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectControlGroups=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=no
+ProtectClock=yes
+ProtectHostname=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block nav_active %}media{% endblock %}
+{% block title %}Media · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="media-title">
+  <p class="eyebrow">Media identity</p>
+  <h1 id="media-title">Media</h1>
+  {% if view.recovery_operation_id %}
+  <section class="detail-panel" role="status">
+    <h2>{{ view.operation_title }}</h2>
+    <p>{{ view.explanation }}</p>
+    {% if user.role == 'admin' %}<a class="secondary-action" href="/operations/{{ view.recovery_operation_id|urlencode }}/recovery">Reset blocked state</a>{% endif %}
+  </section>
+  {% endif %}
+  {% if status and status.expected_media %}
+  <section class="detail-panel">
+    <h2>Expected cassette {{ status.expected_media.sequence }}</h2>
+    <p class="media-label">{{ status.expected_media.label }}</p>
+    {% if view.recovery_operation_id %}
+    <p role="status">Formatting is unavailable until recovery has been reviewed.</p>
+    {% elif status.operation %}
+    <p role="status">Formatting is unavailable while an operation is active: {{ status.operation.phase|default(status.operation.state, true)|replace('_', ' ') }}. Wait for the operation to finish.</p>
+    {% elif not status.accepting_mutations %}
+    <p role="status">Formatting is unavailable while the daemon is not accepting changes.</p>
+    {% elif status.expected_media.format_required and user.role == 'admin' %}
+    <div class="danger-zone">
+      <h3>Destructive formatting</h3>
+      <p>Enter the exact expected label. Final admission remains the daemon's responsibility.</p>
+      <div class="danger-toolbar" role="group" aria-label="Destructive media actions"><form action="/media/{{ status.expected_media.sequence }}/format" method="post">
+        <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+        <label for="typed-label">Exact label</label>
+        <input id="typed-label" name="typed_label" required autocomplete="off">
+        <button class="danger-action" type="submit">Format cassette</button>
+      </form></div>
+    </div>
+    {% elif not status.expected_media.format_required %}<p>The daemon does not require this media to be formatted.</p>{% endif %}
+  </section>
+  {% else %}<p class="empty-state">No cassette expected.</p>{% endif %}
+</main>
+{% endblock %}

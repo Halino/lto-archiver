@@ -1,0 +1,89 @@
+<section id="logs-live-status" class="logs-live-status" data-live-fragment-url="{{ status_fragment_url }}" data-log-live-status data-live-refresh-mode="{{ 'active' if follow_available else 'idle' }}" aria-label="Operational log results">
+  {% if unavailable_state == "upgrade_required" %}
+  <div class="log-state log-state-unavailable" role="alert">
+    <h2>Complete log browser unavailable</h2>
+    <p>A daemon upgrade is required before the complete operational journal can be displayed. The sparse legacy log is not used as a fallback.</p>
+  </div>
+  {% elif unavailable_state == "unavailable" %}
+  <div class="log-state log-state-unavailable" role="alert">
+    <h2>Operational log unavailable</h2>
+    <p>The daemon or constrained journal reader is unavailable. No tape, job, service, or journal state was changed.</p>
+  </div>
+  {% elif page.cursor_rotated %}
+  <div class="log-state log-state-rotated" role="status">
+    <h2>The journal cursor has expired</h2>
+    <p>Retention or journal rotation removed this position. Return to the newest retained events.</p>
+    <a class="secondary-action" href="{{ navigation.newest }}">Return to newest</a>
+  </div>
+  {% elif page.unavailable_sources and page.source.value == 'all' and page.unavailable_sources|length == 6 %}
+  <div class="log-state log-state-unavailable" role="status">
+    <h2>Operational journal unavailable</h2>
+    <p>All application log sources are temporarily unavailable. No incomplete result is shown.</p>
+  </div>
+  {% elif page.unavailable_sources and page.source.value != 'all' %}
+  <div class="log-state log-state-partial" role="status">
+    <h2>Requested source temporarily unavailable</h2>
+    <p>The requested operational source is unavailable. No incomplete result is shown.</p>
+    <ul>{% for source in page.unavailable_sources %}<li>{{ source_labels[source] }}</li>{% endfor %}</ul>
+  </div>
+  {% elif page.unavailable_sources %}
+  <div class="log-state log-state-partial" role="status">
+    <h2>Some sources are temporarily unavailable</h2>
+    <p>The complete filtered result is withheld until these sources recover.</p>
+    <ul>{% for source in page.unavailable_sources %}<li>{{ source_labels[source] }}</li>{% endfor %}</ul>
+  </div>
+  {% else %}
+  <div class="logs-summary" aria-label="Counts in this filtered page">
+    <div>
+      <h2>Severity</h2>
+      <dl>{% for severity, label in severity_labels.items() %}<div><dt>{{ label }}</dt><dd>{{ severity_counts[severity.value] }}</dd></div>{% endfor %}</dl>
+    </div>
+    <div>
+      <h2>Source</h2>
+      <dl>{% for source, label in source_labels.items() %}{% if source.value != 'all' %}<div><dt>{{ label }}</dt><dd>{{ source_counts[source.value] }}</dd></div>{% endif %}{% endfor %}</dl>
+    </div>
+  </div>
+
+  <ol class="operational-log-list" data-log-list aria-label="Operational log entries" tabindex="0">
+    {% for entry in page.items %}
+    <li class="operational-log-row severity-{{ entry.severity.value }}" data-live-key="{{ entry.cursor }}">
+      <div class="log-row-primary">
+        <time datetime="{{ entry.occurred_at }}" title="Exact journal time: {{ entry.occurred_at }}" data-local-time data-label="Time">{{ entry.occurred_at }}</time>
+        <strong class="log-severity" data-label="Severity">{{ severity_labels[entry.severity] }}</strong>
+        <span class="log-source" data-label="Source">{{ source_labels[entry.source] }}</span>
+        <span class="log-message" data-label="Message">{{ entry.message }}</span>
+      </div>
+      <details class="log-details">
+        <summary>Event details</summary>
+        <dl>
+          <div><dt>Exact time</dt><dd>{{ entry.occurred_at }}</dd></div>
+          <div><dt>Service unit</dt><dd>{{ entry.unit }}</dd></div>
+          {% if entry.operation_id %}<div><dt>Operation</dt><dd>{{ entry.operation_id }}</dd></div>{% endif %}
+          {% if entry.job_id %}<div><dt>Job</dt><dd>{{ entry.job_id }}</dd></div>{% endif %}
+          {% if entry.cassette_label %}<div><dt>Cassette</dt><dd>{{ entry.cassette_label }}{% if entry.cassette_sequence %} · sequence {{ entry.cassette_sequence }}{% endif %}</dd></div>{% endif %}
+          {% if entry.command_id %}<div><dt>Command ID</dt><dd>{{ entry.command_id }}</dd></div>{% endif %}
+          {% if entry.daemon_generation is not none %}<div><dt>Daemon generation</dt><dd>{{ entry.daemon_generation }}</dd></div>{% endif %}
+          {% if entry.command_kind %}<div><dt>Command kind</dt><dd>{{ entry.command_kind }}</dd></div>{% endif %}
+          {% if entry.phase %}<div><dt>LTFS phase</dt><dd>{{ entry.phase }}</dd></div>{% endif %}
+          {% if entry.exit_code is not none %}<div><dt>Exit code</dt><dd>{{ entry.exit_code }}</dd></div>{% endif %}
+          {% if entry.elapsed_ms is not none %}<div><dt>Elapsed</dt><dd>{{ entry.elapsed_ms }} ms</dd></div>{% endif %}
+          {% if entry.pid is not none %}<div><dt>Process</dt><dd>{{ entry.pid }}</dd></div>{% endif %}
+          {% if entry.boot_id %}<div><dt>Boot</dt><dd>{{ entry.boot_id }}</dd></div>{% endif %}
+          <div><dt>Repeated</dt><dd>{{ entry.repeat_count }} time{% if entry.repeat_count != 1 %}s{% endif %}</dd></div>
+          <div><dt>Truncated</dt><dd>{{ "Yes" if entry.truncated else "No" }}</dd></div>
+          <div><dt>Journal cursor</dt><dd>{{ entry.cursor }}</dd></div>
+        </dl>
+      </details>
+    </li>
+    {% else %}
+    <li class="empty-state">No matching operational events were found in the selected retained window.</li>
+    {% endfor %}
+  </ol>
+
+  <nav class="logs-pagination" aria-label="Operational log pages">
+    {% if navigation.newer %}<a class="secondary-action" href="{{ navigation.newer }}">Newer</a>{% else %}<span aria-hidden="true"></span>{% endif %}
+    <span>{{ page.items|length }} row{% if page.items|length != 1 %}s{% endif %}</span>
+    {% if navigation.older %}<a class="secondary-action" href="{{ navigation.older }}">Older</a>{% else %}<span aria-hidden="true"></span>{% endif %}
+  </nav>
+  {% endif %}
+</section>

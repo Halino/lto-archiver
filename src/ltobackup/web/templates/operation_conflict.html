@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block nav_active %}dashboard{% endblock %}
+{% block title %}Operation already active · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="conflict-title">
+  <p class="eyebrow">Operation conflict</p>
+  <h1 id="conflict-title">Operation already active</h1>
+  <p>The daemon kept the current operation and did not repeat the request.</p>
+  <section class="detail-panel" aria-label="Active daemon operation">
+    <dl class="detail-list">
+      <div><dt>Identifier</dt><dd>{{ active_operation.id }}</dd></div>
+      <div><dt>Type</dt><dd>{{ active_operation.kind }}</dd></div>
+      <div><dt>State</dt><dd>{{ active_operation.state }}</dd></div>
+      <div><dt>Phase</dt><dd>{{ active_operation.phase or "Not available" }}</dd></div>
+      <div><dt>Job</dt><dd>{{ active_operation.job_id or "Not available" }}</dd></div>
+      <div><dt>Cassette</dt><dd>{{ active_operation.cassette_sequence or "Not available" }}</dd></div>
+      <div><dt>Started</dt><dd>{{ active_operation.started_at }}</dd></div>
+    </dl>
+  </section>
+  <p><a href="/">Return to operation status</a></p>
+</main>
+{% endblock %}

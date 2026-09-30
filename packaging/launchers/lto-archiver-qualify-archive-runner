@@ -1,0 +1,10 @@
+#!/usr/bin/python3.11 -I
+import sys
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, "/usr/lib64/lto-archiver/python-runtime/3.11/site-packages")
+sys.path.insert(0, "/usr/lib/python3.11/site-packages")
+
+from ltobackup.qualification.archive_runner import main
+
+raise SystemExit(main())

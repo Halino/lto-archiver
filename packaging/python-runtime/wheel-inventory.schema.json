@@ -1,0 +1,198 @@
+{
+  "$id": "https://example.invalid/lto-archiver/runtime-wheel-inventory.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "runtime": {
+      "additionalProperties": false,
+      "properties": {
+        "aggregate_license": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "architecture": {
+          "const": "x86_64"
+        },
+        "authorized_lock_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "python_version": {
+          "const": "3.11"
+        },
+        "source_date_epoch": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "version": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "wheel_count": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "python_version",
+        "architecture",
+        "aggregate_license",
+        "wheel_count",
+        "source_date_epoch",
+        "authorized_lock_sha256"
+      ],
+      "type": "object"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "wheels": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "abi_tags": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "architecture": {
+            "enum": [
+              "noarch",
+              "x86_64"
+            ]
+          },
+          "dependencies": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "filename": {
+            "pattern": "^[^/]+\\.whl$",
+            "type": "string"
+          },
+          "license_expression": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "license_files": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "sha256": {
+                  "pattern": "^[0-9a-f]{64}$",
+                  "type": "string"
+                },
+                "wheel_member": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "wheel_member",
+                "path",
+                "sha256"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "metadata_requires_dist": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "normalized_name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "platform_tags": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "python_tags": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "root_is_purelib": {
+            "type": "boolean"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "wheel_tags": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "filename",
+          "sha256",
+          "name",
+          "normalized_name",
+          "version",
+          "python_tags",
+          "abi_tags",
+          "platform_tags",
+          "wheel_tags",
+          "root_is_purelib",
+          "architecture",
+          "license_expression",
+          "license_files",
+          "dependencies",
+          "metadata_requires_dist"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "runtime",
+    "wheels"
+  ],
+  "title": "LTO Archiver closed Python runtime wheel inventory",
+  "type": "object"
+}

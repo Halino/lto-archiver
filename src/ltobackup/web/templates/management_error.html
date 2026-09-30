@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block nav_active %}dashboard{% endblock %}
+{% block title %}Operation unavailable · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="error-title" data-error-code="{{ error_code|default('management_error') }}">
+  <p class="eyebrow">Protected state</p>
+  <h1 id="error-title">{{ error_title|default('Operation unavailable') }}</h1>
+  <div class="error-banner" role="alert">
+    <p data-error-part="explanation">{{ error_explanation|default(error) }}</p>
+    <p><strong>Code: {{ error_code|default('management_error') }}</strong></p>
+    {% if error_field %}<p>Field: {{ error_field }}</p>{% endif %}
+    {% if error_action %}<p>Action: {{ error_action }}</p>{% endif %}
+  </div>
+  <section class="detail-panel" aria-labelledby="error-next-title">
+    <h2 id="error-next-title">Next step</h2>
+    <p data-error-part="next-action">{{ error_next_action|default('Return to the previous page and check the current state before retrying.') }}</p>
+    <p><a class="primary-action" href="{{ next_url|default('/') }}">Continue</a></p>
+  </section>
+</main>
+{% endblock %}

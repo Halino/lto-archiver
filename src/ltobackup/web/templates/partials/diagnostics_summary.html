@@ -1,0 +1,21 @@
+<section id="diagnostics-runtime-summary" class="detail-panel" aria-live="polite" aria-labelledby="runtime-summary-title" data-live-refresh-mode="{{ diagnostic.refresh_mode }}">
+  <h2 id="runtime-summary-title">Redacted runtime telemetry</h2>
+  <dl class="detail-list">
+    <div><dt>Health status</dt><dd>{{ diagnostic.health_status }}</dd></div>
+    <div><dt>Drive cleaning</dt><dd>{{ diagnostic.cleaning_required }}</dd></div>
+    <div><dt>TapeAlert</dt><dd>{{ diagnostic.tape_alerts }}</dd></div>
+    <div><dt>Runtime phase</dt><dd>{{ diagnostic.current_phase }}</dd></div>
+    <div><dt>Acquisition status</dt><dd>{{ diagnostic.acquisition_state }}</dd></div>
+    <div><dt>Last sample</dt><dd>{{ diagnostic.last_sample_at }}</dd></div>
+    <div><dt>Files completed</dt><dd>{{ diagnostic.files_completed }}</dd></div>
+    <div><dt>Bytes completed</dt><dd>{{ diagnostic.bytes_completed }}</dd></div>
+    <div><dt>Current rate</dt><dd>{{ diagnostic.current_rate }}</dd></div>
+    <div><dt>Effective average</dt><dd>{{ diagnostic.effective_rate }}</dd></div>
+  </dl>
+  <h3>Runtime phase timings</h3>
+  <dl class="timing-grid diagnostics-timing-grid">
+    {% for label, duration in diagnostic.phase_durations %}
+    <div><dt>{{ label }}</dt><dd>{{ duration }}</dd></div>
+    {% endfor %}
+  </dl>
+</section>

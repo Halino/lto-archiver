@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import control_error_attributes, form_error_attributes, render_errors %}
+{% block nav_active %}libraries{% endblock %}
+{% block title %}Libraries · LTO Archiver{% endblock %}
+{% block content %}
+{% set errors = field_errors|default({}) %}
+{% set source_kind = form_values.source_kind|default('configured_path') %}
+{% set state_labels = {'active': 'Active', 'disabled': 'Disabled', 'retired': 'Retired'} %}
+{% set scan_labels = {'never': 'Never scanned', 'running': 'Scan running', 'ready': 'Ready', 'failed': 'Error'} %}
+<main class="page-shell detail-page" aria-labelledby="libraries-title">
+  <p class="eyebrow">Source data</p>
+  <h1 id="libraries-title">Libraries</h1>
+  <section class="detail-panel library-introduction" aria-labelledby="libraries-introduction-title">
+    <h2 id="libraries-introduction-title">What is a library?</h2>
+    <p>A library identifies source data to include in backups. It can point to a local folder or an already connected NFS/SMB share.</p>
+    <p class="page-note">Configuration and scanning do not write to tape: writing starts only when you create and start a job.</p>
+  </section>
+  {% if error %}<p class="error-banner" role="alert">{{ error }}</p>{% endif %}
+  {{ render_errors(errors, "libraries") }}
+
+  {% include "partials/libraries_status.html" %}
+
+  {% if user.role == "admin" %}
+  <section class="detail-panel library-create-panel" aria-labelledby="library-create-title">
+    <p class="eyebrow">Guided setup</p>
+    <h2 id="library-create-title">New library</h2>
+    <form action="/libraries" method="post" data-library-form{{ form_error_attributes(errors, ("idempotency_key",), "libraries") }}>
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+
+      <fieldset class="library-form-section">
+        <legend><span class="step-number">1</span> Name the library</legend>
+        <p class="form-help">Use a name you can easily recognize when selecting data for a job.</p>
+        <label for="library-name">Library name</label>
+        <input id="library-name" name="display_name" required maxlength="120" autocomplete="off" value="{{ form_values.display_name|default('') }}" placeholder="Film"{{ control_error_attributes(errors, "display_name", "libraries-display_name-error") }}>
+        <details class="advanced-fields" data-library-advanced open>
+          <summary>Advanced options</summary>
+          <label for="library-id">Technical identifier</label>
+          <input id="library-id" name="library_id" required maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" autocomplete="off" value="{{ form_values.library_id|default('') }}" data-library-id-suggestion{{ control_error_attributes(errors, "library_id", "libraries-library_id-error") }}>
+          <p class="form-help">The ID is suggested automatically from the name. You can change it before creation.</p>
+        </details>
+      </fieldset>
+
+      <fieldset class="library-form-section">
+        <legend><span class="step-number">2</span> Choose where the data is located</legend>
+        <div class="library-source-choices">
+          <label class="library-source-choice" for="library-source-local">
+            <input id="library-source-local" type="radio" name="source_kind" value="configured_path" aria-controls="library-source-local-fields"{% if source_kind == 'configured_path' %} checked{% endif %}>
+            <span><strong>Local folder</strong><small>A path already available on this server.</small></span>
+          </label>
+          <label class="library-source-choice" for="library-source-share">
+            <input id="library-source-share" type="radio" name="source_kind" value="managed_share" aria-controls="library-source-share-fields"{% if source_kind == 'managed_share' %} checked{% endif %}>
+            <span><strong>NFS/SMB share</strong><small>A share configured and connected from the WebUI.</small></span>
+          </label>
+        </div>
+
+        <div id="library-source-local-fields" class="library-source-panel" data-library-source-panel="configured_path">
+          <label for="library-root">Folder path</label>
+          <input id="library-root" name="source_root" value="{{ form_values.source_root|default('') }}" placeholder="/srv/archivio/film" data-required-when-active{{ control_error_attributes(errors, "source_root", "libraries-source_root-error") }}>
+          <p class="form-help">Enter an absolute path that the LTO Archiver service can already access.</p>
+        </div>
+
+        <div id="library-source-share-fields" class="library-source-panel" data-library-source-panel="managed_share">
+          <label for="library-share">Connected share</label>
+          <select id="library-share" name="share_id" data-required-when-active>
+            <option value="">Select a share</option>
+            {% for share in share_options|default(()) %}<option value="{{ share.share_id }}"{% if form_values.share_id|default('') == share.share_id %} selected{% endif %}>{{ share.display_name }} — {{ share.protocol|upper }}</option>{% endfor %}
+          </select>
+          {% if not share_options %}<p class="alert alert-warning">There are no active connected shares.</p>{% endif %}
+          <p class="form-help"><a href="/shares">Configure or connect a share</a>, then return to this page.</p>
+          <label for="library-subpath">Subfolder to include <span class="optional-label">(optional)</span></label>
+          <input id="library-subpath" name="relative_subpath" value="{{ form_values.relative_subpath|default('') }}" placeholder="film/2026">
+          <p class="form-help">Leave blank to use the entire share.</p>
+        </div>
+      </fieldset>
+
+      <div class="library-submit-row">
+        <button class="primary-action" type="submit">Create library</button>
+        <p>You can then scan it and verify its files and size.</p>
+      </div>
+    </form>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

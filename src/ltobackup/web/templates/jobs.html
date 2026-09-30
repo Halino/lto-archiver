@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block nav_active %}jobs{% endblock %}
+{% block title %}Job · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="jobs-title"><p class="eyebrow">Saved backups</p><h1 id="jobs-title">Job</h1><nav class="action-toolbar" aria-label="Job actions"><a class="primary-action" href="/jobs/new">Create new job</a>{% if show_retired %}<a href="/jobs">Hide retired</a>{% else %}<a href="/jobs?show_retired=1">Show retired</a>{% endif %}</nav>
+{% include "partials/jobs_status.html" %}</main>
+{% endblock %}

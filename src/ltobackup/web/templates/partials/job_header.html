@@ -1,0 +1,3 @@
+<header data-job-fragment="header"><p class="eyebrow">Job {{ job.id }}</p><h1 id="job-title">{{ job.display_name }}</h1>
+{% if runtime and runtime.preparation %}<div class="alert" role="status"><strong>{{ runtime.preparation.label }}</strong><p>{{ runtime.preparation.detail }}</p><p>Phase started: <time datetime="{{ runtime.preparation.since }}">{{ runtime.preparation.since }}</time>. Updates automatically.</p></div>{% endif %}
+</header>

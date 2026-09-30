@@ -1,0 +1,15 @@
+[Unit]
+Description=LTO Archiver journal log reader socket
+
+[Socket]
+ListenStream=/run/lto-archiver-log-reader/control.sock
+FileDescriptorName=log-reader
+SocketUser=root
+SocketGroup=lto-log-read
+SocketMode=0660
+DirectoryMode=0750
+RemoveOnStop=yes
+Service=lto-archiver-log-reader.service
+
+[Install]
+WantedBy=sockets.target

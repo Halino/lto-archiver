@@ -1,0 +1,61 @@
+<main id="operations" class="page-shell" aria-live="polite" aria-labelledby="operation-title" data-live-refresh-mode="{{ view.refresh_mode }}" data-live-patch="keyed">
+  {% if not view.daemon_available %}
+  <div class="alert alert-error" role="status" data-live-key="daemon-alert">Daemon unavailable. The following values are not current.</div>
+  {% endif %}
+  <div id="connection-banner" class="alert alert-warning" role="status" hidden data-live-key="connection-alert">Reconnecting; the job continues on the daemon.</div>
+  <section class="active-operation" data-phase="{{ view.operation_phase }}" data-live-key="operation-heading">
+    <p class="eyebrow">Current operation</p>
+    <h1 id="operation-title">{{ view.operation_title }}</h1>
+    <p class="phase-label">{{ view.operation_phase_label }}</p>
+    <p class="operation-explanation">{{ view.explanation }}</p>
+    {% if preparation %}<p role="status">Phase started: <time datetime="{{ preparation.since }}">{{ preparation.since }}</time>. Updates automatically.</p>{% endif %}
+    {% if preparation_unavailable %}<p role="status">Preparation status is temporarily unavailable. Check the job details before issuing another command.</p>{% endif %}
+    {% if view.recovery_operation_id and user.role == 'admin' %}
+    {% if critical_recovery and critical_recovery.operation_id == view.recovery_operation_id %}
+    <a class="secondary-action" href="/critical-recovery/{{ critical_recovery.operation_id|urlencode }}">Recover blocked job</a>
+    {% else %}
+    <a class="secondary-action" href="/operations/{{ view.recovery_operation_id|urlencode }}/recovery">Reset blocked state</a>
+    {% endif %}
+    {% endif %}
+    {% if view.can_resume and view.job_id %}
+    <form action="/jobs/{{ view.job_id|urlencode }}/resume" method="post">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+      <button class="primary-action" type="submit">Resume job</button>
+    </form>
+    {% endif %}
+  </section>
+
+  <section class="metrics-grid" aria-label="Progress and rate" data-live-key="operation-metrics">
+    <article class="metric-card"><h2>Files completed</h2><p>{{ view.files_progress }}</p></article>
+    <article class="metric-card"><h2>Data written</h2><p>{{ view.bytes_progress }}</p></article>
+    <article class="metric-card"><h2>Instantaneous rate (raw)</h2><p data-live-number="dashboard-current-rate"{% if current_rate_value is not none and not view.recovery_operation_id %} data-value="{{ current_rate_value }}"{% endif %}>{{ view.current_rate }}</p></article>
+    <article class="metric-card"><h2>Effective rate (operation window)</h2><p data-live-number="dashboard-effective-rate"{% if effective_rate_value is not none %} data-value="{{ effective_rate_value }}"{% endif %}>{{ view.effective_rate }}</p></article>
+  </section>
+  <p data-live-key="sample-freshness">Sample freshness: {{ view.sample_freshness }}. The recent rate and operation average cover different time windows.</p>
+
+  <section class="finalization-status{% if view.finalization_active %} is-active{% endif %}" data-live-key="operation-finalization" data-finalization-state="{% if view.finalization_active %}active{% else %}inactive{% endif %}" aria-label="LTFS cassette finalization status">
+    <strong>{{ view.finalization_label }}</strong>
+    <span>Remains active until LTFS unmount completes.</span>
+  </section>
+
+  <section class="status-grid" aria-label="Primary operation status" data-live-key="operation-status">
+    <article class="status-card" data-card="drive-status"><h2>Drive</h2><p>{{ view.drive_label }}</p></article>
+    <article class="status-card" data-card="expected-cassette"><h2>Expected cassette</h2><p>{{ view.expected_media_label }}</p></article>
+    <article class="status-card" data-card="active-job"><h2>Active job</h2><p>{{ view.job_display_name }}</p></article>
+  </section>
+
+  <section class="timing-panel" aria-labelledby="timing-title" data-live-key="operation-timings">
+    <h2 id="timing-title">Phase timings</h2>
+    <dl class="timing-grid">
+      <div><dt>Copy</dt><dd>{{ view.copy_time }}</dd></div>
+      <div><dt>File close</dt><dd>{{ view.close_time }}</dd></div>
+      <div><dt>LTFS index finalization</dt><dd>{{ view.finalization_time }}</dd></div>
+      <div><dt>Unmount</dt><dd>{{ view.unmount_time }}</dd></div>
+      <div><dt>Unload</dt><dd>{{ view.unload_time }}</dd></div>
+    </dl>
+  </section>
+
+  <div data-live-key="operation-telemetry">{{ telemetry_html|safe }}</div>
+  {% include "partials/storage.html" %}
+</main>

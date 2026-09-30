@@ -1,0 +1,31 @@
+<div data-job-fragment="retirement">
+{% if job.catalog_cleanup %}
+{% set cleanup = job.catalog_cleanup %}
+<section class="detail-panel" aria-labelledby="catalog-cleanup-title">
+  <h2 id="catalog-cleanup-title">Catalog cleanup result</h2>
+  <p>Removed {{ cleanup.deleted_tape_count }} tape catalogs, {{ cleanup.deleted_blocks }} blocks and {{ cleanup.deleted_files }} file records. Preserved {{ cleanup.preserved_tape_count }} tape catalogs.</p>
+  <p>Physical tape data is not erased. Removed file records are no longer searchable here. Job and audit history are retained.</p>
+  {% if cleanup.deleted_tapes %}<details><summary>Removed tapes (up to 100 shown)</summary><ul>{% for tape in cleanup.deleted_tapes %}<li>{{ tape }}</li>{% endfor %}</ul></details>{% endif %}
+  {% if cleanup.preserved_tapes %}<details><summary>Preserved tapes (up to 100 shown)</summary><ul>{% for tape in cleanup.preserved_tapes %}<li>{{ tape.tape_id }}: {{ tape.reason|replace('_', ' ') }}</li>{% endfor %}</ul></details>{% endif %}
+  <p><a href="/jobs">Back to active jobs</a></p>
+</section>
+{% endif %}
+{% set retire_errors = errors if attempted_action == 'retire' else {} %}
+{% if user.role == 'admin' %}
+<section class="danger-zone"><h2>Delete job</h2>
+  <p>This removes the job from the active list. Only tapes owned exclusively by this job and their file indexes are removed from the catalog. Shared tapes, uncertain ownership and protected restore/history references are preserved.</p>
+  <p>Physical tape data is not erased. Removed file records will no longer be searchable from the GUI. Job and audit history remain available.</p>
+  {% if job.capabilities.retire %}
+  <div class="danger-toolbar" role="group" aria-label="Dangerous job actions">
+    <form action="/jobs/{{ job.id|urlencode }}/retire" method="post"{{ form_error_attributes(retire_errors, ("expected_revision", "idempotency_key", "state"), "job-detail") }}>
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ idempotency_key }}"><input type="hidden" name="expected_revision" value="{{ job.revision }}">
+      <label>Enter {{ job.id }}<input name="typed_job_id" autocomplete="off" required{{ control_error_attributes(retire_errors, "typed_job_id", "job-detail-typed_job_id-error") }}></label>
+      <button class="danger-action" type="submit">Delete job</button>
+    </form>
+  </div>
+  {% elif job.state == 'retired' %}<p>This job is already deleted from the active list.</p>
+  {% elif job.imported %}<p>Imported jobs keep their frozen history and cannot be deleted.</p>
+  {% else %}<p>Pause or finish the active operation before deleting this job.</p>{% endif %}
+</section>
+{% endif %}
+</div>

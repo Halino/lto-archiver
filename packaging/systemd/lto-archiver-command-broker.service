@@ -1,0 +1,38 @@
+[Unit]
+Description=LTO Archiver privileged command broker
+Requires=lto-archiver-command-broker.socket
+After=lto-archiver-command-broker.socket
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=root
+Group=root
+SupplementaryGroups=lto-archiver
+ExecStart=/usr/bin/lto-archiver-command-broker
+ExecStartPre=/usr/libexec/lto-archiver/configure-device-policy.py --verify-only
+LoadCredential=broker-capability:/etc/lto-archiver/credentials/broker-capability
+LoadCredential=broker-proof-key:/etc/lto-archiver/credentials/broker-proof-key
+LoadCredential=qualification-credential:/etc/lto-archiver/credentials/qualification-credential
+Delegate=yes
+KillMode=process
+SendSIGKILL=no
+TimeoutStopSec=infinity
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_SYS_ADMIN CAP_SYS_RAWIO
+AmbientCapabilities=
+DevicePolicy=closed
+ProtectControlGroups=no
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX
+SystemCallFilter=@system-service @mount
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

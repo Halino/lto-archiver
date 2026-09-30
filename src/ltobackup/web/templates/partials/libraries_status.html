@@ -1,0 +1,11 @@
+{% set state_labels = {'active': 'Active', 'disabled': 'Disabled', 'retired': 'Retired'} %}
+{% set scan_labels = {'never': 'Never scanned', 'running': 'Scan running', 'ready': 'Ready', 'failed': 'Error'} %}
+{% set refresh_mode = 'active' if libraries|selectattr('scan_state', 'equalto', 'running')|list else 'idle' %}
+<section id="libraries-live-status" class="detail-panel" aria-labelledby="configured-libraries-title" aria-live="polite" data-live-fragment-url="/libraries/status-fragment" data-live-refresh-mode="{{ refresh_mode }}">
+  <h2 id="configured-libraries-title">Configured libraries</h2>
+  {% if libraries %}
+  <div class="table-scroll"><table class="summary-table libraries-table"><thead><tr><th>Name</th><th>Source</th><th>State</th><th>Scan</th><th>Files</th><th>Size</th></tr></thead><tbody>
+    {% for library in libraries %}<tr><th scope="row" data-label="Name"><a href="/libraries/{{ library.id|urlencode }}">{{ library.display_name }}</a><small class="table-secondary">ID {{ library.id }}</small></th><td data-label="Source">{% if library.source_kind == 'managed_share' %}Share {{ library.share_id }}{% if library.relative_subpath %} / {{ library.relative_subpath }}{% endif %}{% else %}Local folder {{ library.source_root }}{% endif %}</td><td data-label="State">{{ state_labels.get(library.state, library.state) }}</td><td data-label="Scan">{{ scan_labels.get(library.scan_state, library.scan_state) }}</td><td data-label="Files">{{ format_integer(library.file_count) }}</td><td data-label="Size">{{ format_storage_size(library.byte_count) }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<p class="empty-state">No libraries are configured. Complete the two steps below to add one.</p>{% endif %}
+</section>

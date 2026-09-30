@@ -1,0 +1,539 @@
+name: Publish reviewed GitHub-built RPM assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Exact reviewed protected public tag
+        required: true
+        type: string
+      reviewed_commit:
+        description: Exact reviewed public source commit
+        required: true
+        type: string
+      build_run_id:
+        description: Successful build-release run containing the signed candidate
+        required: true
+        type: string
+      approved_manifest_sha256:
+        description: Separately approved FINAL-RPM-SHA256SUMS digest
+        required: true
+        type: string
+      approved_signature_sha256:
+        description: Separately approved detached manifest signature digest
+        required: true
+        type: string
+      approved_key_sha256:
+        description: Separately approved RPM public key file digest
+        required: true
+        type: string
+      approved_attestation_sha256:
+        description: Separately approved final attestation bundle digest
+        required: true
+        type: string
+      approved_fingerprint:
+        description: Separately approved full primary GPG fingerprint
+        required: true
+        type: string
+      approved_signing_subkey_fingerprint:
+        description: Separately approved full RPM signing subkey fingerprint
+        required: true
+        type: string
+      smoke_report_sha256:
+        description: Approved disposable RHEL 9 fresh-install and snapshot-restore report digest
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Configure public-rpm-publication with required external reviewers,
+# prevent-self-review, and a selected protected-tag rule. Set its approval
+# variables only after exact-asset and disposable-host evidence is reviewed.
+# Configure public-rpm-admin-read with an Administration:read-only token scoped
+# to this repository, required reviewers and no bypass. It has no release-write
+# permission and is never exposed to the jobs that create or publish a Release.
+# There is deliberately no signing key or public-push step in this workflow.
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    environment: public-rpm-admin-read
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.PUBLIC_RPM_ADMIN_READ_TOKEN }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.ref }}
+          persist-credentials: false
+      - name: Confirm immutable releases before any draft exists
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          gh api -i "repos/$GITHUB_REPOSITORY/immutable-releases" > "$RUNNER_TEMP/immutable-releases.http"
+          python3 packaging/rpm/verify-public-release.py \
+            --verify-immutability-http "$RUNNER_TEMP/immutable-releases.http"
+  publish:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    environment: public-rpm-publication
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      draft_id: ${{ steps.stage.outputs.draft_id }}
+      asset_set_sha256: ${{ steps.stage.outputs.asset_set_sha256 }}
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+      BUILD_RUN_ID: ${{ inputs.build_run_id }}
+      APPROVED_MANIFEST_SHA256: ${{ inputs.approved_manifest_sha256 }}
+      APPROVED_SIGNATURE_SHA256: ${{ inputs.approved_signature_sha256 }}
+      APPROVED_KEY_SHA256: ${{ inputs.approved_key_sha256 }}
+      APPROVED_ATTESTATION_SHA256: ${{ inputs.approved_attestation_sha256 }}
+      APPROVED_FINGERPRINT: ${{ inputs.approved_fingerprint }}
+      APPROVED_SIGNING_SUBKEY_FINGERPRINT: ${{ inputs.approved_signing_subkey_fingerprint }}
+      SMOKE_REPORT_SHA256: ${{ inputs.smoke_report_sha256 }}
+      ENV_APPROVED_TAG: ${{ vars.PUBLIC_RPM_APPROVED_TAG }}
+      ENV_APPROVED_COMMIT: ${{ vars.PUBLIC_RPM_APPROVED_COMMIT }}
+      ENV_APPROVED_BUILD_RUN_ID: ${{ vars.PUBLIC_RPM_APPROVED_BUILD_RUN_ID }}
+      ENV_APPROVED_MANIFEST_SHA256: ${{ vars.PUBLIC_RPM_APPROVED_MANIFEST_SHA256 }}
+      ENV_APPROVED_SIGNATURE_SHA256: ${{ vars.PUBLIC_RPM_APPROVED_SIGNATURE_SHA256 }}
+      ENV_APPROVED_KEY_SHA256: ${{ vars.PUBLIC_RPM_APPROVED_KEY_SHA256 }}
+      ENV_APPROVED_ATTESTATION_SHA256: ${{ vars.PUBLIC_RPM_APPROVED_ATTESTATION_SHA256 }}
+      ENV_APPROVED_FINGERPRINT: ${{ vars.PUBLIC_RPM_APPROVED_FINGERPRINT }}
+      ENV_APPROVED_SIGNING_SUBKEY_FINGERPRINT: ${{ vars.PUBLIC_RPM_APPROVED_SIGNING_SUBKEY_FINGERPRINT }}
+      ENV_APPROVED_SMOKE_REPORT_SHA256: ${{ vars.PUBLIC_RPM_APPROVED_SMOKE_REPORT_SHA256 }}
+      ENV_SMOKE_REPORT_BASE64: ${{ vars.PUBLIC_RPM_APPROVED_SMOKE_REPORT_BASE64 }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+
+      - name: Admit exact tag, run and separate approval
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$REVIEWED_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$BUILD_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$APPROVED_MANIFEST_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$APPROVED_SIGNATURE_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$APPROVED_KEY_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$APPROVED_ATTESTATION_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          [[ "$APPROVED_FINGERPRINT" =~ ^[0-9A-F]{40}$ ]]
+          [[ "$APPROVED_SIGNING_SUBKEY_FINGERPRINT" =~ ^[0-9A-F]{40}$ ]]
+          [[ "$SMOKE_REPORT_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$REVIEWED_COMMIT"
+          test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$REVIEWED_COMMIT"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+          test "$ENV_APPROVED_TAG" = "$RELEASE_TAG"
+          test "$ENV_APPROVED_COMMIT" = "$REVIEWED_COMMIT"
+          test "$ENV_APPROVED_BUILD_RUN_ID" = "$BUILD_RUN_ID"
+          test "$ENV_APPROVED_MANIFEST_SHA256" = "$APPROVED_MANIFEST_SHA256"
+          test "$ENV_APPROVED_SIGNATURE_SHA256" = "$APPROVED_SIGNATURE_SHA256"
+          test "$ENV_APPROVED_KEY_SHA256" = "$APPROVED_KEY_SHA256"
+          test "$ENV_APPROVED_ATTESTATION_SHA256" = "$APPROVED_ATTESTATION_SHA256"
+          test "$ENV_APPROVED_FINGERPRINT" = "$APPROVED_FINGERPRINT"
+          test "$ENV_APPROVED_SIGNING_SUBKEY_FINGERPRINT" = "$APPROVED_SIGNING_SUBKEY_FINGERPRINT"
+          test "$ENV_APPROVED_SMOKE_REPORT_SHA256" = "$SMOKE_REPORT_SHA256"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" > "$RUNNER_TEMP/build-run.json"
+          jq -e --arg repo "$GITHUB_REPOSITORY" --arg sha "$REVIEWED_COMMIT" \
+            --arg tag "$RELEASE_TAG" --arg path ".github/workflows/build-release.yml" \
+            '.repository.full_name == $repo and .head_repository.full_name == $repo
+              and .head_sha == $sha and .head_branch == $tag and .path == $path
+              and .event == "workflow_dispatch" and .status == "completed"
+              and .conclusion == "success"' "$RUNNER_TEMP/build-run.json"
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "release already exists; never replace published assets" >&2
+            exit 1
+          fi
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: signed-release-candidate
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ github.token }}
+          path: candidate
+      - name: Verify exact signed source, RPM signatures and GitHub attestations
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y cpio gnupg jq rpm rpm2cpio
+          python3.11 packaging/rpm/verify-public-release.py \
+            --candidate candidate --approved-manifest-sha256 "$APPROVED_MANIFEST_SHA256" \
+            --approved-signature-sha256 "$APPROVED_SIGNATURE_SHA256" \
+            --approved-key-sha256 "$APPROVED_KEY_SHA256" \
+            --approved-attestation-sha256 "$APPROVED_ATTESTATION_SHA256" \
+            --public-key candidate/RPM-PUBLIC-KEY.asc \
+            --fingerprint "$APPROVED_FINGERPRINT" --repo "$GITHUB_REPOSITORY" \
+            --signing-subkey-fingerprint "$APPROVED_SIGNING_SUBKEY_FINGERPRINT" \
+            --tag "$RELEASE_TAG" --commit "$REVIEWED_COMMIT" \
+            --report "$RUNNER_TEMP/publication-verification.json"
+      - name: Admit reviewed disposable-VM smoke report bytes
+        run: |
+          set -euo pipefail
+          python3.11 - "$RUNNER_TEMP/smoke-report.json" <<'PY'
+          import base64, os, sys
+          value = os.environ["ENV_SMOKE_REPORT_BASE64"]
+          if not value or len(value) > 22000:
+              raise SystemExit("missing or oversized approved VM report")
+          try:
+              raw = base64.b64decode(value, validate=True)
+          except ValueError as error:
+              raise SystemExit("invalid approved VM report encoding") from error
+          descriptor = os.open(sys.argv[1], os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+          with os.fdopen(descriptor, "wb") as stream:
+              stream.write(raw)
+          PY
+          python3.11 packaging/rpm/verify-public-fresh-smoke.py \
+            --report "$RUNNER_TEMP/smoke-report.json" \
+            --approved-sha256 "$SMOKE_REPORT_SHA256" \
+            --app-commit "$REVIEWED_COMMIT" \
+            --app-rpm candidate/signed/app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm \
+            --runtime-rpm candidate/signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm
+      - name: Stage only the approved release assets
+        run: |
+          set -euo pipefail
+          mkdir assets
+          cp candidate/signed/app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm assets/
+          cp candidate/signed/app/SRPMS/lto-archiver-0.11.28-155.el9.src.rpm assets/
+          cp candidate/signed/runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm assets/
+          cp candidate/signed/runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm assets/
+          cp candidate/FINAL-RPM-SHA256SUMS candidate/FINAL-RPM-SHA256SUMS.asc candidate/RPM-PUBLIC-KEY.asc \
+            candidate/ATTESTATION.json assets/
+          test "$(find assets -maxdepth 1 -type f | wc -l)" -eq 8
+      - name: Stage draft and independently reverify
+        id: stage
+        run: |
+          set -euo pipefail
+          {
+            printf "LTO Archiver %s\n\n" "$RELEASE_TAG"
+            printf "Source repository: %s\nSource tag: %s\nSource commit: %s\n" \
+              "$GITHUB_REPOSITORY" "$RELEASE_TAG" "$REVIEWED_COMMIT"
+            printf "GitHub build run: %s\nApproved final manifest SHA-256: %s\n" \
+              "$BUILD_RUN_ID" "$APPROVED_MANIFEST_SHA256"
+            printf "Approved primary GPG fingerprint: %s\nApproved RPM signing subkey: %s\n" \
+              "$APPROVED_FINGERPRINT" "$APPROVED_SIGNING_SUBKEY_FINGERPRINT"
+            printf "Approved disposable RHEL 9 smoke report SHA-256: %s\n\n" "$SMOKE_REPORT_SHA256"
+            printf "Exact approved release assets (SHA-256):\n"
+            for asset in assets/*; do
+              printf "%s  %s\n" "$(sha256sum "$asset" | cut -d\  -f1)" "${asset##*/}"
+            done
+            printf "\nInstall the separately released lto-ltfs driver, then the runtime, then this application.\n"
+          } > "$RUNNER_TEMP/release-notes.md"
+          gh release create "$RELEASE_TAG" --draft --verify-tag \
+            --title "LTO Archiver $RELEASE_TAG" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" assets/*
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
+          mkdir published
+          gh release download "$RELEASE_TAG" --dir published --pattern '*'
+          diff -u <(find assets -maxdepth 1 -type f -printf '%f\n' | LC_ALL=C sort) \
+            <(find published -maxdepth 1 -type f -printf '%f\n' | LC_ALL=C sort)
+          for source in assets/*; do
+            cmp -s "$source" "published/${source##*/}"
+          done
+          gnupg="$(mktemp -d)"
+          chmod 700 "$gnupg"
+          gpg --homedir "$gnupg" --batch --import published/RPM-PUBLIC-KEY.asc
+          gpg --homedir "$gnupg" --batch --verify \
+            published/FINAL-RPM-SHA256SUMS.asc published/FINAL-RPM-SHA256SUMS
+          (cd published && sha256sum -c FINAL-RPM-SHA256SUMS)
+          rm -rf "$gnupg"
+          rpmdb="$(mktemp -d)"
+          trap 'rm -rf "$rpmdb"' EXIT
+          rpmkeys --dbpath "$rpmdb" --import published/RPM-PUBLIC-KEY.asc
+          for package in published/*.rpm; do
+            signature="$(rpmkeys --dbpath "$rpmdb" --checksig --verbose "$package")"
+            key_id="${APPROVED_SIGNING_SUBKEY_FINGERPRINT: -8}"
+            key_id="${key_id,,}"
+            [[ "${signature,,}" == *"key id $key_id: ok"* ]]
+            rpm --dbpath "$rpmdb" -K "$package"
+            gh attestation verify "$package" --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/build-release.yml" \
+              --source-ref "refs/tags/$RELEASE_TAG" \
+              --source-digest "$REVIEWED_COMMIT" --signer-digest "$REVIEWED_COMMIT" \
+              --deny-self-hosted-runners --bundle published/ATTESTATION.json
+          done
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
+          gh release view "$RELEASE_TAG" --json databaseId,isDraft > "$RUNNER_TEMP/draft-view.json"
+          draft_id="$(jq -er '.databaseId | select(type == "number" and . > 0)' "$RUNNER_TEMP/draft-view.json")"
+          jq -e '.isDraft == true' "$RUNNER_TEMP/draft-view.json"
+          asset_set_sha256="$(python3.11 - published <<'PY'
+          import runpy, sys
+          from pathlib import Path
+          gate = runpy.run_path("packaging/rpm/verify-public-release.py")
+          root = Path(sys.argv[1])
+          files = {p.name: gate["_sha256"](p) for p in root.iterdir() if p.is_file() and not p.is_symlink()}
+          if len(list(root.iterdir())) != 8:
+              raise SystemExit("draft asset closure differs")
+          print(gate["asset_set_sha256"](files))
+          PY
+          )"
+          printf 'draft_id=%s\nasset_set_sha256=%s\n' "$draft_id" "$asset_set_sha256" >> "$GITHUB_OUTPUT"
+  final_preflight:
+    needs: publish
+    runs-on: ubuntu-24.04
+    environment: public-rpm-admin-read
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      proof: ${{ steps.proof.outputs.proof }}
+      draft_id: ${{ steps.proof.outputs.draft_id }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DRAFT_ID: ${{ needs.publish.outputs.draft_id }}
+      PUBLISH_ASSET_SET_SHA256: ${{ needs.publish.outputs.asset_set_sha256 }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+      BUILD_RUN_ID: ${{ inputs.build_run_id }}
+      APPROVED_MANIFEST_SHA256: ${{ inputs.approved_manifest_sha256 }}
+      APPROVED_SIGNATURE_SHA256: ${{ inputs.approved_signature_sha256 }}
+      APPROVED_KEY_SHA256: ${{ inputs.approved_key_sha256 }}
+      APPROVED_ATTESTATION_SHA256: ${{ inputs.approved_attestation_sha256 }}
+      APPROVED_FINGERPRINT: ${{ inputs.approved_fingerprint }}
+      APPROVED_SIGNING_SUBKEY_FINGERPRINT: ${{ inputs.approved_signing_subkey_fingerprint }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: signed-release-candidate
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ github.token }}
+          path: candidate
+      - name: Independently verify the exact draft before the final admin check
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          [[ "$DRAFT_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$PUBLISH_ASSET_SET_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$REVIEWED_COMMIT"
+          sudo apt-get update
+          sudo apt-get install -y cpio gnupg jq rpm rpm2cpio
+          python3.11 packaging/rpm/verify-public-release.py \
+            --candidate candidate --approved-manifest-sha256 "$APPROVED_MANIFEST_SHA256" \
+            --approved-signature-sha256 "$APPROVED_SIGNATURE_SHA256" \
+            --approved-key-sha256 "$APPROVED_KEY_SHA256" \
+            --approved-attestation-sha256 "$APPROVED_ATTESTATION_SHA256" \
+            --public-key candidate/RPM-PUBLIC-KEY.asc \
+            --fingerprint "$APPROVED_FINGERPRINT" --repo "$GITHUB_REPOSITORY" \
+            --signing-subkey-fingerprint "$APPROVED_SIGNING_SUBKEY_FINGERPRINT" \
+            --tag "$RELEASE_TAG" --commit "$REVIEWED_COMMIT" \
+            --report "$RUNNER_TEMP/final-preflight-verification.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$DRAFT_ID" > "$RUNNER_TEMP/draft.json"
+          mkdir draft-assets
+          gh release download "$RELEASE_TAG" --dir draft-assets --pattern '*'
+          python3.11 - "$RUNNER_TEMP/draft.json" draft-assets <<'PY'
+          import json, runpy, sys
+          from pathlib import Path
+          gate = runpy.run_path("packaging/rpm/verify-public-release.py")
+          release = json.loads(Path(sys.argv[1]).read_text())
+          names = [item["name"] for item in release["assets"]]
+          files = {p.name: gate["_sha256"](p) for p in Path(sys.argv[2]).iterdir() if p.is_file() and not p.is_symlink()}
+          if (type(release["id"]) is not int or release["id"] != int(__import__("os").environ["DRAFT_ID"])
+                  or release["draft"] is not True or release["tag_name"] != __import__("os").environ["RELEASE_TAG"]
+                  or len(names) != len(set(names)) or set(names) != gate["APPROVED_ASSET_NAMES"]
+                  or set(files) != gate["APPROVED_ASSET_NAMES"]):
+              raise SystemExit("draft identity or asset closure differs")
+          gate["asset_set_sha256"](files)
+          PY
+          for source in candidate/signed/app/RPMS/noarch/*.rpm candidate/signed/app/SRPMS/*.rpm \
+            candidate/signed/runtime/RPMS/x86_64/*.rpm candidate/signed/runtime/SRPMS/*.rpm \
+            candidate/FINAL-RPM-SHA256SUMS candidate/FINAL-RPM-SHA256SUMS.asc \
+            candidate/RPM-PUBLIC-KEY.asc candidate/ATTESTATION.json; do
+            cmp -s "$source" "draft-assets/${source##*/}"
+          done
+          test "$(python3.11 - draft-assets <<'PY'
+          import runpy, sys
+          from pathlib import Path
+          gate = runpy.run_path("packaging/rpm/verify-public-release.py")
+          files = {p.name: gate["_sha256"](p) for p in Path(sys.argv[1]).iterdir()}
+          print(gate["asset_set_sha256"](files))
+          PY
+          )" = "$PUBLISH_ASSET_SET_SHA256"
+      - name: Final authenticated immutable-release check and bound proof
+        id: proof
+        env:
+          GH_TOKEN: ${{ secrets.PUBLIC_RPM_ADMIN_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          gh api -i "repos/$GITHUB_REPOSITORY/immutable-releases" > "$RUNNER_TEMP/immutable-releases.http"
+          python3.11 packaging/rpm/verify-public-release.py \
+            --verify-immutability-http "$RUNNER_TEMP/immutable-releases.http"
+          proof="$(python3.11 - "$RUNNER_TEMP/draft.json" draft-assets <<'PY'
+          import json, os, runpy, sys, time
+          from pathlib import Path
+          gate = runpy.run_path("packaging/rpm/verify-public-release.py")
+          release = json.loads(Path(sys.argv[1]).read_text())
+          files = {p.name: gate["_sha256"](p) for p in Path(sys.argv[2]).iterdir()}
+          value = gate["make_final_proof"](
+              os.environ["GITHUB_REPOSITORY"], os.environ["RELEASE_TAG"],
+              os.environ["REVIEWED_COMMIT"], release["id"],
+              os.environ["APPROVED_MANIFEST_SHA256"], gate["asset_set_sha256"](files),
+              int(os.environ["GITHUB_RUN_ID"]), int(time.time()),
+          )
+          if value["draft_id"] != int(os.environ["DRAFT_ID"]) or value["asset_set_sha256"] != os.environ["PUBLISH_ASSET_SET_SHA256"]:
+              raise SystemExit("draft proof differs from staged publication")
+          print(json.dumps(value, sort_keys=True, separators=(",", ":")))
+          PY
+          )"
+          printf 'proof=%s\n' "$proof" >> "$GITHUB_OUTPUT"
+          printf 'draft_id=%s\n' "$DRAFT_ID" >> "$GITHUB_OUTPUT"
+  finalize:
+    needs: final_preflight
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      FINAL_PROOF: ${{ needs.final_preflight.outputs.proof }}
+      DRAFT_ID: ${{ needs.final_preflight.outputs.draft_id }}
+      RELEASE_TAG: ${{ inputs.tag }}
+      REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+      BUILD_RUN_ID: ${{ inputs.build_run_id }}
+      APPROVED_MANIFEST_SHA256: ${{ inputs.approved_manifest_sha256 }}
+      APPROVED_SIGNATURE_SHA256: ${{ inputs.approved_signature_sha256 }}
+      APPROVED_KEY_SHA256: ${{ inputs.approved_key_sha256 }}
+      APPROVED_ATTESTATION_SHA256: ${{ inputs.approved_attestation_sha256 }}
+      APPROVED_FINGERPRINT: ${{ inputs.approved_fingerprint }}
+      APPROVED_SIGNING_SUBKEY_FINGERPRINT: ${{ inputs.approved_signing_subkey_fingerprint }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: signed-release-candidate
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ github.token }}
+          path: candidate
+      - name: Verify the unchanged draft and publish the exact approved bytes
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
+          [[ "$DRAFT_ID" =~ ^[1-9][0-9]*$ ]]
+          test "$(git rev-parse HEAD)" = "$REVIEWED_COMMIT"
+          test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$REVIEWED_COMMIT"
+          sudo apt-get update
+          sudo apt-get install -y cpio gnupg jq rpm rpm2cpio
+          python3.11 packaging/rpm/verify-public-release.py \
+            --candidate candidate --approved-manifest-sha256 "$APPROVED_MANIFEST_SHA256" \
+            --approved-signature-sha256 "$APPROVED_SIGNATURE_SHA256" \
+            --approved-key-sha256 "$APPROVED_KEY_SHA256" \
+            --approved-attestation-sha256 "$APPROVED_ATTESTATION_SHA256" \
+            --public-key candidate/RPM-PUBLIC-KEY.asc \
+            --fingerprint "$APPROVED_FINGERPRINT" --repo "$GITHUB_REPOSITORY" \
+            --signing-subkey-fingerprint "$APPROVED_SIGNING_SUBKEY_FINGERPRINT" \
+            --tag "$RELEASE_TAG" --commit "$REVIEWED_COMMIT" \
+            --report "$RUNNER_TEMP/final-verification.json"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$DRAFT_ID" > "$RUNNER_TEMP/draft.json"
+          mkdir draft-assets
+          gh release download "$RELEASE_TAG" --dir draft-assets --pattern '*'
+          verify_flat_assets() {
+            local directory="$1"
+            local digest
+            digest="$(python3.11 - "$directory" <<'PY'
+          import os, runpy, sys
+          from pathlib import Path
+          gate = runpy.run_path("packaging/rpm/verify-public-release.py")
+          root = Path(sys.argv[1])
+          files = {p.name: gate["_sha256"](p) for p in root.iterdir() if p.is_file() and not p.is_symlink()}
+          if len(list(root.iterdir())) != 8 or set(files) != gate["APPROVED_ASSET_NAMES"]:
+              raise SystemExit("release asset closure differs")
+          approved = {
+              "FINAL-RPM-SHA256SUMS": "APPROVED_MANIFEST_SHA256",
+              "FINAL-RPM-SHA256SUMS.asc": "APPROVED_SIGNATURE_SHA256",
+              "RPM-PUBLIC-KEY.asc": "APPROVED_KEY_SHA256",
+              "ATTESTATION.json": "APPROVED_ATTESTATION_SHA256",
+          }
+          if any(files[name] != os.environ[key] for name, key in approved.items()):
+              raise SystemExit("auxiliary Release bytes differ from approval")
+          print(gate["asset_set_sha256"](files))
+          PY
+            )" || return 1
+            for source in candidate/signed/app/RPMS/noarch/*.rpm candidate/signed/app/SRPMS/*.rpm \
+              candidate/signed/runtime/RPMS/x86_64/*.rpm candidate/signed/runtime/SRPMS/*.rpm \
+              candidate/FINAL-RPM-SHA256SUMS candidate/FINAL-RPM-SHA256SUMS.asc \
+              candidate/RPM-PUBLIC-KEY.asc candidate/ATTESTATION.json; do
+              cmp -s "$source" "$directory/${source##*/}" || return 1
+            done
+            (cd "$directory" && sha256sum -c FINAL-RPM-SHA256SUMS) >&2 || return 1
+            gpg --homedir "$gnupg" --batch --verify \
+              "$directory/FINAL-RPM-SHA256SUMS.asc" "$directory/FINAL-RPM-SHA256SUMS" || return 1
+            for package in "$directory"/*.rpm; do
+              signature="$(rpmkeys --dbpath "$rpmdb" --checksig --verbose "$package")" || return 1
+              [[ "${signature,,}" == *"key id $key_id: ok"* ]] || return 1
+              rpm --dbpath "$rpmdb" -K "$package" >&2 || return 1
+              gh attestation verify "$package" --repo "$GITHUB_REPOSITORY" \
+                --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/build-release.yml" \
+                --source-ref "refs/tags/$RELEASE_TAG" \
+                --source-digest "$REVIEWED_COMMIT" --signer-digest "$REVIEWED_COMMIT" \
+                --deny-self-hosted-runners --bundle "$directory/ATTESTATION.json" >&2 || return 1
+            done
+            printf '%s\n' "$digest"
+          }
+          gnupg="$(mktemp -d)"
+          rpmdb="$(mktemp -d)"
+          trap 'rm -rf "$gnupg" "$rpmdb"' EXIT
+          chmod 700 "$gnupg"
+          gpg --homedir "$gnupg" --batch --import draft-assets/RPM-PUBLIC-KEY.asc
+          rpmkeys --dbpath "$rpmdb" --import draft-assets/RPM-PUBLIC-KEY.asc
+          key_id="${APPROVED_SIGNING_SUBKEY_FINGERPRINT: -8}"
+          key_id="${key_id,,}"
+          asset_set_sha256="$(verify_flat_assets draft-assets)"
+          gh api "repos/$GITHUB_REPOSITORY/releases/$DRAFT_ID" > "$RUNNER_TEMP/draft.json"
+          python3.11 - "$RUNNER_TEMP/draft.json" "$asset_set_sha256" <<'PY'
+          import json, os, runpy, sys, time
+          from pathlib import Path
+          gate = runpy.run_path("packaging/rpm/verify-public-release.py")
+          release = json.loads(Path(sys.argv[1]).read_text())
+          proof = json.loads(os.environ["FINAL_PROOF"])
+          names = [item["name"] for item in release["assets"]]
+          if (release["draft"] is not True or release["tag_name"] != os.environ["RELEASE_TAG"]
+                  or len(names) != len(set(names)) or set(names) != gate["APPROVED_ASSET_NAMES"]):
+              raise SystemExit("draft identity or asset closure changed")
+          expected = {
+              "repo": os.environ["GITHUB_REPOSITORY"], "tag": os.environ["RELEASE_TAG"],
+              "commit": os.environ["REVIEWED_COMMIT"], "draft_id": release["id"],
+              "manifest_sha256": os.environ["APPROVED_MANIFEST_SHA256"],
+              "asset_set_sha256": sys.argv[2], "run_id": int(os.environ["GITHUB_RUN_ID"]),
+          }
+          gate["validate_final_proof"](proof, expected, int(time.time()))
+          if release["id"] != int(os.environ["DRAFT_ID"]):
+              raise SystemExit("draft ID changed")
+          PY
+          gh release edit "$RELEASE_TAG" --draft=false --verify-tag
+          gh api "repos/$GITHUB_REPOSITORY/releases/$DRAFT_ID" > "$RUNNER_TEMP/published.json"
+          jq -e --argjson id "$(jq -er '.id' "$RUNNER_TEMP/draft.json")" \
+            --arg tag "$RELEASE_TAG" '.id == $id and .tag_name == $tag and .draft == false' \
+            "$RUNNER_TEMP/published.json"
+          mkdir published
+          gh release download "$RELEASE_TAG" --dir published --pattern '*'
+          test "$(verify_flat_assets published)" = "$asset_set_sha256"
+          test "$(gh release view "$RELEASE_TAG" --json isDraft,isImmutable \
+            --jq '.isDraft == false and .isImmutable == true')" = true

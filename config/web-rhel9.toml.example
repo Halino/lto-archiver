@@ -1,0 +1,8 @@
+# Copy to /etc/lto-archiver/web.toml and replace the empty marker with the
+# single LAN IPv4 address assigned to this host. The marker cannot activate.
+listen_host = ""
+listen_port = 8443
+tls_certfile = "/etc/lto-archiver/tls/server.crt"
+tls_keyfile = "/etc/lto-archiver/tls/server.key"
+firewall_zone = "public"
+allowed_ipv4_cidrs = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]

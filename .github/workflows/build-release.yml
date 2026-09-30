@@ -1,0 +1,307 @@
+name: Build public RPM release candidate on GitHub
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Reviewed protected release tag (vX.Y.Z)
+        required: true
+        type: string
+      reviewed_commit:
+        description: Exact approved 40-character public source commit
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Configure the public-rpm-signing Environment with required reviewers,
+# prevent-self-review, and a selected-tag rule before ever dispatching this.
+# Its secrets are never visible to the two build jobs or the comparison job.
+jobs:
+  build-a:
+    runs-on: ubuntu-24.04
+    container:
+      image: quay.io/rockylinux/rockylinux@sha256:ed654c694190a670bb5c33f68995b862214fc96ffbdca95e07a8935ba0a3717d
+    defaults:
+      run: {shell: bash}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Admit exact reviewed tag and source
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$REVIEWED_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$REVIEWED_COMMIT"
+          test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$REVIEWED_COMMIT"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+      - name: Install pinned-image EL9 build tools
+        run: |
+          set -euo pipefail
+          dnf -y install dnf-plugins-core epel-release
+          dnf config-manager --set-enabled crb
+          dnf -y install cpio git-core gnupg2 make rpm-build rpm-sign rpmdevtools \
+            python3.11 python3.11-pip python3.11-devel python3.11-packaging \
+            python3.11-setuptools python3.11-wheel pyproject-rpm-macros \
+            selinux-policy-devel systemd-rpm-macros policycoreutils-devel
+      - name: Reconstruct hash-locked runtime Source0 and build unsigned RPMs
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+          GITHUB_ACTIONS: 'true'
+          LTO_PUBLIC_EPHEMERAL_CONTAINER: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/wheelhouse"
+          python3.11 -m pip download --require-hashes --only-binary=:all: --no-deps \
+            -r packaging/python-runtime/requirements-runtime.lock -d "$RUNNER_TEMP/wheelhouse"
+          python3.11 packaging/python-runtime/runtime_source.py verify-authority \
+            --authority-root packaging/python-runtime
+          python3.11 packaging/python-runtime/runtime_source.py seal \
+            --authority packaging/python-runtime/runtime-components.json \
+            --authorized-lock packaging/python-runtime/requirements-runtime.lock \
+            --wheelhouse "$RUNNER_TEMP/wheelhouse" --output "$RUNNER_TEMP/source" \
+            --source-date-epoch 1787523964
+          python3.11 packaging/python-runtime/runtime_source.py build-source0 \
+            --source "$RUNNER_TEMP/source" \
+            --output "$RUNNER_TEMP/lto-archiver-python-runtime-0.11.27.tar.gz" \
+            --source-date-epoch 1787523964 --authority-root packaging/python-runtime
+          python3.11 packaging/rpm/build-public-unsigned.py --tag "$RELEASE_TAG" \
+            --commit "$REVIEWED_COMMIT" \
+            --runtime-source0 "$RUNNER_TEMP/lto-archiver-python-runtime-0.11.27.tar.gz" \
+            --output "$RUNNER_TEMP/unsigned"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unsigned-build-a
+          path: ${{ runner.temp }}/unsigned/
+          if-no-files-found: error
+          retention-days: 7
+
+  build-b:
+    runs-on: ubuntu-24.04
+    container:
+      image: quay.io/rockylinux/rockylinux@sha256:ed654c694190a670bb5c33f68995b862214fc96ffbdca95e07a8935ba0a3717d
+    defaults:
+      run: {shell: bash}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Admit exact reviewed tag and source
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$REVIEWED_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$REVIEWED_COMMIT"
+          test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$REVIEWED_COMMIT"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+      - name: Install pinned-image EL9 build tools
+        run: |
+          set -euo pipefail
+          dnf -y install dnf-plugins-core epel-release
+          dnf config-manager --set-enabled crb
+          dnf -y install cpio git-core gnupg2 make rpm-build rpm-sign rpmdevtools \
+            python3.11 python3.11-pip python3.11-devel python3.11-packaging \
+            python3.11-setuptools python3.11-wheel pyproject-rpm-macros \
+            selinux-policy-devel systemd-rpm-macros policycoreutils-devel
+      - name: Reconstruct hash-locked runtime Source0 and build unsigned RPMs
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+          GITHUB_ACTIONS: 'true'
+          LTO_PUBLIC_EPHEMERAL_CONTAINER: '1'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/wheelhouse"
+          python3.11 -m pip download --require-hashes --only-binary=:all: --no-deps \
+            -r packaging/python-runtime/requirements-runtime.lock -d "$RUNNER_TEMP/wheelhouse"
+          python3.11 packaging/python-runtime/runtime_source.py verify-authority \
+            --authority-root packaging/python-runtime
+          python3.11 packaging/python-runtime/runtime_source.py seal \
+            --authority packaging/python-runtime/runtime-components.json \
+            --authorized-lock packaging/python-runtime/requirements-runtime.lock \
+            --wheelhouse "$RUNNER_TEMP/wheelhouse" --output "$RUNNER_TEMP/source" \
+            --source-date-epoch 1787523964
+          python3.11 packaging/python-runtime/runtime_source.py build-source0 \
+            --source "$RUNNER_TEMP/source" \
+            --output "$RUNNER_TEMP/lto-archiver-python-runtime-0.11.27.tar.gz" \
+            --source-date-epoch 1787523964 --authority-root packaging/python-runtime
+          python3.11 packaging/rpm/build-public-unsigned.py --tag "$RELEASE_TAG" \
+            --commit "$REVIEWED_COMMIT" \
+            --runtime-source0 "$RUNNER_TEMP/lto-archiver-python-runtime-0.11.27.tar.gz" \
+            --output "$RUNNER_TEMP/unsigned"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: unsigned-build-b
+          path: ${{ runner.temp }}/unsigned/
+          if-no-files-found: error
+          retention-days: 7
+
+  compare:
+    needs: [build-a, build-b]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.ref }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: unsigned-build-a
+          path: build-a
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: unsigned-build-b
+          path: build-b
+      - name: Reject any byte or closure difference
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$REVIEWED_COMMIT"
+          python3.11 packaging/rpm/verify-public-artifacts.py \
+            --first build-a --second build-b --tag "$RELEASE_TAG" \
+            --commit "$REVIEWED_COMMIT" \
+            --rpm app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm \
+            --rpm app/SRPMS/lto-archiver-0.11.28-155.el9.src.rpm \
+            --rpm runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm \
+            --rpm runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm \
+            --report comparison-report.json
+          mkdir compared
+          cp -a build-a compared/unsigned
+          cp comparison-report.json compared/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: compared-unsigned
+          path: compared/
+          if-no-files-found: error
+          retention-days: 7
+
+  sign:
+    needs: [compare]
+    runs-on: ubuntu-24.04
+    environment: public-rpm-signing
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.ref }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: compared-unsigned
+          path: incoming
+      - name: Reverify compared bytes and install RPM signing tools
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          REVIEWED_COMMIT: ${{ inputs.reviewed_commit }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$REVIEWED_COMMIT"
+          python3.11 packaging/rpm/verify-public-artifacts.py \
+            --first incoming/unsigned --second incoming/unsigned \
+            --tag "$RELEASE_TAG" --commit "$REVIEWED_COMMIT" \
+            --rpm app/RPMS/noarch/lto-archiver-0.11.28-155.el9.noarch.rpm \
+            --rpm app/SRPMS/lto-archiver-0.11.28-155.el9.src.rpm \
+            --rpm runtime/RPMS/x86_64/lto-archiver-python-runtime-0.11.27-3.el9.x86_64.rpm \
+            --rpm runtime/SRPMS/lto-archiver-python-runtime-0.11.27-3.el9.src.rpm \
+            --report current-report.json
+          cmp -s current-report.json incoming/comparison-report.json
+          sudo apt-get update
+          sudo apt-get install -y rpm gnupg
+      - name: Sign final RPMs only after protected reviewer approval
+        env:
+          PUBLIC_RPM_SECRET_KEY_B64: ${{ secrets.PUBLIC_RPM_SECRET_KEY_B64 }}
+          PUBLIC_RPM_PUBLIC_KEY_B64: ${{ secrets.PUBLIC_RPM_PUBLIC_KEY_B64 }}
+          PUBLIC_RPM_POLICY_B64: ${{ secrets.PUBLIC_RPM_POLICY_B64 }}
+          PUBLIC_RPM_POLICY_SHA256: ${{ vars.PUBLIC_RPM_POLICY_SHA256 }}
+          PUBLIC_RPM_PRIMARY_FPR: ${{ vars.PUBLIC_RPM_PRIMARY_FPR }}
+          PUBLIC_RPM_SUBKEY_FPR: ${{ vars.PUBLIC_RPM_SUBKEY_FPR }}
+        run: |
+          set -euo pipefail
+          umask 077
+          keydir="$(mktemp -d)"
+          trap 'rm -rf "$keydir"' EXIT
+          mkdir -m 700 "$keydir/gnupg"
+          printf '%s' "$PUBLIC_RPM_SECRET_KEY_B64" | base64 -d > "$keydir/secret.asc"
+          printf '%s' "$PUBLIC_RPM_PUBLIC_KEY_B64" | base64 -d > "$keydir/public.asc"
+          printf '%s' "$PUBLIC_RPM_POLICY_B64" | base64 -d > "$keydir/policy.json"
+          test -n "$PUBLIC_RPM_POLICY_SHA256"
+          printf '%s  %s\n' "$PUBLIC_RPM_POLICY_SHA256" "$keydir/policy.json" | sha256sum -c --status
+          gpg --homedir "$keydir/gnupg" --batch --quiet --import "$keydir/secret.asc"
+          mkdir signed
+          python3.11 packaging/rpm/sign-rpm-tree.py \
+            --unsigned-tree "$PWD/incoming/unsigned/app" --output "$PWD/signed/app" \
+            --package-name lto-archiver --gnupg-home "$keydir/gnupg" \
+            --primary-fingerprint "$PUBLIC_RPM_PRIMARY_FPR" \
+            --signing-subkey-fingerprint "$PUBLIC_RPM_SUBKEY_FPR" \
+            --policy "$keydir/policy.json" --public-key "$keydir/public.asc"
+          python3.11 packaging/rpm/sign-rpm-tree.py \
+            --unsigned-tree "$PWD/incoming/unsigned/runtime" --output "$PWD/signed/runtime" \
+            --package-name lto-archiver-python-runtime --gnupg-home "$keydir/gnupg" \
+            --primary-fingerprint "$PUBLIC_RPM_PRIMARY_FPR" \
+            --signing-subkey-fingerprint "$PUBLIC_RPM_SUBKEY_FPR" \
+            --policy "$keydir/policy.json" --public-key "$keydir/public.asc"
+          mkdir "$keydir/rpmdb"
+          rpm --dbpath "$keydir/rpmdb" --import "$keydir/public.asc"
+          mapfile -t packages < <(find signed -type f -name '*.rpm' | LC_ALL=C sort)
+          test "${#packages[@]}" -eq 4
+          mkdir release-candidate
+          mv signed release-candidate/
+          cp incoming/comparison-report.json release-candidate/
+          cp "$keydir/public.asc" release-candidate/RPM-PUBLIC-KEY.asc
+          chmod 644 release-candidate/RPM-PUBLIC-KEY.asc
+          : > release-candidate/FINAL-RPM-SHA256SUMS
+          for package in "${packages[@]}"; do
+            rpm --dbpath "$keydir/rpmdb" -K "release-candidate/$package"
+            digest="$(sha256sum "release-candidate/$package" | cut -d' ' -f1)"
+            printf '%s  %s\n' "$digest" "${package##*/}" >> release-candidate/FINAL-RPM-SHA256SUMS
+          done
+          gpg --homedir "$keydir/gnupg" --batch --yes --armor --detach-sign \
+            --local-user "$PUBLIC_RPM_SUBKEY_FPR!" \
+            --output release-candidate/FINAL-RPM-SHA256SUMS.asc release-candidate/FINAL-RPM-SHA256SUMS
+      - name: Attest final signed RPM and SRPM bytes
+        id: attest
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+        with:
+          subject-path: release-candidate/signed/**/*.rpm
+      - name: Retain candidate, not a public GitHub Release
+        run: cp '${{ steps.attest.outputs.bundle-path }}' release-candidate/ATTESTATION.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: signed-release-candidate
+          path: release-candidate/
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Restore plan {{ plan.id }} · LTO Archiver{% endblock %}
+{% block nav_active %}catalog{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="restore-plan-title">
+  <p class="eyebrow">Persistent offline plan</p>
+  <h1 id="restore-plan-title">Restore plan {{ plan.id }}</h1>
+  <p class="page-note">This plan is derived exclusively from the catalog. It did not mount tapes, read data, or contact sources.</p>
+  <section class="detail-panel" aria-labelledby="restore-summary-title">
+    <h2 id="restore-summary-title">Destination and order</h2>
+    <dl class="detail-list">
+      <div><dt>Authorized destination</dt><dd>{{ plan.destination_root }}</dd></div>
+      <div><dt>Created</dt><dd>{{ plan.created_at }}</dd></div>
+      <div><dt>Selected versions</dt><dd>{{ plan.total_files }}</dd></div>
+    </dl>
+  </section>
+  {% if plan.identity_state == 'legacy_invalid' %}
+  <section class="error-panel" role="alert" data-error-code="{{ plan.invalidation_reason }}" aria-labelledby="restore-invalid-title">
+    <h2 id="restore-invalid-title">Historical plan cannot be used</h2>
+    <p>The physical cassette identity in the historical plan is ambiguous. The plan is retained as evidence, but it cannot be used to prepare a restore.</p>
+    <p><strong>Code: {{ plan.invalidation_reason }}</strong></p>
+  </section>
+  {% else %}
+  {% if start_error %}
+  <section class="error-panel" role="alert" data-error-code="restore_run_outcome_ambiguous">
+    <h2>Restore start outcome is ambiguous</h2>
+    <p>{{ start_error }}</p>
+  </section>
+  {% endif %}
+  <section class="detail-panel restore-actions" aria-labelledby="restore-start-title">
+    <h2 id="restore-start-title">Start the immutable restore</h2>
+    <p>The drive has no autoloader. Insert each named cassette when requested; the run advances automatically.</p>
+    <div class="cassette-callout" data-required-cassette="{{ plan.cassettes[0].physical_label }}">
+      <span>First required cassette</span>
+      <strong>{{ plan.cassettes[0].physical_label }}</strong>
+    </div>
+    <form action="/restore-plans/{{ plan.id }}/runs" method="post">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+      <button class="primary-action" type="submit">Start restore</button>
+    </form>
+  </section>
+  {% for cassette in plan.cassettes %}
+  <section class="detail-panel" aria-labelledby="restore-cassette-{{ loop.index }}">
+    <h2 id="restore-cassette-{{ loop.index }}">Cassette {{ loop.index }}</h2>
+    <dl class="detail-list">
+      <div><dt>Physical label</dt><dd data-catalog-field="physical-label">{% if cassette.physical_label %}{{ cassette.physical_label }}{% else %}<span data-value-state="unknown">—</span>{% endif %}</dd></div>
+      <div><dt>Tape ID</dt><dd data-catalog-field="tape-id">{{ cassette.tape_id }}</dd></div>
+      <div><dt>Cassette number</dt><dd data-catalog-field="cassette-number">{{ cassette.cassette_number }}</dd></div>
+      <div><dt>File</dt><dd>{{ cassette.item_count }}</dd></div>
+    </dl>
+    <ol>
+      {% for item in plan.items %}{% if item.tape_id == cassette.tape_id %}<li>
+        <strong data-catalog-field="logical-path">{{ item.relative_path }}</strong><br>
+        <span data-catalog-field="file-version-id">Catalog version {{ item.file_version_id }}</span> ·
+        <span data-catalog-field="library-id">{{ item.library_id }}</span> ·
+        <span data-catalog-field="volume-label">{% if item.volume_label is not none %}{{ item.volume_label }}{% else %}<span data-value-state="unknown">—</span>{% endif %}</span> ·
+        <span data-catalog-field="block-id">{% if item.block_id is not none %}{{ item.block_id }}{% else %}<span data-value-state="unknown">—</span>{% endif %}</span> ·
+        <span data-catalog-field="tape-relative-path">{{ item.tape_relative_path }}</span> ·
+        <span data-catalog-field="size">{{ item.size }}</span> ·
+        <span data-catalog-field="copied-at">{{ item.copied_at }}</span> ·
+        <span data-catalog-field="sha256">{{ item.sha256 }}</span> ·
+        <span data-catalog-field="version-state">{% if item.is_current is none %}<span data-value-state="unknown">—</span>{% elif item.is_current %}current{% else %}history{% endif %}</span>
+      </li>{% endif %}{% endfor %}
+    </ol>
+  </section>
+  {% endfor %}
+  {% endif %}
+  <p><a href="/catalog">Return to catalog</a></p>
+</main>
+{% endblock %}

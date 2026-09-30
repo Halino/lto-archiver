@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import control_error_attributes, form_error_attributes, render_errors %}
+{% block nav_active %}jobs{% endblock %}
+{% block title %}{{ job.display_name }} · LTO Archiver{% endblock %}
+{% block content %}
+{% set errors = field_errors|default({}) %}{% set attempted_action = error_action|default("") %}
+<main class="page-shell detail-page" aria-labelledby="job-title">{% include "partials/job_header.html" %}
+{% if error %}<p class="error-banner" role="alert">{{ error }}</p>{% endif %}{{ render_errors(errors, "job-detail") }}
+{% include "partials/job_summary.html" %}
+{% include "partials/job_source_check.html" %}
+{% include "partials/job_runtime.html" %}
+{% include "partials/job_actions.html" %}
+{% include "partials/resume_confirmation.html" %}
+{% include "partials/job_management.html" %}
+<section class="detail-panel"><h2>Manifest</h2>{% if manifest.items %}<div class="table-scroll" tabindex="0" role="region" aria-label="Job manifest"><table><thead><tr><th>Library</th><th>Relative path</th><th>Size</th></tr></thead><tbody>{% for item in manifest.items %}<tr><td>{{ item.library_id }}</td><td>{{ item.relative_path }}</td><td>{{ format_integer(item.size) }} B</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>No items available.</p>{% endif %}{% if manifest.next_cursor %}<a href="/jobs/{{ job.id|urlencode }}?manifest_cursor={{ manifest.next_cursor|urlencode }}{% if history_cursor %}&amp;history_cursor={{ history_cursor|urlencode }}{% endif %}{% if cassette_cursor %}&amp;cassette_cursor={{ cassette_cursor|urlencode }}{% endif %}">More manifest items</a>{% endif %}</section>
+<section class="detail-panel"><h2>History</h2>{% if history.items %}<div class="table-scroll" tabindex="0" role="region" aria-label="Job history"><table><thead><tr><th>Date</th><th>Action</th><th>Checkpoint</th></tr></thead><tbody>{% for item in history.items %}<tr><td>{{ item.occurred_at }}</td><td>{{ item.action }}</td><td>{{ item.checkpoint }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>No events available.</p>{% endif %}{% if history.next_cursor %}<a href="/jobs/{{ job.id|urlencode }}?history_cursor={{ history.next_cursor|urlencode }}{% if manifest_cursor %}&amp;manifest_cursor={{ manifest_cursor|urlencode }}{% endif %}{% if cassette_cursor %}&amp;cassette_cursor={{ cassette_cursor|urlencode }}{% endif %}">More events</a>{% endif %}</section>
+{% include "partials/job_retirement.html" %}</main>
+{% endblock %}

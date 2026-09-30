@@ -1,0 +1,16 @@
+[Unit]
+Description=LTO Archiver daemon API socket
+Conflicts=lto-archiver-archive-runner-qualification.service
+
+[Socket]
+ListenStream=/run/lto-archiver/daemon.sock
+FileDescriptorName=daemon
+SocketUser=lto-archiver
+SocketGroup=lto-web
+SocketMode=0660
+DirectoryMode=0750
+RemoveOnStop=yes
+Service=lto-archiverd.service
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,9 @@
+{% from "macros/forms.html" import control_error_attributes, form_error_attributes %}
+{% set errors = {} %}{% set attempted_action = "" %}
+{% include "partials/job_header.html" %}
+{% include "partials/job_summary.html" %}
+{% include "partials/job_source_check.html" %}
+{% include "partials/job_actions.html" %}
+{% include "partials/job_management.html" %}
+{% include "partials/job_retirement.html" %}
+{% include "partials/job_runtime.html" %}

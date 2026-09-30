@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import control_error_attributes, form_error_attributes, render_errors %}
+{% block nav_active %}jobs{% endblock %}
+{% block title %}New job · LTO Archiver{% endblock %}
+{% block content %}
+{% set errors = field_errors|default({}) %}
+<main class="page-shell detail-page" aria-labelledby="new-job-title"><p class="eyebrow">Step 1 of 3</p><h1 id="new-job-title">Select libraries and profile</h1>
+{% if error %}<p class="error-banner" role="alert">{{ error }}</p>{% endif %}
+{{ render_errors(errors, "job-new") }}
+<form action="/jobs/plans" method="post"{{ form_error_attributes(errors, ("idempotency_key",), "job-new") }}><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+<fieldset{{ control_error_attributes(errors, "library_ids", "job-new-library_ids-error") }}><legend>Active libraries</legend>{% for library in libraries %}<label><input type="checkbox" name="library_ids" value="{{ library.id }}"{% if library.id in selected_libraries %} checked{% endif %}> {{ library.display_name }} — {{ library.id }}</label>{% else %}<p>No active libraries. Configure or scan a library.</p>{% endfor %}</fieldset>
+<label for="media-profile">Cassette profile</label><select id="media-profile" name="media_profile"{{ control_error_attributes(errors, "media_profile", "job-new-media_profile-error") }}>{% for profile in profiles.items %}<option value="{{ profile.key }}"{% if profile.key == (selected_media_profile|default(profiles.default_media_profile, true)) %} selected{% endif %}>{{ profile.key }} — Native capacity: {{ format_integer(profile.native_capacity_bytes) }} B — Usable LTFS: {{ format_integer(profile.ltfs_usable_bytes) }} B</option>{% endfor %}</select>
+<p class="form-help">The estimate uses actual usable LTFS space, not advertised compressed capacity.</p>
+<button class="primary-action" type="submit">Scan and prepare estimate</button></form></main>
+{% endblock %}

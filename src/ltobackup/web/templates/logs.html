@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block nav_active %}logs{% endblock %}
+{% block title %}Operational log · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page logs-page" aria-labelledby="logs-title" data-log-browser>
+  <div class="page-heading logs-heading">
+    <div>
+      <p class="eyebrow">Redacted operational evidence</p>
+      <h1 id="logs-title">Operational log</h1>
+      <p class="page-note">Browse correlated daemon, WebUI, broker, qualification, LTFS, and tape events retained by the host journal.</p>
+    </div>
+    <button class="secondary-action logs-follow" type="button" data-log-follow aria-pressed="{{ 'true' if follow_available else 'false' }}"{% if not follow_available %} disabled{% endif %}>
+      {{ "Pause live updates" if follow_available else "Live updates unavailable" }}
+    </button>
+  </div>
+
+  <div id="connection-banner" class="alert alert-warning" role="status" aria-live="polite" hidden>Reconnecting; displayed log entries are retained but may be stale.</div>
+
+  <form class="logs-filter-panel" action="/logs" method="get" aria-label="Operational log filters">
+    <label>Source
+      <select name="source">
+        {% for value, label in source_labels.items() %}<option value="{{ value.value }}"{% if query.source == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Minimum severity
+      <select name="severity">
+        {% for value, label in severity_labels.items() %}<option value="{{ value.value }}"{% if query.severity == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Time range
+      <select name="range">
+        {% for value, label in range_labels.items() %}<option value="{{ value.value }}"{% if query.range == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Order
+      <select name="direction">
+        {% for value, label in direction_labels.items() %}<option value="{{ value.value }}"{% if query.direction == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Rows per page
+      <select name="limit">
+        {% for value in (25, 50, 100, 200) %}<option value="{{ value }}"{% if query.limit == value %} selected{% endif %}>{{ value }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="logs-search">Search
+      <input name="q" type="search" maxlength="128" value="{{ query.search or '' }}" placeholder="Message, label, job, or operation">
+    </label>
+    <button class="primary-action" type="submit">Apply filters</button>
+  </form>
+
+  {% include "partials/logs_status.html" %}
+</main>
+{% endblock %}

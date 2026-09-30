@@ -1,0 +1,13 @@
+{% macro control_error_attributes(errors, field, error_id) -%}
+{% if errors.get(field) %} aria-errormessage="{{ error_id }}" aria-invalid="true"{% endif %}
+{%- endmacro %}
+
+{% macro form_error_attributes(errors, fields, prefix) -%}
+{%- set active = namespace(found=false) -%}
+{%- for field in fields -%}{%- if errors.get(field) -%}{%- set active.found = true -%}{%- endif -%}{%- endfor -%}
+{%- if active.found %} aria-describedby="{%- set emitted = namespace(found=false) -%}{%- for field in fields -%}{%- if errors.get(field) -%}{%- if emitted.found %} {% endif -%}{{ prefix }}-{{ field }}-error{%- set emitted.found = true -%}{%- endif -%}{%- endfor -%}" aria-invalid="true"{%- endif -%}
+{%- endmacro %}
+
+{% macro render_errors(errors, prefix) -%}
+{% for field, message in errors.items() %}<p id="{{ prefix }}-{{ field }}-error" class="field-error" data-field-error="{{ field }}">{{ message }}</p>{% endfor %}
+{%- endmacro %}

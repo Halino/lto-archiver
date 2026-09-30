@@ -1,0 +1,1 @@
+{"packages":{"lto-archiver":{"allowed_config_paths":{"/etc/lto-archiver/config.toml":["5","S","T"],"/etc/lto-archiver/web.toml":["5","S","T"]}},"lto-archiver-python-runtime":{"allowed_config_paths":{}}},"schema":1}

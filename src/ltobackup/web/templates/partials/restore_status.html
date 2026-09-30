@@ -1,0 +1,71 @@
+<section id="restore-status-{{ run.id }}" class="restore-status" data-live-fragment-url="/restore-runs/{{ run.id }}/status-fragment" data-live-patch="keyed" data-live-refresh-mode="{{ refresh_mode }}" aria-live="polite">
+  <div id="connection-banner" class="alert alert-warning" role="status" hidden data-live-key="restore-connection-alert">Reconnecting; the restore continues on the daemon.</div>
+  <section class="restore-status-head" data-live-key="restore-state" aria-labelledby="restore-state-title">
+    <div>
+      <p class="eyebrow">State and phase</p>
+      <h2 id="restore-state-title">{{ run.state|replace('_', ' ')|title }}</h2>
+      <p>{{ phase }}</p>
+    </div>
+    {% if current_cassette %}
+    <div class="cassette-callout" data-required-cassette="{{ current_cassette.physical_label }}">
+      <span>Required physical cassette</span>
+      <strong>Insert cassette {{ current_cassette.physical_label }}</strong>
+      <small>No Load or per-cassette Continue action is required.</small>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="metrics-grid compact-metrics" aria-label="Restore progress" data-live-key="restore-metrics">
+    <article class="metric-card"><h3>Files</h3><p>{{ run.restored_files + run.skipped_files + run.failed_files }} / {{ run.total_files }}</p></article>
+    <article class="metric-card"><h3>Bytes</h3><p>{{ bytes_progress }}</p></article>
+    <article class="metric-card"><h3>Restored</h3><p>{{ run.restored_files }}</p></article>
+    <article class="metric-card"><h3>Verified skips</h3><p>{{ run.skipped_files }}</p></article>
+    <article class="metric-card"><h3>Failed</h3><p>{{ run.failed_files }}</p></article>
+    <article class="metric-card"><h3>Instantaneous rate (raw)</h3><p data-live-number="restore-current-rate"{% if current_rate_value is not none %} data-value="{{ current_rate_value }}"{% endif %}>{{ current_rate }}</p></article>
+    <article class="metric-card"><h3>Effective rate (operation window)</h3><p data-live-number="restore-effective-rate"{% if effective_rate_value is not none %} data-value="{{ effective_rate_value }}"{% endif %}>{{ effective_rate }}</p></article>
+  </section>
+
+  <section class="restore-actions detail-panel" data-live-key="restore-actions" aria-labelledby="restore-actions-title">
+    <h2 id="restore-actions-title">Run controls</h2>
+    <div class="action-toolbar">
+      {% if run.state in ('waiting_media', 'restoring') %}
+      <form action="/restore-runs/{{ run.id }}/pause" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ new_idempotency_key() }}"><button type="submit">Pause at file boundary</button></form>
+      {% endif %}
+      {% if run.state == 'paused' %}
+      <form action="/restore-runs/{{ run.id }}/resume" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ new_idempotency_key() }}"><button class="primary-action" type="submit">Resume</button></form>
+      {% endif %}
+      {% if run.state not in ('completed', 'cancelled', 'failed') %}
+      <form action="/restore-runs/{{ run.id }}/cancel" method="post"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ new_idempotency_key() }}"><button class="danger-action" type="submit">Cancel safely</button></form>
+      {% endif %}
+    </div>
+    <p class="page-note">Cancellation keeps files already restored and waits for safe unmount and physical eject.</p>
+  </section>
+
+  {% if run.last_error_code %}<div class="error-panel" role="alert" data-live-key="restore-error" data-error-code="{{ run.last_error_code }}"><strong>Restore requires attention</strong><p>Code: {{ run.last_error_code }}</p></div>{% endif %}
+
+  {% for item in run.items %}{% if item.conflict and item.conflict.state == 'recorded' %}
+  <section class="error-panel restore-conflict" data-live-key="restore-conflict-{{ item.sequence }}" aria-labelledby="restore-conflict-{{ item.sequence }}">
+    <h2 id="restore-conflict-{{ item.sequence }}">Existing destination differs</h2>
+    <p>The daemon recorded a conflict for <strong>{{ item.canonical_destination }}</strong>. No replacement occurs automatically.</p>
+    {% if recent_admin %}
+    <form action="/restore-runs/{{ run.id }}/items/{{ item.sequence }}/replacement-authorizations" method="post">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="idempotency_key" value="{{ new_idempotency_key() }}">
+      <button class="danger-action" type="submit">Authorize exact replacement</button>
+    </form>
+    {% else %}<p>Only a recently reauthenticated administrator can authorize this exact recorded conflict.</p>{% endif %}
+  </section>
+  {% endif %}{% endfor %}
+
+  <section class="detail-panel" data-live-key="restore-cassettes" aria-labelledby="restore-cassettes-title">
+    <h2 id="restore-cassettes-title">Cassette results</h2>
+    <div class="table-scroll"><table class="summary-table restore-results"><thead><tr><th>Label</th><th>State</th><th>Files</th><th>Bytes</th><th>Error</th></tr></thead><tbody>{% for cassette in run.cassettes %}<tr><td data-label="Label"><strong>{{ cassette.physical_label }}</strong></td><td data-label="State">{{ cassette.state }}</td><td data-label="Files">{{ cassette.restored_files }} restored · {{ cassette.skipped_files }} skipped · {{ cassette.failed_files }} failed</td><td data-label="Bytes">{{ cassette.copied_bytes }} B</td><td data-label="Error">{{ cassette.last_error_code or 'None' }}</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+
+  <section class="detail-panel" data-live-key="restore-items" aria-labelledby="restore-items-title">
+    <h2 id="restore-items-title">File results and destinations</h2>
+    <div class="table-scroll"><table class="summary-table restore-results"><thead><tr><th>File</th><th>State</th><th>Bytes</th><th>Destination</th><th>Error</th></tr></thead><tbody>{% for item in run.items %}<tr><td data-label="File">{{ item.plan_item.relative_path }}</td><td data-label="State">{{ item.state }}</td><td data-label="Bytes">{{ item.bytes_copied }} B</td><td data-label="Destination"><code>{{ item.canonical_destination }}</code></td><td data-label="Error">{{ item.error_code or 'None' }}</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+
+  <div data-live-key="restore-telemetry">{{ telemetry_html|safe }}</div>
+</section>

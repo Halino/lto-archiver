@@ -1,0 +1,46 @@
+## <summary>LTO Archiver service domains and local socket boundaries.</summary>
+
+########################################
+## <summary>Connect the WebUI domain to the daemon API socket.</summary>
+## <param name="domain"><summary>WebUI client domain.</summary></param>
+interface(`lto_archiver_connect_daemon',`
+    gen_require(`
+        type lto_archiver_t, lto_archiver_runtime_t;
+    ')
+    allow $1 lto_archiver_runtime_t:sock_file { getattr open read write };
+    allow $1 lto_archiver_t:unix_stream_socket connectto;
+')
+
+########################################
+## <summary>Connect the daemon domain to the command broker socket.</summary>
+## <param name="domain"><summary>Daemon client domain.</summary></param>
+interface(`lto_archiver_connect_broker',`
+    gen_require(`
+        type lto_archiver_broker_t, lto_archiver_broker_runtime_t;
+    ')
+    allow $1 lto_archiver_broker_runtime_t:sock_file { getattr open read write };
+    allow $1 lto_archiver_broker_t:unix_stream_socket connectto;
+')
+
+########################################
+## <summary>Connect the daemon domain to the network-share broker socket.</summary>
+## <param name="domain"><summary>Daemon client domain.</summary></param>
+interface(`lto_archiver_connect_share_broker',`
+    gen_require(`
+        type lto_archiver_share_broker_t, lto_archiver_share_broker_runtime_t;
+    ')
+    allow $1 lto_archiver_share_broker_runtime_t:sock_file { getattr open read write };
+    allow $1 lto_archiver_share_broker_t:unix_stream_socket connectto;
+')
+
+########################################
+## <summary>Connect to the constrained LTO Archiver journal reader.</summary>
+## <param name="domain"><summary>Reader client domain.</summary></param>
+interface(`lto_archiver_connect_log_reader',`
+    gen_require(`
+        type lto_archiver_log_reader_t, lto_archiver_log_reader_runtime_t;
+    ')
+    allow $1 lto_archiver_log_reader_runtime_t:dir search;
+    allow $1 lto_archiver_log_reader_runtime_t:sock_file { getattr open write };
+    allow $1 lto_archiver_log_reader_t:unix_stream_socket connectto;
+')

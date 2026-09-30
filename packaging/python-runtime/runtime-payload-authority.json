@@ -1,0 +1,15 @@
+{
+  "file_count": 1031,
+  "filelist_sha256": "2724b419758d946d521123ff615e406de4a63be9dea4453d84d261328e41ec36",
+  "installed_root": "/usr/lib64/lto-archiver/python-runtime/3.11/site-packages",
+  "native_extension_paths": [
+    "_argon2_cffi_bindings/_ffi.abi3.so",
+    "_cffi_backend.cpython-311-x86_64-linux-gnu.so",
+    "markupsafe/_speedups.cpython-311-x86_64-linux-gnu.so",
+    "pydantic_core/_pydantic_core.cpython-311-x86_64-linux-gnu.so"
+  ],
+  "pyc_count": 443,
+  "python_cache_tag": "cpython-311",
+  "schema_version": 1,
+  "wheel_count": 22
+}

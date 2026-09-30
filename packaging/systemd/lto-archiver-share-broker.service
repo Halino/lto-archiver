@@ -1,0 +1,32 @@
+[Unit]
+Description=LTO Archiver privileged network share broker
+Requires=lto-archiver-share-broker.socket
+After=lto-archiver-share-broker.socket network-online.target
+Wants=network-online.target
+PartOf=lto-archiver-share-broker.socket
+
+[Service]
+Type=simple
+User=root
+Group=root
+SupplementaryGroups=lto-archiver
+ExecStart=/usr/bin/lto-archiver-share-broker
+ExecStopPost=/usr/bin/lto-archiver-share-broker --fence-all
+LoadCredential=share-broker-capability:/etc/lto-archiver/credentials/share-broker-capability
+LoadCredential=share-broker-proof-key:/etc/lto-archiver/credentials/share-broker-proof-key
+LoadCredential=share-store-request-key:/etc/lto-archiver/credentials/share-store-request-key
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+DevicePolicy=closed
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SystemCallFilter=@system-service
+SystemCallFilter=~@mount
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+UMask=0077

@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Catalog · LTO Archiver{% endblock %}
+{% block nav_active %}catalog{% endblock %}
+{% block content %}
+{% macro physical_label(value) -%}
+  <span data-catalog-field="physical-label">{% if value %}{{ value }}{% else %}<span data-value-state="unknown">—</span>{% endif %}</span>
+{%- endmacro %}
+{% macro restore_physical_label(value) -%}
+  <span data-restore-selection-field="physical-label">{% if value %}{{ value }}{% else %}<span data-value-state="unknown">—</span>{% endif %}</span>
+{%- endmacro %}
+{% macro restore_selection(version) -%}
+  <span data-restore-selection>
+  <span data-restore-selection-field="logical-path">{{ version.relative_path }}</span> ·
+  {{ restore_physical_label(version.physical_label) }} ·
+  <span data-restore-selection-field="tape-id">{{ version.tape_id }}</span> ·
+  <span data-restore-selection-field="cassette-number">{{ version.cassette_number }}</span> ·
+  <span data-restore-selection-field="volume-label">{{ version.volume_label }}</span> ·
+  <span data-restore-selection-field="block-id">{{ version.block_id }}</span> ·
+  <span data-restore-selection-field="tape-relative-path">{{ version.tape_relative_path }}</span> ·
+  <span data-restore-selection-field="size">{{ version.size }}</span> ·
+  <span data-restore-selection-field="sha256">{{ version.sha256 }}</span> ·
+  <span data-restore-selection-field="version-state">{% if version.is_current %}current{% else %}history{% endif %}</span>
+  </span>
+{%- endmacro %}
+{% macro catalog_row(item) -%}
+<tr data-restore-selection>
+  <td data-label="Select">{% if restore_options.restore_roots %}<input type="checkbox" name="file_version_ids" value="{{ item.id }}" form="catalog-restore-form" aria-label="Select {{ item.relative_path }} version {{ item.id }}">{% else %}—{% endif %}</td>
+  <td data-label="Path">
+    <a data-catalog-field="logical-path" data-restore-selection-field="logical-path" href="/catalog/file-versions/{{ item.id }}">{{ item.relative_path }}</a>
+    <details class="catalog-metadata"><summary>Technical details</summary><dl class="detail-list">
+      <div><dt>Tape ID</dt><dd data-catalog-field="tape-id" data-restore-selection-field="tape-id">{{ item.tape_id }}</dd></div>
+      <div><dt>Cassette</dt><dd data-catalog-field="cassette-number" data-restore-selection-field="cassette-number">{{ item.cassette_number }}</dd></div>
+      <div><dt>Volume LTFS</dt><dd data-catalog-field="volume-label" data-restore-selection-field="volume-label">{{ item.volume_label }}</dd></div>
+      <div><dt>Block</dt><dd data-catalog-field="block-id" data-restore-selection-field="block-id">{{ item.block_id }}</dd></div>
+      <div><dt>LTFS path</dt><dd data-catalog-field="tape-relative-path" data-restore-selection-field="tape-relative-path">{{ item.tape_relative_path }}</dd></div>
+      <div><dt>Job ID</dt><dd data-catalog-field="job-id">{{ item.job_id or '—' }}</dd></div>
+      <div><dt>Job</dt><dd data-catalog-field="job-name">{{ item.job_display_name or '—' }}</dd></div>
+      <div><dt>Copied</dt><dd data-catalog-field="copied-at">{{ item.copied_at }}</dd></div>
+      <div><dt>SHA-256</dt><dd data-catalog-field="sha256" data-restore-selection-field="sha256">{{ item.sha256 }}</dd></div>
+    </dl></details>
+  </td>
+  <td data-label="Library"><span data-catalog-field="library-name">{{ item.library_name }}</span><small data-catalog-field="library-id">{{ item.library_id }}</small></td>
+  <td data-label="Physical label"><span data-restore-selection-field="physical-label">{{ physical_label(item.physical_label) }}</span></td>
+  <td data-label="Size" data-catalog-field="size" data-restore-selection-field="size" title="{{ format_integer(item.size_bytes) }} B">{{ format_storage_size(item.size_bytes) }}</td>
+  <td data-label="Version"><span data-catalog-field="version-state" data-restore-selection-field="version-state">{% if item.is_current %}Current{% else %}Historical{% endif %}</span><small>#{{ item.id }}</small></td>
+</tr>
+{%- endmacro %}
+<main class="page-shell catalog-page">
+  {% if catalog_mode == 'detail' %}
+  <p><a href="/catalog">Return to catalog</a></p>
+  <section class="detail-page" aria-labelledby="catalog-detail-title">
+    <p class="eyebrow">Cataloged version {{ version.id }}</p>
+    <h1 id="catalog-detail-title" data-catalog-field="logical-path">{{ version.relative_path }}</h1>
+    <p class="page-note">This view shows catalog metadata only: it does not read bytes from tapes or mount tapes.</p>
+    <section class="detail-panel" aria-labelledby="catalog-identity-title">
+      <h2 id="catalog-identity-title">Identity and location</h2>
+      <dl class="detail-list">
+        <div><dt>Physical label</dt><dd>{{ physical_label(version.physical_label) }}</dd></div>
+        <div><dt>Tape ID</dt><dd data-catalog-field="tape-id">{{ version.tape_id }}</dd></div>
+        <div><dt>Volume LTFS</dt><dd data-catalog-field="volume-label">{{ version.volume_label }}</dd></div>
+        <div><dt>Cassette</dt><dd data-catalog-field="cassette-number">{{ version.cassette_number }}</dd></div>
+        <div><dt>Block</dt><dd data-catalog-field="block-id">{{ version.block_id }}</dd></div>
+        <div><dt>LTFS path</dt><dd data-catalog-field="tape-relative-path">{{ version.tape_relative_path }}</dd></div>
+        <div><dt>Library ID</dt><dd data-catalog-field="library-id">{{ version.library_id }}</dd></div>
+        <div><dt>Library</dt><dd data-catalog-field="library-name">{{ version.library_name }}</dd></div>
+        <div><dt>Job ID</dt><dd data-catalog-field="job-id">{% if version.job_id %}{{ version.job_id }}{% else %}<span data-value-state="unknown">—</span>{% endif %}</dd></div>
+        <div><dt>Job</dt><dd data-catalog-field="job-name">{% if version.job_display_name %}{{ version.job_display_name }}{% else %}<span data-value-state="unknown">—</span>{% endif %}</dd></div>
+      </dl>
+    </section>
+    <section class="detail-panel" aria-labelledby="catalog-metadata-title">
+      <h2 id="catalog-metadata-title">Cataloged metadata</h2>
+      <dl class="detail-list">
+        <div><dt>Size</dt><dd data-catalog-field="size">{{ version.size }}</dd></div>
+        <div><dt>Copied</dt><dd data-catalog-field="copied-at">{{ version.copied_at }}</dd></div>
+        <div><dt>SHA-256</dt><dd data-catalog-field="sha256">{{ version.sha256 }}</dd></div>
+        <div><dt>Version state</dt><dd data-catalog-field="version-state">{% if version.is_current %}Current{% else %}Historical{% endif %}</dd></div>
+        <div><dt>Metadata state</dt><dd>{{ version.metadata_state }}</dd></div>
+        <div><dt>Metadata error</dt><dd>{{ version.metadata_error or 'None' }}</dd></div>
+        <div><dt>mtime ns</dt><dd>{{ version.mtime_ns }}</dd></div>
+        <div><dt>Created ns</dt><dd>{{ version.created_ns if version.created_ns is not none else 'Not cataloged' }}</dd></div>
+        <div><dt>Accessed ns</dt><dd>{{ version.accessed_ns if version.accessed_ns is not none else 'Not cataloged' }}</dd></div>
+        <div><dt>Source mode</dt><dd>{{ version.source_mode if version.source_mode is not none else 'Not cataloged' }}</dd></div>
+        <div><dt>Windows attributes</dt><dd>{{ version.windows_attributes if version.windows_attributes is not none else 'Not cataloged' }}</dd></div>
+        <div><dt>Owner</dt><dd>{{ version.owner_name or 'Not cataloged' }}</dd></div>
+        <div><dt>Owner SID</dt><dd>{{ version.owner_sid or 'Not cataloged' }}</dd></div>
+        <div><dt>Security descriptor</dt><dd>{{ version.security_descriptor or 'Not cataloged' }}</dd></div>
+      </dl>
+      <h3>Alternate streams</h3>
+      {% if version.alternate_streams %}<ul>{% for stream in version.alternate_streams %}<li>{{ stream.name }} — {{ stream.size }} B</li>{% endfor %}</ul>{% else %}<p class="page-note">None cataloged.</p>{% endif %}
+    </section>
+    <section class="detail-panel" aria-labelledby="restore-plan-title">
+      <h2 id="restore-plan-title">Prepare offline restore</h2>
+      <p class="page-note">Create a persistent plan using catalog metadata only. No tape is mounted and no bytes are read.</p>
+      {% if restore_options.restore_roots %}
+      <form id="catalog-restore-form" action="/catalog/restore-plans" method="post">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+        <input type="hidden" name="file_version_ids" value="{{ version.id }}">
+        <p class="page-note">{{ restore_selection(version) }}</p>
+        <label>Authorized destination<select name="destination_root" required>{% for root in restore_options.restore_roots %}<option value="{{ root }}">{{ root }}</option>{% endfor %}</select></label>
+        <label>Optional destination subdirectory<input name="destination_subdirectory" maxlength="2048" placeholder="project/restore-2026" autocomplete="off"></label>
+        <button class="primary-action" type="submit">Create restore plan</button>
+      </form>
+      {% else %}<p class="empty-state">No restore destination is authorized in host settings.</p>{% endif %}
+    </section>
+  </section>
+  {% else %}
+  <section aria-labelledby="catalog-title">
+    <p class="eyebrow">Search and browse</p>
+    <h1 id="catalog-title">Catalog</h1>
+    <p class="page-note">The catalog does not read bytes from tapes, mount tapes, or contact sources.</p>
+    <form class="catalog-search" action="/catalog" method="get">
+      <input type="hidden" name="mode" value="search">
+      <div class="catalog-filter-grid">
+        <label>Search <input name="q" value="{{ query.q }}" maxlength="256"></label>
+        <label>Library <input name="library_id" value="{{ query.library_id }}" maxlength="128"></label>
+        <label>Job <input name="job_id" value="{{ query.job_id }}" maxlength="128"></label>
+        <label>Cassette label <input name="cassette" value="{{ query.cassette }}" maxlength="128"></label>
+        <label>SHA-256 <input name="sha256" value="{{ query.sha256 }}" maxlength="64"></label>
+        <label>Minimum size (B) <input name="min_size" type="number" min="0" value="{{ query.min_size if query.min_size is not none else '' }}"></label>
+        <label>Maximum size (B) <input name="max_size" type="number" min="0" value="{{ query.max_size if query.max_size is not none else '' }}"></label>
+        <label>Copied after <input name="copied_after" value="{{ query.copied_after }}" maxlength="64"></label>
+        <label>Copied before <input name="copied_before" value="{{ query.copied_before }}" maxlength="64"></label>
+        <label>Results per page <input name="limit" type="number" min="1" max="200" value="{{ query.limit }}"></label>
+      </div>
+      <label class="catalog-checkbox"><input name="include_history" type="checkbox" value="true"{% if query.include_history %} checked{% endif %}> Include historical versions</label>
+      <button class="primary-action" type="submit">Search</button>
+    </form>
+  </section>
+  {% if browse_root_url %}<p class="action-toolbar"><a href="{{ browse_root_url }}">Browse the selected library root</a></p>{% endif %}
+  {% if catalog_mode == 'browse' %}
+  <section class="detail-panel" aria-labelledby="catalog-browse-title">
+    <h2 id="catalog-browse-title">Browse catalog</h2>
+    <nav class="catalog-breadcrumbs" aria-label="Catalog path">{% for label, url in breadcrumbs %}<a href="{{ url }}">{{ label }}</a>{% if not loop.last %}<span aria-hidden="true">/</span>{% endif %}{% endfor %}</nav>
+    {% if entries %}<div class="table-scroll" tabindex="0" role="region" aria-label="Catalog results"><table class="summary-table catalog-table"><thead><tr><th>Select</th><th>Path</th><th>Library</th><th>Physical label</th><th>Size</th><th>Version</th></tr></thead><tbody>{% for entry in entries %}{% if entry.kind == "directory" %}<tr><td data-label="Select">—</td><td data-label="Path" data-catalog-field="logical-path"><a href="/catalog?mode=browse&amp;library_id={{ query.library_id|urlencode }}&amp;parent_path={{ entry.relative_path|urlencode }}&amp;limit={{ query.limit }}">{{ entry.name }}</a><small>Folder</small></td><td data-label="Library">{{ query.library_id }}</td><td data-label="Physical label">—</td><td data-label="Size">—</td><td data-label="Version">—</td></tr>{% else %}{{ catalog_row(entry.file) }}{% endif %}{% endfor %}</tbody></table></div>{% else %}<p class="empty-state">No items in this folder.</p>{% endif %}
+  </section>
+  {% else %}
+  <section class="detail-panel" aria-labelledby="catalog-results-title">
+    <h2 id="catalog-results-title">Results</h2>
+    {% if results %}<div class="table-scroll" tabindex="0" role="region" aria-label="Catalog results"><table class="summary-table catalog-table"><thead><tr><th>Select</th><th>Path</th><th>Library</th><th>Physical label</th><th>Size</th><th>Version</th></tr></thead><tbody>{% for result in results %}{{ catalog_row(result) }}{% endfor %}</tbody></table></div>{% else %}<p class="empty-state">No cataloged files match the filters.</p>{% endif %}
+  </section>
+  {% endif %}
+  {% if (catalog_mode == 'search' and results) or (catalog_mode == 'browse' and entries) %}
+  <section class="detail-panel" aria-labelledby="restore-plan-title">
+    <h2 id="restore-plan-title">Prepare offline restore</h2>
+    <p class="page-note">The selection creates a persistent cassette-ordered plan using catalog metadata only.</p>
+    {% if restore_options.restore_roots %}
+    <form id="catalog-restore-form" action="/catalog/restore-plans" method="post">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+      <p class="page-note">Select versions in the results above. Selection applies to this page only.</p>
+      <label>Authorized destination<select name="destination_root" required>{% for root in restore_options.restore_roots %}<option value="{{ root }}">{{ root }}</option>{% endfor %}</select></label>
+      <label>Optional destination subdirectory<input name="destination_subdirectory" maxlength="2048" placeholder="project/restore-2026" autocomplete="off"></label>
+      <button class="primary-action" type="submit">Create restore plan</button>
+    </form>
+    {% else %}<p class="empty-state">No restore destination is authorized in host settings.</p>{% endif %}
+  </section>
+  {% endif %}
+  {% if next_url %}<p class="action-toolbar"><a class="primary-action" href="{{ next_url }}">Next page</a></p>{% endif %}
+  {% endif %}
+</main>
+{% endblock %}

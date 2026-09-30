@@ -1,0 +1,7 @@
+u lto-archiver - "LTO Archiver daemon" /var/lib/lto-archiver /usr/sbin/nologin
+u lto-web - "LTO Archiver WebUI" /var/lib/lto-archiver-web /usr/sbin/nologin
+g lto-log-read -
+m lto-web lto-archiver
+m lto-archiver tape
+m lto-archiver lto-admin
+m lto-archiver lto-log-read

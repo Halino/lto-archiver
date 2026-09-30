@@ -1,0 +1,42 @@
+[Unit]
+Description=Manual isolated ArchiveRunner physical qualification
+Requires=lto-archiver-command-broker.socket
+After=lto-archiver-command-broker.socket local-fs.target lto-archiverd.service lto-archiverd.socket lto-archiver-ltfs-qualification.service
+Conflicts=lto-archiverd.service lto-archiverd.socket lto-archiver-ltfs-qualification.service
+
+[Service]
+Type=oneshot
+User=lto-archiver
+Group=lto-archiver
+SupplementaryGroups=tape lto-admin lto-web
+TimeoutStartSec=infinity
+TimeoutStopSec=infinity
+SendSIGKILL=no
+ExecStartPre=/usr/libexec/lto-archiver/configure-device-policy.py --verify-only
+EnvironmentFile=-/etc/lto-archiver/archive-runner-qualification.env
+ExecStart=/usr/bin/lto-archiver-qualify-archive-runner $LTO_ARCHIVER_RESTORE_QUALIFICATION --state-root /var/lib/lto-archiver-qualification/archive-runner --config /etc/lto-archiver/config.toml --broker-socket /run/lto-archiver-broker/control.sock --broker-capability-file /run/credentials/lto-archiver-archive-runner-qualification.service/broker-capability --ltfs-info-binary /usr/bin/ltfs-info
+LoadCredential=broker-capability:/etc/lto-archiver/credentials/broker-capability
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+DevicePolicy=closed
+PrivateDevices=no
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX
+SystemCallFilter=~@mount
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+UMask=0077
+ReadWritePaths=/var/lib/lto-archiver-qualification /mnt/lto-archiver

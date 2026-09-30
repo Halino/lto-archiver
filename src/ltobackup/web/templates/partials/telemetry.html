@@ -1,0 +1,63 @@
+<section class="telemetry-panel" data-telemetry-chart aria-labelledby="telemetry-title">
+  <div class="panel-heading">
+    <div>
+      <p class="eyebrow">Authoritative daemon samples</p>
+      <h2 id="telemetry-title">Operation rate</h2>
+    </div>
+    <p class="telemetry-window">Window: {{ format_elapsed(chart.elapsed_seconds) }}</p>
+  </div>
+  {% if chart.available %}
+  <div class="telemetry-chart-scroll" tabindex="0" role="region" aria-label="Scrollable operation rate chart">
+  <svg class="telemetry-chart" viewBox="0 0 1000 300" role="img" aria-labelledby="telemetry-chart-title telemetry-chart-description">
+    <title id="telemetry-chart-title">Instantaneous operation rate and current effective reference in MiB/s</title>
+    <desc id="telemetry-chart-description">Instantaneous geometry is presentation-smoothed within each continuous segment. Tooltips and the table retain exact daemon values. The effective rate is one current scalar reference, not historical samples. Lines never cross missing telemetry gaps.</desc>
+    <g class="chart-grid" aria-hidden="true">
+      <line x1="150" y1="30" x2="850" y2="30"></line>
+      <line x1="150" y1="140" x2="850" y2="140"></line>
+      <line x1="150" y1="250" x2="850" y2="250"></line>
+      <line x1="500" y1="30" x2="500" y2="250"></line>
+    </g>
+    <g class="chart-axis chart-axis-left" aria-label="Left rate scale">
+      <text x="135" y="35" text-anchor="end">{{ format_axis_rate(chart.maximum_rate) }}</text>
+      <text x="135" y="145" text-anchor="end">{{ format_axis_rate(chart.middle_rate) }}</text>
+      <text x="135" y="255" text-anchor="end">0 MiB/s</text>
+    </g>
+    <g class="chart-axis chart-axis-right" aria-label="Right rate scale">
+      <text x="865" y="35">{{ format_axis_rate(chart.maximum_rate) }}</text>
+      <text x="865" y="145">{{ format_axis_rate(chart.middle_rate) }}</text>
+      <text x="865" y="255">0 MiB/s</text>
+    </g>
+    <g class="chart-axis chart-axis-time" aria-label="Time scale">
+      <text x="150" y="282" text-anchor="start">0%</text>
+      <text x="500" y="282" text-anchor="middle">50%</text>
+      <text x="850" y="282" text-anchor="end">100% · {{ format_elapsed(chart.elapsed_seconds) }}</text>
+    </g>
+    {% for segment in chart.segments %}
+    <g data-segment="true" data-segment-events="{% for point in segment %}{{ point.event_id }}{% if not loop.last %},{% endif %}{% endfor %}">
+      {% if segment|length > 1 %}
+      <polyline class="telemetry-line telemetry-line-instantaneous" data-series="instantaneous" data-segment-index="{{ loop.index0 }}" data-segment-events="{% for point in segment %}{{ point.event_id }}{% if not loop.last %},{% endif %}{% endfor %}" points="{% for point in segment %}{{ '%.3f'|format(point.x) }},{{ '%.3f'|format(point.presentation_y) }}{% if not loop.last %} {% endif %}{% endfor %}"></polyline>
+      {% endif %}
+      {% for point in segment %}
+      <circle class="telemetry-point" data-series="instantaneous" cx="{{ '%.3f'|format(point.x) }}" cy="{{ '%.3f'|format(point.presentation_y) }}" r="4" data-event-id="{{ point.event_id }}" data-time-offset-seconds="{{ '%.3f'|format(point.time_offset_seconds) }}" data-raw-rate="{{ '%.3f'|format(point.rate) }}" data-presentation-rate="{{ '%.3f'|format(point.presentation_rate) }}" data-presentation-smoothed="true"><title>Raw instantaneous rate {{ '%.3f'|format(point.rate) }} MiB/s · +{{ format_elapsed(point.time_offset_seconds) }}</title></circle>
+      {% endfor %}
+    </g>
+    {% endfor %}
+    {% if chart.effective_rate is not none %}
+    <line class="telemetry-line telemetry-line-effective" data-series="effective-reference" x1="150" y1="{{ '%.3f'|format(chart.effective_y) }}" x2="850" y2="{{ '%.3f'|format(chart.effective_y) }}"><title>Effective operation rate {{ '%.3f'|format(chart.effective_rate) }} MiB/s (current reference)</title></line>
+    {% endif %}
+    {% for gap in chart.gaps %}
+    <g data-gap="true" data-time-offset-seconds="{{ '%.3f'|format(gap.time_offset_seconds) }}">
+      <line class="telemetry-gap" x1="{{ '%.3f'|format(gap.x) }}" y1="30" x2="{{ '%.3f'|format(gap.x) }}" y2="250"></line>
+      <title>Telemetry unavailable at +{{ format_elapsed(gap.time_offset_seconds) }}</title>
+    </g>
+    {% endfor %}
+  </svg>
+  </div>
+  <ul class="telemetry-legend" aria-label="Rate series"><li><span class="legend-swatch instantaneous"></span>Instantaneous rate (smoothed geometry; exact values available)</li>{% if chart.effective_rate is not none %}<li><span class="legend-swatch effective"></span>Current effective reference</li>{% endif %}</ul>
+  <table class="sr-only telemetry-accessible-data"><caption>Exact authoritative rate values</caption><thead><tr><th>Series</th><th>Time</th><th>Rate</th></tr></thead><tbody>{% for segment in chart.segments %}{% for point in segment %}<tr><td>Raw instantaneous rate</td><td>+{{ format_elapsed(point.time_offset_seconds) }}</td><td>{{ '%.3f'|format(point.rate) }} MiB/s</td></tr>{% endfor %}{% endfor %}{% if chart.effective_rate is not none %}<tr><td>Effective operation rate</td><td>Current operation window</td><td>{{ '%.3f'|format(chart.effective_rate) }} MiB/s</td></tr>{% endif %}</tbody></table>
+  <p class="chart-note">Presentation may animate between received values; exact raw values remain in tooltips and the accessible table. Lines do not cross intervals without data.</p>
+  {% else %}
+  <div class="telemetry-unavailable" role="status">Telemetry unavailable</div>
+  {% for gap in chart.gaps %}<span hidden data-gap="true" data-time-offset-seconds="{{ '%.3f'|format(gap.time_offset_seconds) }}"></span>{% endfor %}
+  {% endif %}
+</section>

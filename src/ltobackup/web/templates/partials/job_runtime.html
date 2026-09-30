@@ -1,0 +1,40 @@
+<section id="job-runtime-{{ job.id|urlencode }}" class="detail-panel" data-job-runtime data-job-id="{{ job.id }}" data-runtime-url="/partials/jobs/{{ job.id|urlencode }}/runtime?cassette_cursor={{ (cassette_cursor or '')|urlencode }}&amp;manifest_cursor={{ (manifest_cursor or '')|urlencode }}&amp;history_cursor={{ (history_cursor or '')|urlencode }}" data-live-patch="keyed" data-live-refresh-mode="{{ runtime.refresh_mode }}" aria-labelledby="job-runtime-title">
+  <h2 id="job-runtime-title" data-live-key="job-runtime-heading">Runtime progress</h2>
+  <div data-live-key="job-preparation">{% if runtime.preparation %}<p role="status"><strong>{{ runtime.preparation.label }}</strong> — {{ runtime.preparation.detail }} Phase started: <time datetime="{{ runtime.preparation.since }}">{{ runtime.preparation.since }}</time>.</p>{% endif %}</div>
+  <div data-live-key="job-runtime-blocker">{% if runtime.blocked %}<p role="status">{{ runtime.blocked_explanation }}</p>{% endif %}</div>
+  <div data-live-key="job-boundary-refresh">{% if runtime.boundary_refresh %}{% set refresh = runtime.boundary_refresh %}
+    <h3>Cassette-boundary refresh</h3>
+    {% if refresh.state == "queued" %}
+      <p role="status">Boundary refresh is queued{% if refresh.completed_sequence is not none %} after cassette {{ format_integer(refresh.completed_sequence) }}{% endif %}. The daemon will check for files added, changed, or removed.</p>
+    {% elif refresh.state == "scanning" %}
+      <p role="status">Boundary refresh is scanning for files added, changed, or removed{% if refresh.completed_sequence is not none %} after cassette {{ format_integer(refresh.completed_sequence) }}{% endif %}.</p>
+    {% elif refresh.state == "waiting_labels" %}
+      <p role="status">Boundary refresh{% if refresh.candidate_files is not none %} found {{ format_integer(refresh.candidate_files) }} candidate file{% if refresh.candidate_files != 1 %}s{% endif %}{% if refresh.candidate_bytes is not none %} ({{ format_storage_size(refresh.candidate_bytes) }}){% endif %}{% endif %}{% if refresh.completed_sequence is not none %} after cassette {{ format_integer(refresh.completed_sequence) }}{% endif %} and is waiting{% if refresh.required_additional_labels is not none %} for exactly {{ format_integer(refresh.required_additional_labels) }} additional label{% if refresh.required_additional_labels != 1 %}s{% endif %}{% else %} for additional labels{% endif %}.</p>
+    {% elif refresh.state == "blocked" %}
+      <p role="status">Boundary refresh is blocked{% if refresh.completed_sequence is not none %} after cassette {{ format_integer(refresh.completed_sequence) }}{% endif %}.{% if refresh.error_code %} Safe error code: {{ refresh.error_code }}.{% endif %}</p>
+    {% elif refresh.state == "stale" %}
+      <p role="status">Boundary refresh evidence is stale{% if refresh.completed_sequence is not none %} after cassette {{ format_integer(refresh.completed_sequence) }}{% endif %} and will not be applied.{% if refresh.error_code %} Safe reason code: {{ refresh.error_code }}.{% endif %}</p>
+    {% elif refresh.state == "applied" %}
+      <p role="status">Boundary refresh was applied{% if refresh.completed_sequence is not none %} after cassette {{ format_integer(refresh.completed_sequence) }}{% endif %}.</p>
+    {% elif refresh.state == "paused" %}
+      <p role="status">Boundary refresh is paused with this job{% if refresh.completed_sequence is not none %} after cassette {{ format_integer(refresh.completed_sequence) }}{% endif %}.</p>
+      {% if refresh.candidate_files is not none %}<p>Retained candidate: {{ format_integer(refresh.candidate_files) }} candidate file{% if refresh.candidate_files != 1 %}s{% endif %}{% if refresh.candidate_bytes is not none %} ({{ format_storage_size(refresh.candidate_bytes) }}){% endif %}.</p>{% endif %}
+      {% if refresh.required_additional_labels is not none %}<p>Required: exactly {{ format_integer(refresh.required_additional_labels) }} additional label{% if refresh.required_additional_labels != 1 %}s{% endif %}.</p>{% endif %}
+    {% endif %}
+  {% endif %}</div>
+  <dl class="detail-list" data-live-key="job-runtime-metrics">
+    <div><dt>Files</dt><dd>{{ runtime.files_progress }}</dd></div>
+    <div><dt>Bytes</dt><dd>{{ runtime.bytes_progress }}</dd></div>
+    <div><dt>Current cassette</dt><dd>{{ runtime.cassette_progress }}</dd></div>
+    <div><dt>Instantaneous rate (raw)</dt><dd data-live-number="job-current-rate"{% if runtime.current_rate_value is not none %} data-value="{{ runtime.current_rate_value }}"{% endif %}>{{ runtime.current_rate }}</dd></div>
+    <div><dt>Effective rate (operation window)</dt><dd data-live-number="job-effective-rate"{% if runtime.effective_rate_value is not none %} data-value="{{ runtime.effective_rate_value }}"{% endif %}>{{ runtime.effective_rate }}</dd></div>
+    <div><dt>Sample freshness</dt><dd>{{ runtime.sample_freshness }}</dd></div>
+    <div><dt>Phase</dt><dd>{{ runtime.phase }}</dd></div>
+    <div><dt>ETA</dt><dd>{{ runtime.eta }}</dd></div>
+  </dl>
+  <div data-live-key="job-runtime-telemetry">{% if runtime.live %}
+    {{ runtime.telemetry_html|safe }}
+  {% else %}
+    <p class="telemetry-unavailable" role="status">No active telemetry for this job. Persisted progress is shown above.</p>
+  {% endif %}</div>
+</section>

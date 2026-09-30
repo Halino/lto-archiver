@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}LTO Archiver{% endblock %}</title>
+    <link rel="stylesheet" href="/static/app.css?v={{ asset_revision }}">
+    <script defer src="/static/htmx.js" integrity="sha384-Q+Dky3iHVJOr6wUjQ4ulh6uQ76an/t+ak1+PjMVaxRjbZamFLAG+u9InkfjbsEQf"></script>
+    {% if user %}<script defer src="/static/live.js?v={{ asset_revision }}"></script>{% endif %}
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    {% set active_nav %}{% block nav_active %}dashboard{% endblock %}{% endset %}
+    {% if user %}
+    <div class="app-shell">
+      <header class="site-header">
+        <div class="rail-heading">
+          <a class="brand" href="/" aria-label="LTO Archiver, dashboard">LTO Archiver</a>
+          <button class="nav-toggle" type="button" data-nav-toggle aria-label="Open or close the main menu" aria-controls="app-navigation" aria-expanded="false">Menu</button>
+        </div>
+        <nav id="app-navigation" class="site-nav" aria-label="Main navigation">
+          <div class="nav-group" role="group" aria-label="Management">
+            <p class="nav-group-title" id="nav-management-title">Management</p>
+            <a href="/"{% if active_nav|trim == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+            <a href="/libraries"{% if active_nav|trim == 'libraries' %} aria-current="page"{% endif %}>Libraries</a>
+            <a href="/shares"{% if active_nav|trim == 'shares' %} aria-current="page"{% endif %}>Shares</a>
+            <a href="/jobs"{% if active_nav|trim == 'jobs' %} aria-current="page"{% endif %}>Job</a>
+            <a href="/media"{% if active_nav|trim == 'media' %} aria-current="page"{% endif %}>Media</a>
+            <a href="/catalog"{% if active_nav|trim == 'catalog' %} aria-current="page"{% endif %}>Catalog</a>
+            {% if critical_recovery %}<a href="/critical-recovery/{{ critical_recovery.operation_id|urlencode }}"{% if active_nav|trim == 'critical-recovery' %} aria-current="page"{% endif %}>Critical recovery</a>{% endif %}
+          </div>
+          <div class="nav-group" role="group" aria-label="Administration">
+            <p class="nav-group-title" id="nav-administration-title">Administration</p>
+            <a href="/settings"{% if active_nav|trim == 'settings' %} aria-current="page"{% endif %}>Settings</a>
+            <a href="/users"{% if active_nav|trim == 'users' %} aria-current="page"{% endif %}>Users</a>
+          </div>
+          <div class="nav-group" role="group" aria-label="Diagnostics">
+            <p class="nav-group-title" id="nav-diagnostics-title">Diagnostics</p>
+            <a href="/diagnostics"{% if active_nav|trim == 'diagnostics' %} aria-current="page"{% endif %}>Runtime</a>
+            <a href="/logs"{% if active_nav|trim == 'logs' %} aria-current="page"{% endif %}>Log</a>
+          </div>
+        </nav>
+        <div class="session-summary">
+          <a href="/account" aria-label="Authenticated account {{ user.login_name }}">{{ user.login_name }}</a>
+          <form action="/logout" method="post">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <button class="link-button" type="submit">Sign out</button>
+          </form>
+        </div>
+      </header>
+      <div class="content-column" id="main-content" tabindex="-1">
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+    {% else %}
+    <header class="site-header site-header-public">
+      <a class="brand" href="/" aria-label="LTO Archiver, dashboard">LTO Archiver</a>
+    </header>
+    <div id="main-content" tabindex="-1">{% block public_content %}{% endblock %}</div>
+    {% endif %}
+  </body>
+</html>

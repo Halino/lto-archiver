@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block nav_active %}critical-recovery{% endblock %}
+{% block title %}Critical recovery · LTO Archiver{% endblock %}
+{% macro proof_fields(key) -%}
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <input type="hidden" name="idempotency_key" value="{{ key }}">
+  <input type="hidden" name="operation_id" value="{{ proof.operation_id }}">
+  <input type="hidden" name="job_id" value="{{ proof.job_id }}">
+  <input type="hidden" name="cassette_sequence" value="{{ proof.cassette_sequence }}">
+  <input type="hidden" name="expected_label" value="{{ proof.expected_label }}">
+  <input type="hidden" name="daemon_generation" value="{{ proof.daemon_generation }}">
+  <input type="hidden" name="attempt_number" value="{{ proof.attempt_number }}">
+  <input type="hidden" name="evidence_sha256" value="{{ proof.evidence_sha256 }}">
+  <input type="hidden" name="observed_media_identity_sha256" value="{{ proof.observed_media_identity_sha256 or '' }}">
+  <input type="hidden" name="mount_path_sha256" value="{{ proof.target.mount_path_sha256 }}">
+  <input type="hidden" name="tape_device_identity_sha256" value="{{ proof.target.tape_device_identity_sha256 }}">
+  <input type="hidden" name="scsi_device_identity_sha256" value="{{ proof.target.scsi_device_identity_sha256 }}">
+  <input type="hidden" name="expected_media_scope_sha256" value="{{ proof.target.expected_media_scope_sha256 }}">
+{%- endmacro %}
+{% macro password_field() -%}
+  {% if password_required %}
+  <label data-protected-password-inline>Your current password
+    <input type="password" name="password" autocomplete="current-password" required>
+  </label>
+  {% endif %}
+{%- endmacro %}
+{% block content %}
+<main class="page-shell" aria-labelledby="critical-recovery-title">
+  <p><a href="/jobs/{{ proof.job_id|urlencode }}">← Back to this job</a></p>
+  <p class="eyebrow">Protected recovery</p>
+  <h1 id="critical-recovery-title">Recover cassette {{ proof.expected_label }}</h1>
+  <p>Choose the action here. If confirmation is needed, enter your current password when prompted. You do not need to visit Account.</p>
+  {% if error %}<div class="alert alert-error" role="alert" data-field-error="password">{{ error }}</div>{% endif %}
+  {% if notice %}<div class="alert" role="status">{{ notice }}</div>{% endif %}
+  <div class="alert alert-warning" role="status">{{ proof.safe_explanation }} {{ proof.safe_next_action }}</div>
+  <details class="detail-panel">
+    <summary>Technical details and recovery evidence</summary>
+    <p>Operation <code>{{ proof.operation_id }}</code></p>
+    <dl class="timing-grid">
+      <div><dt>Job</dt><dd>{{ proof.job_id }}</dd></div>
+      <div><dt>Cassette</dt><dd>{{ proof.cassette_sequence }} · {{ proof.expected_label }}</dd></div>
+      <div><dt>Attempt</dt><dd>{{ proof.attempt_number }} · generation {{ proof.daemon_generation }}</dd></div>
+      <div><dt>Last safe checkpoint</dt><dd>{{ proof.last_safe_checkpoint or 'Not available' }}</dd></div>
+      <div><dt>Category</dt><dd>{{ proof.evidence_category }}</dd></div>
+      <div><dt>Terminal commands</dt><dd>{{ 'Yes' if proof.commands_quiescent else 'No' }}</dd></div>
+      <div><dt>Quiescent mount</dt><dd>{{ 'Yes' if proof.mount_quiescent else 'No' }}</dd></div>
+      <div><dt>Quiescent processes</dt><dd>{{ 'Yes' if proof.processes_quiescent else 'No' }}</dd></div>
+    </dl>
+    <p><strong>Evidence digest:</strong> <code>{{ proof.evidence_sha256 }}</code></p>
+  </details>
+  <section class="detail-panel" aria-labelledby="critical-actions-title">
+    <h2 id="critical-actions-title">1. Check whether recovery is safe</h2>
+    <p>Reassess the current state without writing to tape. This does not resume the backup.</p>
+    <form action="/critical-recovery/{{ proof.operation_id|urlencode }}/reconcile" method="post" data-protected-action="Re-evaluate read-only" data-password-required="{{ 'true' if password_required else 'false' }}">
+      {{ proof_fields(reconcile_key) }}
+      {{ password_field() }}
+      <button type="submit">Re-evaluate read-only</button>
+    </form>
+    <h2>2. Authorize a replacement attempt</h2>
+    <p>Only after reviewing the result above: confirm the exact cassette label. A replacement attempt may format this cassette. The daemon will still check all safety prerequisites. Authorization alone does not prove that copying has started.</p>
+    <form action="/critical-recovery/{{ proof.operation_id|urlencode }}/authorize-replacement" method="post" data-protected-action="Authorize replacement attempt" data-password-required="{{ 'true' if password_required else 'false' }}">
+      {{ proof_fields(replacement_key) }}
+      <label>Confirm exact label
+        <input name="typed_label_confirmation" autocomplete="off" value="{{ typed_label_confirmation|default('') }}" required>
+      </label>
+      {{ password_field() }}
+      <button type="submit">Authorize replacement attempt</button>
+    </form>
+    <details>
+      <summary>Other option: abandon this attempt</summary>
+      <p>Close the protected attempt without starting a replacement. This does not resume the backup or erase the tape.</p>
+      <form action="/critical-recovery/{{ proof.operation_id|urlencode }}/abandon" method="post" data-protected-action="Abandon attempt" data-password-required="{{ 'true' if password_required else 'false' }}">
+        {{ proof_fields(abandon_key) }}
+        {{ password_field() }}
+        <button type="submit">Abandon attempt</button>
+      </form>
+    </details>
+  </section>
+  <dialog class="resume-confirmation" id="protected-confirmation" aria-labelledby="protected-confirmation-title">
+    <form method="dialog" data-protected-confirmation>
+      <h2 id="protected-confirmation-title">Confirm this action</h2>
+      <p data-protected-action-description></p>
+      <p>Enter your current password to send this command. You will stay in this recovery flow.</p>
+      <label for="protected-password">Your current password</label>
+      <input id="protected-password" type="password" autocomplete="current-password" required>
+      <div class="action-row">
+        <button type="button" data-protected-cancel>Cancel</button>
+        <button type="submit">Confirm and continue</button>
+      </div>
+    </form>
+  </dialog>
+</main>
+<script src="/static/protected-action.js?v={{ asset_revision }}" defer></script>
+{% endblock %}

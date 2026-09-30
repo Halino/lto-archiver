@@ -1,0 +1,46 @@
+[Unit]
+Description=Manual label-bound physical LTFS qualification stage
+Requires=lto-archiver-command-broker.socket
+After=lto-archiver-command-broker.socket local-fs.target
+ConditionPathExists=/var/lib/lto-archiver/qualification/active-plan.json
+ConditionPathExists=/etc/lto-archiver/qualification-artifacts.json
+ConditionPathExists=/etc/lto-archiver/credentials/qualification-operation-token
+Conflicts=lto-archiver-archive-runner-qualification.service
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+SupplementaryGroups=lto-archiver
+TimeoutStartSec=infinity
+TimeoutStopSec=infinity
+SendSIGKILL=no
+ExecStartPre=/usr/libexec/lto-archiver/configure-device-policy.py --verify-only
+ExecStart=/usr/bin/lto-archiver-qualify-ltfs execute-approved-stage
+LoadCredential=broker-capability:/etc/lto-archiver/credentials/broker-capability
+LoadCredential=qualification-credential:/etc/lto-archiver/credentials/qualification-credential
+LoadCredential=operation-token:/etc/lto-archiver/credentials/qualification-operation-token
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER
+AmbientCapabilities=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER
+DevicePolicy=closed
+PrivateDevices=no
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_UNIX
+SystemCallFilter=~@mount
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+UMask=0077
+ReadWritePaths=/var/lib/lto-archiver

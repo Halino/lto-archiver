@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block nav_active %}shares{% endblock %}
+{% block title %}Ambiguous outcome · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="share-retry-title">
+  <p class="eyebrow">Share {{ share_id }}</p>
+  <h1 id="share-retry-title">Ambiguous outcome</h1>
+  <p class="error-banner" role="alert">The daemon did not confirm the outcome. {% if offer_retry %}Retry once with the same request.{% else %}Do not repeat this operation manually.{% endif %}</p>
+  {% if offer_retry %}
+  <section class="detail-panel" aria-labelledby="share-retry-action-title">
+    <h2 id="share-retry-action-title">Retry operation</h2>
+    <form action="{{ action_url }}" method="post" autocomplete="off">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+      {% for name, value in retry_fields.items() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+      {% if credential_retry %}<label>Username<input name="username" autocomplete="off"></label><label>Domain<input name="domain" autocomplete="off"></label><label>Password<input name="password" type="password" autocomplete="new-password" required></label>{% endif %}
+      <button type="submit">Retry once</button>
+    </form>
+  </section>
+  {% else %}
+  <section class="detail-panel" aria-labelledby="share-retry-action-title">
+    <h2 id="share-retry-action-title">Check status</h2>
+    <p>Return to the share and refresh its status before taking any other action.</p>
+  </section>
+  {% endif %}
+  <p><a href="/shares/{{ share_id|urlencode }}">Cancel and refresh</a></p>
+</main>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Sign in · LTO Archiver{% endblock %}
+{% block public_content %}
+<main class="login-shell" aria-labelledby="login-title">
+  <section class="login-panel">
+    <p class="eyebrow">Administration console</p>
+    <h1 id="login-title">Sign in to LTO Archiver</h1>
+    <p>There are no default credentials. Use the administrator created locally on the server.</p>
+    {% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+    <form action="/login" method="post">
+      <input type="hidden" name="login_csrf" value="{{ login_csrf }}">
+      <input type="hidden" name="next" value="{{ next_destination|default('/') }}">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username" required autofocus maxlength="128">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button class="primary-action" type="submit">Sign in</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

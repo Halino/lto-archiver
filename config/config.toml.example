@@ -1,0 +1,12 @@
+state_dir = "/var/lib/lto-archiver"
+socket_path = "/run/lto-archiver/daemon.sock"
+socket_group = "lto-web"
+tape_device_path = "/dev/tape/by-id/configure-tape-drive-nst"
+scsi_device_path = "/dev/lto-archiver-scsi-configure-generic"
+mount_path = "/mnt/lto-archiver/tape"
+managed_source_mount_root = "/mnt/lto-archiver/sources"
+source_roots = ["/srv/archive-sources/configure-source"]
+restore_roots = ["/mnt/lto-archiver/restores"]
+share_endpoint_cidrs = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7", "fe80::/10"]
+share_endpoint_dns_suffixes = [".lan", ".local"]
+buffer_bytes = 8388608

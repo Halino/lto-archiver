@@ -1,0 +1,16 @@
+{
+  "accepted_digest_algorithms": [
+    "SHA256"
+  ],
+  "accepted_public_key_algorithm": "RSA",
+  "exact_package_names": [
+    "lto-archiver",
+    "lto-archiver-python-runtime"
+  ],
+  "minimum_rsa_bits": 3072,
+  "primary_fingerprint": "720A3739260F7F170F6775D671BFB166903560F7",
+  "public_key_path": "packaging/signing/lto-archiver-task9-rpm-public.asc",
+  "public_key_sha256": "0363930f5a9c9b6a11f8891b498de9381233d63fdf49ea71bfe8313ed4501804",
+  "schema_version": 1,
+  "signing_subkey_fingerprint": "B89E149F0793DA2E3C7C5D3C442162C8A68E868D"
+}

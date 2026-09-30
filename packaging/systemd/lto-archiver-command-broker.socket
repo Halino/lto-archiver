@@ -1,0 +1,15 @@
+[Unit]
+Description=LTO Archiver privileged command broker socket
+
+[Socket]
+ListenSequentialPacket=/run/lto-archiver-broker/control.sock
+FileDescriptorName=broker
+SocketUser=root
+SocketGroup=lto-archiver
+SocketMode=0660
+DirectoryMode=0750
+RemoveOnStop=yes
+Service=lto-archiver-command-broker.service
+
+[Install]
+WantedBy=sockets.target

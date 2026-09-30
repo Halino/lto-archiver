@@ -1,0 +1,614 @@
+{
+  "components": [
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [],
+      "filename": "annotated_doc-0.0.5-py3-none-any.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "annotated_doc-0.0.5.dist-info/licenses/LICENSE"
+      ],
+      "name": "annotated-doc",
+      "normalized_name": "annotated-doc",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "0.0.5",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [],
+      "filename": "annotated_types-0.8.0-py3-none-any.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "annotated_types-0.8.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "annotated-types",
+      "normalized_name": "annotated-types",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "0.8.0",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "idna",
+        "typing-extensions"
+      ],
+      "filename": "anyio-4.14.2-py3-none-any.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "anyio-4.14.2.dist-info/licenses/LICENSE"
+      ],
+      "name": "anyio",
+      "normalized_name": "anyio",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "4.14.2",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "argon2-cffi-bindings"
+      ],
+      "filename": "argon2_cffi-25.1.0-py3-none-any.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "argon2_cffi-25.1.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "argon2-cffi",
+      "normalized_name": "argon2-cffi",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "25.1.0",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "abi3"
+      ],
+      "architecture": "x86_64",
+      "dependencies": [
+        "cffi"
+      ],
+      "filename": "argon2_cffi_bindings-26.1.0-cp310-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "argon2_cffi_bindings-26.1.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "argon2-cffi-bindings",
+      "normalized_name": "argon2-cffi-bindings",
+      "platform_tags": [
+        "manylinux_2_26_x86_64",
+        "manylinux_2_28_x86_64"
+      ],
+      "python_tags": [
+        "cp310"
+      ],
+      "root_is_purelib": false,
+      "version": "26.1.0",
+      "wheel_tags": [
+        "cp310-abi3-manylinux_2_26_x86_64",
+        "cp310-abi3-manylinux_2_28_x86_64"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [],
+      "filename": "certifi-2026.7.22-py3-none-any.whl",
+      "license_expression": "MPL-2.0",
+      "license_members": [
+        "certifi-2026.7.22.dist-info/licenses/LICENSE"
+      ],
+      "name": "certifi",
+      "normalized_name": "certifi",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "2026.7.22",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "cp311"
+      ],
+      "architecture": "x86_64",
+      "dependencies": [
+        "pycparser"
+      ],
+      "filename": "cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "license_expression": "MIT-0",
+      "license_members": [
+        "cffi-2.1.1.dist-info/licenses/LICENSE"
+      ],
+      "name": "cffi",
+      "normalized_name": "cffi",
+      "platform_tags": [
+        "manylinux2014_x86_64",
+        "manylinux_2_17_x86_64"
+      ],
+      "python_tags": [
+        "cp311"
+      ],
+      "root_is_purelib": false,
+      "version": "2.1.1",
+      "wheel_tags": [
+        "cp311-cp311-manylinux_2_17_x86_64",
+        "cp311-cp311-manylinux2014_x86_64"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [],
+      "filename": "click-8.4.2-py3-none-any.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "click-8.4.2.dist-info/licenses/LICENSE.txt"
+      ],
+      "name": "click",
+      "normalized_name": "click",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "8.4.2",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "annotated-doc",
+        "pydantic",
+        "starlette",
+        "typing-extensions",
+        "typing-inspection"
+      ],
+      "filename": "fastapi-0.141.1-py3-none-any.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "fastapi-0.141.1.dist-info/licenses/LICENSE"
+      ],
+      "name": "fastapi",
+      "normalized_name": "fastapi",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "0.141.1",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [],
+      "filename": "h11-0.16.0-py3-none-any.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "h11-0.16.0.dist-info/licenses/LICENSE.txt"
+      ],
+      "name": "h11",
+      "normalized_name": "h11",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "0.16.0",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "certifi",
+        "h11"
+      ],
+      "filename": "httpcore-1.0.9-py3-none-any.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "httpcore-1.0.9.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "httpcore",
+      "normalized_name": "httpcore",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "1.0.9",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "anyio",
+        "certifi",
+        "httpcore",
+        "idna"
+      ],
+      "filename": "httpx-0.28.1-py3-none-any.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "httpx-0.28.1.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "httpx",
+      "normalized_name": "httpx",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "0.28.1",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [],
+      "filename": "idna-3.19-py3-none-any.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "idna-3.19.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "idna",
+      "normalized_name": "idna",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "3.19",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "markupsafe"
+      ],
+      "filename": "jinja2-3.1.6-py3-none-any.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "jinja2-3.1.6.dist-info/licenses/LICENSE.txt"
+      ],
+      "name": "Jinja2",
+      "normalized_name": "jinja2",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "3.1.6",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "cp311"
+      ],
+      "architecture": "x86_64",
+      "dependencies": [],
+      "filename": "markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "markupsafe-3.0.3.dist-info/licenses/LICENSE.txt"
+      ],
+      "name": "MarkupSafe",
+      "normalized_name": "markupsafe",
+      "platform_tags": [
+        "manylinux2014_x86_64",
+        "manylinux_2_17_x86_64",
+        "manylinux_2_28_x86_64"
+      ],
+      "python_tags": [
+        "cp311"
+      ],
+      "root_is_purelib": false,
+      "version": "3.0.3",
+      "wheel_tags": [
+        "cp311-cp311-manylinux_2_17_x86_64",
+        "cp311-cp311-manylinux2014_x86_64",
+        "cp311-cp311-manylinux_2_28_x86_64"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [],
+      "filename": "pycparser-3.0-py3-none-any.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "pycparser-3.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "pycparser",
+      "normalized_name": "pycparser",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "3.0",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "annotated-types",
+        "pydantic-core",
+        "typing-extensions",
+        "typing-inspection"
+      ],
+      "filename": "pydantic-2.13.4-py3-none-any.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "pydantic-2.13.4.dist-info/licenses/LICENSE"
+      ],
+      "name": "pydantic",
+      "normalized_name": "pydantic",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "2.13.4",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "cp311"
+      ],
+      "architecture": "x86_64",
+      "dependencies": [
+        "typing-extensions"
+      ],
+      "filename": "pydantic_core-2.46.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "pydantic_core-2.46.4.dist-info/licenses/LICENSE"
+      ],
+      "name": "pydantic_core",
+      "normalized_name": "pydantic-core",
+      "platform_tags": [
+        "manylinux_2_17_x86_64",
+        "manylinux2014_x86_64"
+      ],
+      "python_tags": [
+        "cp311"
+      ],
+      "root_is_purelib": false,
+      "version": "2.46.4",
+      "wheel_tags": [
+        "cp311-cp311-manylinux_2_17_x86_64",
+        "cp311-cp311-manylinux2014_x86_64"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "anyio",
+        "typing-extensions"
+      ],
+      "filename": "starlette-1.6.0-py3-none-any.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "starlette-1.6.0.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "starlette",
+      "normalized_name": "starlette",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "1.6.0",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [],
+      "filename": "typing_extensions-4.16.0-py3-none-any.whl",
+      "license_expression": "PSF-2.0",
+      "license_members": [
+        "typing_extensions-4.16.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "typing_extensions",
+      "normalized_name": "typing-extensions",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "4.16.0",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "typing-extensions"
+      ],
+      "filename": "typing_inspection-0.4.4-py3-none-any.whl",
+      "license_expression": "MIT",
+      "license_members": [
+        "typing_inspection-0.4.4.dist-info/licenses/LICENSE"
+      ],
+      "name": "typing-inspection",
+      "normalized_name": "typing-inspection",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "0.4.4",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "abi_tags": [
+        "none"
+      ],
+      "architecture": "noarch",
+      "dependencies": [
+        "click",
+        "h11"
+      ],
+      "filename": "uvicorn-0.52.4-py3-none-any.whl",
+      "license_expression": "BSD-3-Clause",
+      "license_members": [
+        "uvicorn-0.52.4.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "uvicorn",
+      "normalized_name": "uvicorn",
+      "platform_tags": [
+        "any"
+      ],
+      "python_tags": [
+        "py3"
+      ],
+      "root_is_purelib": true,
+      "version": "0.52.4",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    }
+  ],
+  "runtime": {
+    "aggregate_license": "BSD-3-Clause AND MIT AND MIT-0 AND MPL-2.0 AND PSF-2.0",
+    "architecture": "x86_64",
+    "authorized_lock_sha256": "b61ac9dbdb373fb7f0665d2f6d7fcfeb16f5f4ec141d9d66f3271c9e0d3adaac",
+    "expected_wheel_count": 22,
+    "name": "lto-archiver-python-runtime",
+    "python_version": "3.11",
+    "version": "0.11.27"
+  },
+  "schema_version": 1
+}

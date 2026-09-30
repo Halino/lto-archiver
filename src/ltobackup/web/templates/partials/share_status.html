@@ -1,0 +1,17 @@
+{% set current_operation = share.current_operation %}
+<section id="share-status-{{ share.share_id }}" class="share-status{% if not compact|default(false) %} detail-panel{% endif %}"{% if compact|default(false) %} aria-label="Connection status"{% else %} aria-labelledby="share-status-title-{{ share.share_id }}"{% endif %} aria-live="polite" data-share-id="{{ share.share_id }}" data-share-mode="{{ 'list' if compact|default(false) else 'detail' }}" data-live-refresh-mode="{{ 'active' if current_operation else 'idle' }}">
+  {% set operation = current_operation or share.latest_operation %}
+  {% set error_detail = share.error_detail %}
+  {% if not compact|default(false) %}<h2 id="share-status-title-{{ share.share_id }}">Connection status</h2>{% endif %}
+  {% if compact|default(false) %}<p>{{ error_detail.title if error_detail else share.observed_state }}</p>{% else %}
+  <dl class="detail-list"><div><dt>Desired</dt><dd>{{ share.desired_state }}</dd></div><div><dt>Observed</dt><dd>{{ share.observed_state }}</dd></div><div><dt>Last checked</dt><dd>{{ share.last_checked_at or "Never" }}</dd></div><div><dt>Outcome</dt><dd>{{ error_detail.title if error_detail else "Normal" }}</dd></div></dl>
+  {% if error_detail %}<article class="share-error-panel" role="alert" aria-labelledby="share-error-title-{{ share.share_id }}">
+    <h3 id="share-error-title-{{ share.share_id }}">{{ error_detail.title }}</h3>
+    <p>{{ error_detail.explanation }}</p>
+    <p><strong>Recommended action:</strong> {{ error_detail.recommendation }}</p>
+    <dl class="share-error-context"><div><dt>Operation</dt><dd>{{ error_detail.operation }}</dd></div><div><dt>Date</dt><dd>{{ error_detail.occurred_at or "Not available" }}</dd></div></dl>
+    <details><summary>Technical details</summary><p>Safe code: <code>{{ error_detail.code }}</code></p></details>
+  </article>{% endif %}
+  {% if operation %}<p class="operation-summary">Operation {{ operation.action }}: {{ operation.state }}{% if operation.safe_error_code and error_detail %} — {{ error_detail.title }}{% endif %}</p>{% endif %}
+  {% endif %}
+</section>

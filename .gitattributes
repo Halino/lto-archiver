@@ -1,0 +1,49 @@
+* text=auto eol=lf
+packaging/python-runtime/licenses/** binary
+
+# Linux/WebUI release boundary. These entries are defensive reintroduction
+# guards for forbidden payload paths; the old implementations are not retained.
+src/ltobackup/gui.py export-ignore
+src/lto_backup_gui_entry.py export-ignore
+src/lto_backup_entry.py export-ignore
+src/pyi_rth_tkinter_local.py export-ignore
+LtoBackupManager.spec export-ignore
+hooks/hook-_tkinter.py export-ignore
+hooks/pre_find_module_path/hook-tkinter.py export-ignore
+requirements-build.txt export-ignore
+packaging/version_info.txt export-ignore
+packaging/version_info_cli.txt export-ignore
+scripts/build-release.ps1 export-ignore
+scripts/verify-release.ps1 export-ignore
+scripts/install-lto-backup-manager.ps1 export-ignore
+scripts/configure-controlled-folder-access.ps1 export-ignore
+scripts/field-tools/read-only/diagnose-live-io-detailed.ps1 export-ignore
+scripts/field-tools/read-only/diagnose-live-io.ps1 export-ignore
+scripts/field-tools/read-only/diagnose-live-job.ps1 export-ignore
+scripts/field-tools/read-only/diagnose-storeopen-mappings.ps1 export-ignore
+scripts/field-tools/read-only/inspect-antivirus-state.ps1 export-ignore
+scripts/field-tools/read-only/inspect-cfa-policy.ps1 export-ignore
+scripts/field-tools/read-only/inspect-defender-events.ps1 export-ignore
+scripts/field-tools/read-only/inspect-plan-state.ps1 export-ignore
+scripts/field-tools/read-only/inspect-run-lock.ps1 export-ignore
+scripts/field-tools/read-only/inspect-runtime-capabilities.ps1 export-ignore
+scripts/field-tools/read-only/inspect-storeopen-installation.ps1 export-ignore
+scripts/field-tools/read-only/inspect-storeopen-tools.ps1 export-ignore
+scripts/field-tools/read-only/inspect_job_sqlite.py export-ignore
+scripts/field-tools/read-only/inspect-tape-pnp-and-storeopen.ps1 export-ignore
+scripts/field-tools/read-only/probe-system-telemetry.ps1 export-ignore
+tests/test_gui.py export-ignore
+tests/test_gui_english.py export-ignore
+tests/test_cfa_installer.py export-ignore
+tests/test_deployment_scripts.py export-ignore
+tests/test_entry.py export-ignore
+docs/installation-windows.md export-ignore
+scripts/field-tools/README.md export-ignore
+src/ltobackup/winio.py export-ignore
+src/ltobackup/volume_probe.py export-ignore
+src/ltobackup/cli.py export-ignore
+src/ltobackup/__main__.py export-ignore
+src/ltobackup/legacy_guard.py export-ignore
+src/ltobackup/security.py export-ignore
+tests/test_cli.py export-ignore
+tests/test_security.py export-ignore

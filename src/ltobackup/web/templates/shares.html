@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block nav_active %}shares{% endblock %}
+{% block title %}Shares · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="shares-title">
+  <p class="eyebrow">Network sources</p><h1 id="shares-title">Shares</h1>
+  <div id="connection-banner" class="alert alert-warning" role="status" aria-live="polite" hidden>Event connection interrupted; periodic refresh is active.</div>
+  {% if user.role == "admin" %}<p><a class="primary-action" href="/shares/new">New share</a></p>{% endif %}
+  {% if shares %}<div class="table-scroll"><table class="summary-table"><thead><tr><th>Name</th><th>ID</th><th>Protocol</th><th>State</th><th>Availability</th></tr></thead><tbody>
+  {% for share in shares %}<tr><th scope="row" data-label="Name"><a href="/shares/{{ share.share_id|urlencode }}">{{ share.display_name }}</a></th><td data-label="ID">{{ share.share_id }}</td><td data-label="Protocol">{{ share.protocol|upper }}</td><td data-label="State">{{ share.lifecycle }}</td><td data-label="Availability">{% set compact = true %}{% include "partials/share_status.html" %}</td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<p class="empty-state">No shares configured.</p>{% endif %}
+</main>
+{% endblock %}

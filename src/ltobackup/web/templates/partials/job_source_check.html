@@ -1,0 +1,22 @@
+<div data-job-fragment="source-check">
+{% if job.source_check %}
+{% set check = job.source_check %}
+<section class="detail-panel" aria-labelledby="source-check-title">
+  <h2 id="source-check-title">Source check</h2>
+  <p>Cassette {{ check.cassette_sequence }} · {{ check.checked_at }}</p>
+  {% if check.state == 'ready' %}
+  <p>Planned source metadata matched at the last check. Sources are checked again during backup.</p>
+  {% else %}
+  <p role="status">Automatic continuation was held at this check. The frozen layout is unchanged.</p>
+  {% if check.unavailable_libraries %}
+  <p>{{ check.unavailable_libraries }} source libraries could not be verified. Check share connectivity and access; unavailable sources are not treated as deleted files.</p>
+  {% endif %}
+  <p>Missing files: {{ check.missing_files }}. Changed files: {{ check.changed_files }}. Checked files: {{ check.checked_files }}.</p>
+  <p>Restore the planned sources or create a separate backup cycle for changed versions. While this cassette remains eligible for automatic continuation, the daemon retries this check automatically; no tape operation is performed by the check.</p>
+  <details><summary>Source issues (up to 100 shown)</summary>
+    <ul>{% for issue in check.issues %}<li>{{ issue.library_id }}{% if issue.relative_path %} / {{ issue.relative_path }}{% endif %}: {{ issue.code|replace('_', ' ') }}</li>{% endfor %}</ul>
+  </details>
+  {% endif %}
+</section>
+{% endif %}
+</div>

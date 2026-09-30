@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "macros/forms.html" import control_error_attributes, form_error_attributes, render_errors %}
+{% block nav_active %}libraries{% endblock %}
+{% block title %}{{ library.display_name }} · LTO Archiver{% endblock %}
+{% block content %}
+{% set errors = field_errors|default({}) %}
+{% set attempted_action = error_action|default("") %}
+<main class="page-shell detail-page" aria-labelledby="library-title">
+  <p class="eyebrow">Library {{ library.id }}</p><h1 id="library-title">{{ library.display_name }}</h1>
+  {% if error %}<p class="error-banner" role="alert">{{ error }}</p>{% endif %}
+  {{ render_errors(errors, "library-detail") }}
+  <section class="detail-panel"><dl class="detail-list">
+    <div><dt>Source</dt><dd>{% if library.source_kind == 'managed_share' %}{% if source_share %}{{ source_share.display_name }} — {{ source_share.protocol|upper }} — {{ source_share.observed_state }} — checked {{ source_share.last_checked_at or 'Never' }}{% else %}Share unavailable{% endif %} / {{ library.relative_subpath }}{% else %}Local path {{ library.source_root }}{% endif %}</dd></div><div><dt>State</dt><dd>{{ library.state }}</dd></div><div><dt>Scan</dt><dd>{{ library.scan_state }}</dd></div><div><dt>Revision</dt><dd>{{ library.revision }}</dd></div>
+  </dl></section>
+  {% set scan_errors = errors if attempted_action == 'scan' else {} %}<section class="detail-panel next-step-panel" aria-labelledby="library-next-step-title"><p class="eyebrow">Next step</p><h2 id="library-next-step-title">Scan and verify</h2><p>Read the file list and calculate the library size before adding it to a job. This operation does not use tape.</p><div class="action-toolbar" role="group" aria-label="Library actions"><form action="/libraries/{{ library.id|urlencode }}/scan" method="post"{{ form_error_attributes(scan_errors, ("idempotency_key", "state"), "library-detail") }}><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ idempotency_key }}"><button class="primary-action" type="submit">Scan and verify</button></form></div></section>
+  {% if user.role == "admin" %}
+  {% set update_errors = errors if attempted_action == 'update' else {} %}<section class="detail-panel"><h2>Edit configuration</h2><form action="/libraries/{{ library.id|urlencode }}/update" method="post"{{ form_error_attributes(update_errors, ("expected_revision", "idempotency_key"), "library-detail") }}>
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+    <input type="hidden" name="expected_revision" value="{{ library.revision }}">
+    <label for="library-name">Name</label><input id="library-name" name="display_name" value="{{ form_values.display_name|default(library.display_name, true) }}" required{{ control_error_attributes(update_errors, "display_name", "library-detail-display_name-error") }}>
+    {% set source_kind = library.source_kind %}<input type="hidden" name="source_kind" value="{{ source_kind }}">
+    {% if source_kind == 'configured_path' %}<fieldset class="library-form-section"><legend>Local folder</legend><p class="form-help">You can update the path while keeping this library local.</p><label for="library-root">Folder path</label><input id="library-root" name="source_root" value="{{ form_values.source_root|default(library.source_root or '', true) }}" required{{ control_error_attributes(update_errors, "source_root", "library-detail-source_root-error") }}></fieldset>
+    {% else %}<input type="hidden" name="share_id" value="{{ library.share_id }}"><input type="hidden" name="relative_subpath" value="{{ library.relative_subpath or '' }}"><fieldset class="library-form-section"><legend>NFS/SMB source</legend><dl class="detail-list"><div><dt>Share</dt><dd>{% if source_share %}{{ source_share.display_name }} — {{ source_share.protocol|upper }}{% else %}{{ library.share_id }}{% endif %}</dd></div><div><dt>Subfolder</dt><dd>{{ library.relative_subpath or 'Entire share' }}</dd></div></dl><p class="form-help">The source of a network library is immutable. To change the source, create a new library.</p><a href="/libraries#library-create-title">Create a new library</a></fieldset>{% endif %}
+    {% set selected_state = form_values.state|default(library.state, true) %}<label for="library-state">State</label><select id="library-state" name="state"{{ control_error_attributes(update_errors, "state", "library-detail-state-error") }}><option value="active"{% if selected_state == 'active' %} selected{% endif %}>Active</option><option value="disabled"{% if selected_state == 'disabled' %} selected{% endif %}>Disabled</option></select>
+    <button type="submit">Save changes</button></form></section>
+  {% set retire_errors = errors if attempted_action == 'retire' else {} %}<section class="danger-zone"><h2>Retire library</h2><div class="danger-toolbar" role="group" aria-label="Dangerous library actions"><form action="/libraries/{{ library.id|urlencode }}/retire" method="post"{{ form_error_attributes(retire_errors, ("expected_revision", "idempotency_key", "state"), "library-detail") }}><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="idempotency_key" value="{{ idempotency_key }}"><input type="hidden" name="expected_revision" value="{{ library.revision }}"><label for="typed-library-id">Enter {{ library.id }}</label><input id="typed-library-id" name="typed_library_id" autocomplete="off" required{{ control_error_attributes(retire_errors, "typed_library_id", "library-detail-typed_library_id-error") }}><button class="danger-action" type="submit">Retire</button></form></div></section>
+  {% endif %}
+</main>
+{% endblock %}

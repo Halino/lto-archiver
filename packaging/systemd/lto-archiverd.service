@@ -1,0 +1,47 @@
+[Unit]
+Description=LTO Archiver native daemon
+Requires=lto-archiver-command-broker.service lto-archiver-command-broker.socket lto-archiver-share-broker.socket lto-archiver-log-reader.socket
+After=lto-archiver-command-broker.service lto-archiver-command-broker.socket lto-archiver-share-broker.socket lto-archiver-log-reader.socket local-fs.target
+Conflicts=lto-archiver-archive-runner-qualification.service
+
+[Service]
+Type=simple
+User=lto-archiver
+Group=lto-archiver
+SupplementaryGroups=tape lto-admin lto-web lto-log-read
+ExecStart=/usr/bin/lto-archiverd --config /etc/lto-archiver/config.toml --broker-socket /run/lto-archiver-broker/control.sock --broker-capability-file /run/credentials/lto-archiverd.service/broker-capability --share-broker-socket /run/lto-archiver-share-broker/control.sock --share-broker-capability-file /run/credentials/lto-archiverd.service/share-broker-capability --share-broker-proof-key-file /run/credentials/lto-archiverd.service/share-broker-proof-key --share-request-key-file /run/credentials/lto-archiverd.service/share-request-key --log-reader-socket /run/lto-archiver-log-reader/control.sock --ltfs-info-binary /usr/bin/ltfs-info
+ExecStartPre=/usr/libexec/lto-archiver/preflight-rhel9.sh --config /etc/lto-archiver/config.toml --json --broker-socket /run/lto-archiver-broker/control.sock --broker-capability-file /run/credentials/lto-archiverd.service/broker-capability --share-broker-socket /run/lto-archiver-share-broker/control.sock --share-broker-capability-file /run/credentials/lto-archiverd.service/share-broker-capability --share-broker-proof-key-file /run/credentials/lto-archiverd.service/share-broker-proof-key
+ExecStartPre=/usr/libexec/lto-archiver/configure-device-policy.py --verify-only
+LoadCredential=broker-capability:/etc/lto-archiver/credentials/broker-capability
+LoadCredential=share-broker-capability:/etc/lto-archiver/credentials/share-broker-capability
+LoadCredential=share-broker-proof-key:/etc/lto-archiver/credentials/share-broker-proof-key
+LoadCredential=share-request-key:/etc/lto-archiver/credentials/share-request-key
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+DevicePolicy=closed
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=no
+ProtectControlGroups=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectClock=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+SystemCallFilter=~@mount
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+UMask=0027
+ReadWritePaths=/var/lib/lto-archiver /run/lto-archiver /mnt/lto-archiver/tape /mnt/lto-archiver/restores
+ReadOnlyPaths=/mnt/lto-archiver/sources
+
+[Install]
+WantedBy=multi-user.target

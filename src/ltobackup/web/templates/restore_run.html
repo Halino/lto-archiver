@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Restore run {{ run.id }} · LTO Archiver{% endblock %}
+{% block nav_active %}catalog{% endblock %}
+{% block content %}
+<main class="page-shell detail-page restore-run-page" aria-labelledby="restore-run-title">
+  <header class="page-header">
+    <p class="eyebrow">Read-only LTFS restore</p>
+    <h1 id="restore-run-title">Restore run {{ run.id }}</h1>
+    <p class="page-note">The immutable plan controls every file and cassette. The run continues automatically after each verified eject.</p>
+  </header>
+  {% include "partials/restore_status.html" %}
+  <p><a href="/restore-plans/{{ run.plan_id }}">View immutable plan</a></p>
+</main>
+{% endblock %}

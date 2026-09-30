@@ -1,0 +1,27 @@
+<section class="detail-panel" aria-labelledby="storage-title" data-live-key="storage">
+  <h2 id="storage-title">Storage</h2>
+  {% if storage %}
+  {% set labels = {'state': 'Application data', 'backups': 'Catalog backups', 'scratch': 'Temporary files'} %}
+  <div class="status-grid">
+    {% for filesystem in storage.filesystems %}
+    <article class="status-card">
+      <h3>{% for role in filesystem.roles %}{{ labels[role] }}{% if not loop.last %} · {% endif %}{% endfor %}</h3>
+      {% if filesystem.available_bytes is not none and filesystem.total_bytes is not none %}
+      <p>{{ format_storage_size(filesystem.available_bytes) }} available of {{ format_storage_size(filesystem.total_bytes) }}</p>
+      {% else %}
+      <p>Available space: Not available</p>
+      {% endif %}
+      {% if filesystem.roles|length > 1 %}<p>Shared filesystem</p>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  <dl class="detail-list">
+    <div><dt>Catalog file</dt><dd>{% if storage.catalog_bytes is not none %}{{ format_storage_size(storage.catalog_bytes) }}{% else %}Not available{% endif %}</dd></div>
+    <div><dt>Catalog write-ahead log (WAL)</dt><dd>{% if storage.wal_bytes is not none %}{{ format_storage_size(storage.wal_bytes) }}{% else %}Not available{% endif %}</dd></div>
+    <div><dt>Rollback backup</dt><dd>Not available — verification information has not been reported.</dd></div>
+  </dl>
+  <p>Measured <time datetime="{{ storage.measured_at }}">{{ storage.measured_at|replace('T', ' ')|replace('+00:00', ' UTC')|replace('Z', ' UTC') }}</time>. Measurements refresh at most every {{ storage.cache_seconds }} seconds.</p>
+  {% else %}
+  <p>Storage information is not available. It will be requested again on the next dashboard update.</p>
+  {% endif %}
+</section>

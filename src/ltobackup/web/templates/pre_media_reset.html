@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block nav_active %}dashboard{% endblock %}
+{% block title %}Reset blocked state · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="reset-title">
+  <p class="eyebrow">Operation recovery</p>
+  <h1 id="reset-title">Reset blocked state</h1>
+  {% if error %}<div class="error-banner" role="alert"><p>{{ error }}</p></div>{% endif %}
+  <section class="detail-panel" aria-labelledby="reset-operation-title">
+    <h2 id="reset-operation-title">Operation {{ proof.operation_id }}</h2>
+    <dl class="detail-list">
+      <div><dt>Job</dt><dd>{{ proof.job_id }}</dd></div>
+      <div><dt>Cassette</dt><dd>{{ proof.cassette_sequence }}</dd></div>
+    </dl>
+    <p>No tape data or catalog records are removed. This reset releases only an eligible blocked attempt from before media work.</p>
+    {% if reset_complete %}
+    <p role="status">The blocked attempt has been reset. The job is deliberately paused. Review the job and use Resume when you are ready to continue.</p>
+    <a class="primary-action" href="/jobs/{{ proof.job_id|urlencode }}">Review paused job</a>
+    {% else %}
+    <p>The daemon will verify that the reviewed proof still matches and that the attempt is safe to reset. The job will remain deliberately paused after reset; use Resume separately to continue.</p>
+    <form action="/operations/{{ proof.operation_id|urlencode }}/recovery" method="post">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+      <input type="hidden" name="operation_id" value="{{ proof.operation_id }}">
+      <input type="hidden" name="job_id" value="{{ proof.job_id }}">
+      <input type="hidden" name="cassette_sequence" value="{{ proof.cassette_sequence }}">
+      <input type="hidden" name="daemon_generation" value="{{ proof.daemon_generation }}">
+      <input type="hidden" name="command_ledger_sha256" value="{{ proof.command_ledger_sha256 }}">
+      <input type="hidden" name="mount_path_sha256" value="{{ proof.target.mount_path_sha256 }}">
+      <input type="hidden" name="tape_device_identity_sha256" value="{{ proof.target.tape_device_identity_sha256 }}">
+      <input type="hidden" name="scsi_device_identity_sha256" value="{{ proof.target.scsi_device_identity_sha256 }}">
+      <input type="hidden" name="expected_media_scope_sha256" value="{{ proof.target.expected_media_scope_sha256 }}">
+      <label for="reset-password">Your password</label>
+      <input id="reset-password" type="password" name="password" autocomplete="current-password" required>
+      <button type="submit">Confirm reset and keep job paused</button>
+      <a href="/">Cancel</a>
+    </form>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

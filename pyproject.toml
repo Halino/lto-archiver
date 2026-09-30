@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=65.5.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lto-archiver"
+version = "0.11.28"
+description = "LTO Archiver for append-only SMB library backups to HPE LTFS tapes"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.11"
+dependencies = [
+    "argon2-cffi>=25.1,<26",
+    "fastapi>=0.116,<1",
+    "httpx>=0.28,<1",
+    "jinja2>=3.1,<4",
+    "pydantic>=2.11,<3",
+    "uvicorn>=0.35,<1",
+]
+
+[project.optional-dependencies]
+test = [
+    "httpx2==2.12.0",
+]
+
+[project.scripts]
+lto-archiver-admin = "ltobackup.admin_cli:main"
+lto-archiver-command-broker = "ltobackup.broker.main:main"
+lto-archiver-share-broker = "ltobackup.share_broker.main:main"
+lto-archiverd = "ltobackup.daemon.main:main"
+lto-archiver-migrate = "ltobackup.migration.cli:main"
+lto-archiver-qualify-ltfs = "ltobackup.qualification.cli:main"
+lto-archiver-web = "ltobackup.web.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"ltobackup.web" = [
+    "static/*.css",
+    "static/*.js",
+    "static/*.txt",
+    "templates/*.html",
+    "templates/macros/*.html",
+    "templates/partials/*.html",
+]

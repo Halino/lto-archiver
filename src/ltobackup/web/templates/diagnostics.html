@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block nav_active %}diagnostics{% endblock %}
+{% block title %}Diagnostics · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="diagnostics-title">
+  <p class="eyebrow">Safe operational evidence</p>
+  <h1 id="diagnostics-title">Diagnostics</h1>
+  <div id="connection-banner" class="alert alert-warning" role="status" hidden>Reconnecting; runtime data may be stale until the daemon responds.</div>
+  {% include "partials/diagnostics_summary.html" %}
+  <section class="detail-panel">
+    <h2>Redacted diagnostic export</h2>
+    <p>The bundle excludes the catalog, production paths, serial numbers, UUIDs, passphrases, and log text. Uncompressed content is limited to 256 KiB.</p>
+    <a class="primary-action" href="/diagnostics/export">Download redacted ZIP bundle</a>
+  </section>
+</main>
+{% endblock %}

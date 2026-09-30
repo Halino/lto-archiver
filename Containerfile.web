@@ -1,0 +1,32 @@
+ARG UBI_IMAGE
+FROM ${UBI_IMAGE} AS builder
+
+USER 0
+WORKDIR /opt/lto-archiver-build
+
+COPY requirements-web.lock ./
+COPY wheelhouse ./wheelhouse
+COPY pyproject.toml README.md ./
+COPY src ./src
+
+RUN python -m venv /opt/lto-archiver-venv \
+    && /opt/lto-archiver-venv/bin/python -m pip install \
+        --no-cache-dir --no-index --find-links=wheelhouse \
+        --require-hashes --requirement requirements-web.lock \
+    && /opt/lto-archiver-venv/bin/python -m pip install \
+        --no-cache-dir --no-index --no-deps --no-build-isolation .
+
+FROM ${UBI_IMAGE}
+
+USER 0
+COPY --from=builder /opt/lto-archiver-venv /opt/lto-archiver-venv
+RUN install -d -m 0700 -o 1001 -g 1001 /var/lib/lto-archiver-web
+
+ENV PATH="/opt/lto-archiver-venv/bin:${PATH}"
+
+USER 1001:1001
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/login', timeout=4).close()"]
+ENTRYPOINT ["lto-archiver-web"]
+CMD ["serve", "--port", "8080"]

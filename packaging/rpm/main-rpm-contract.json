@@ -1,0 +1,348 @@
+{
+  "allowed_config_paths": [
+    "/etc/lto-archiver",
+    "/etc/lto-archiver/config.toml",
+    "/etc/lto-archiver/credentials",
+    "/etc/lto-archiver/qualification-artifacts.json",
+    "/etc/lto-archiver/share-credentials",
+    "/etc/lto-archiver/tls",
+    "/etc/lto-archiver/web.toml"
+  ],
+  "architecture": "noarch",
+  "driver_requirement": "lto-ltfs = 0.1.0-22.el9",
+  "forbidden_payload_prefixes": [
+    "/home/",
+    "/root/",
+    "/run/",
+    "/tmp/",
+    "/usr/lib/python3.11/site-packages/ltobackup/gui.",
+    "/usr/lib/python3.11/site-packages/ltobackup/__pycache__/gui.",
+    "/usr/lib/python3.11/site-packages/ltobackup/winio.",
+    "/usr/lib/python3.11/site-packages/ltobackup/__pycache__/winio.",
+    "/usr/lib/python3.11/site-packages/ltobackup/volume_probe.",
+    "/usr/lib/python3.11/site-packages/ltobackup/__pycache__/volume_probe.",
+    "/usr/lib/python3.11/site-packages/ltobackup/cli.",
+    "/usr/lib/python3.11/site-packages/ltobackup/__pycache__/cli.",
+    "/usr/lib/python3.11/site-packages/ltobackup/__main__.",
+    "/usr/lib/python3.11/site-packages/ltobackup/__pycache__/__main__.",
+    "/usr/lib/python3.11/site-packages/ltobackup/legacy_guard.",
+    "/usr/lib/python3.11/site-packages/ltobackup/__pycache__/legacy_guard.",
+    "/usr/lib/python3.11/site-packages/ltobackup/security.",
+    "/usr/lib/python3.11/site-packages/ltobackup/__pycache__/security.",
+    "/var/lib/",
+    "/var/log/"
+  ],
+  "forbidden_payload_suffixes": [
+    "-shm",
+    "-wal",
+    ".cred",
+    ".db",
+    ".exe",
+    ".key",
+    ".log",
+    ".pem",
+    ".ps1",
+    "/lto_backup_entry.py",
+    "/lto_backup_gui_entry.py",
+    "/pyi_rth_tkinter_local.py",
+    ".receipt",
+    ".sqlite",
+    ".token"
+  ],
+  "name": "lto-archiver",
+  "project_url": "https://github.com/Halino/lto-archiver",
+  "public_key_sha256": "0363930f5a9c9b6a11f8891b498de9381233d63fdf49ea71bfe8313ed4501804",
+  "release": "155.el9",
+  "required_payload_metadata": {
+    "/etc/lto-archiver": [
+      "drwxr-x---",
+      "root",
+      "lto-archiver"
+    ],
+    "/etc/lto-archiver/credentials": [
+      "drwx------",
+      "root",
+      "root"
+    ],
+    "/etc/lto-archiver/share-credentials": [
+      "drwx------",
+      "root",
+      "root"
+    ],
+    "/etc/lto-archiver/tls": [
+      "drwxr-x---",
+      "root",
+      "lto-web"
+    ],
+    "/usr/share/selinux/packages/lto_archiver.pp": [
+      "-rw-r--r--",
+      "root",
+      "root"
+    ]
+  },
+  "required_selinux_contexts": {
+    "/etc/lto-archiver/tls": "lto_archiver_web_tls_t",
+    "/etc/lto-archiver/web.toml": "lto_archiver_web_config_t",
+    "/usr/bin/lto-archiver-admin": "lto_archiver_exec_t",
+    "/usr/bin/lto-archiver-command-broker": "lto_archiver_broker_exec_t",
+    "/usr/bin/lto-archiver-log-reader": "lto_archiver_log_reader_exec_t",
+    "/usr/bin/lto-archiver-migrate": "lto_archiver_exec_t",
+    "/usr/bin/lto-archiver-qualify-archive-runner": "lto_archiver_exec_t",
+    "/usr/bin/lto-archiver-qualify-ltfs": "lto_archiver_exec_t",
+    "/usr/bin/lto-archiver-share-broker": "lto_archiver_share_broker_exec_t",
+    "/usr/bin/lto-archiver-web": "lto_archiver_web_exec_t",
+    "/usr/bin/lto-archiverd": "lto_archiver_exec_t",
+    "/usr/libexec/lto-archiver/preflight-rhel9.sh": "lto_archiver_exec_t",
+    "/usr/libexec/lto-archiver/run-web-rhel9.py": "lto_archiver_web_exec_t"
+  },
+  "required_source_authorities": {
+    "/etc/lto-archiver/config.toml": {
+      "group": "lto-archiver",
+      "mode": "-rw-r-----",
+      "source": "config/config.toml.example",
+      "user": "root"
+    },
+    "/etc/lto-archiver/web.toml": {
+      "group": "lto-web",
+      "mode": "-rw-r-----",
+      "source": "config/web-rhel9.toml.example",
+      "user": "root"
+    },
+    "/usr/share/doc/lto-archiver/THIRD_PARTY_NOTICES.md": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "THIRD_PARTY_NOTICES.md",
+      "user": "root"
+    },
+    "/usr/share/licenses/lto-archiver/LICENSE": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "LICENSE",
+      "user": "root"
+    },
+    "/usr/share/licenses/lto-archiver/NOTICE": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "NOTICE",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiver-admin": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiver-admin",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiver-command-broker": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiver-command-broker",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiver-log-reader": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiver-log-reader",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiver-migrate": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiver-migrate",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiver-qualify-archive-runner": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiver-qualify-archive-runner",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiver-qualify-ltfs": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiver-qualify-ltfs",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiver-share-broker": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiver-share-broker",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiver-web": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiver-web",
+      "user": "root"
+    },
+    "/usr/bin/lto-archiverd": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/launchers/lto-archiverd",
+      "user": "root"
+    },
+    "/usr/lib/python3.11/site-packages/ltobackup/web/static/HTMX-LICENSE.txt": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "src/ltobackup/web/static/HTMX-LICENSE.txt",
+      "user": "root"
+    },
+    "/usr/lib/python3.11/site-packages/ltobackup/web/static/htmx.js": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "src/ltobackup/web/static/htmx.js",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-archive-runner-qualification.service": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-archive-runner-qualification.service",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-command-broker.service": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-command-broker.service",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-command-broker.socket": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-command-broker.socket",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-ltfs-qualification.service": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-ltfs-qualification.service",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-log-reader.service": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-log-reader.service",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-log-reader.socket": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-log-reader.socket",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-share-broker.service": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-share-broker.service",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-share-broker.socket": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-share-broker.socket",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiver-web.service": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver-web.service",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiverd.service": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiverd.service",
+      "user": "root"
+    },
+    "/usr/lib/systemd/system/lto-archiverd.socket": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiverd.socket",
+      "user": "root"
+    },
+    "/usr/lib/sysusers.d/lto-archiver.conf": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver.sysusers",
+      "user": "root"
+    },
+    "/usr/lib/tmpfiles.d/lto-archiver.conf": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/systemd/lto-archiver.tmpfiles",
+      "user": "root"
+    },
+    "/usr/lib/udev/rules.d/70-lto-archiver-scsi.rules": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/udev/70-lto-archiver-scsi.rules",
+      "user": "root"
+    },
+    "/usr/libexec/lto-archiver/activate-rhel9.py": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/scripts/activate-rhel9.py",
+      "user": "root"
+    },
+    "/usr/libexec/lto-archiver/configure-device-policy.py": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/scripts/configure-device-policy.py",
+      "user": "root"
+    },
+    "/usr/libexec/lto-archiver/configure-web-firewall-rhel9.py": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/scripts/configure-web-firewall-rhel9.py",
+      "user": "root"
+    },
+    "/usr/libexec/lto-archiver/preflight-rhel9.sh": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "scripts/preflight-rhel9.sh",
+      "user": "root"
+    },
+    "/usr/libexec/lto-archiver/provision-credentials.py": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/scripts/provision-credentials.py",
+      "user": "root"
+    },
+    "/usr/libexec/lto-archiver/relabel-device-aliases.py": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/scripts/relabel-device-aliases.py",
+      "user": "root"
+    },
+    "/usr/libexec/lto-archiver/run-web-rhel9.py": {
+      "group": "root",
+      "mode": "-rwxr-xr-x",
+      "source": "packaging/scripts/run-web-rhel9.py",
+      "user": "root"
+    },
+    "/usr/share/lto-archiver/deployment/main-rpm-contract.json": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/rpm/main-rpm-contract.json",
+      "user": "root"
+    },
+    "/usr/share/lto-archiver/signing/lto-archiver-task9-rpm-public.asc": {
+      "group": "root",
+      "mode": "-rw-r--r--",
+      "source": "packaging/signing/lto-archiver-task9-rpm-public.asc",
+      "user": "root"
+    }
+  },
+  "runtime_requirement": "lto-archiver-python-runtime = 0.11.27-3.el9",
+  "schema_version": 1,
+  "security_sensitive_prefixes": [
+    "/usr/bin/lto-archiver",
+    "/usr/lib/systemd/system/lto-archiver",
+    "/usr/lib/sysusers.d/lto-archiver",
+    "/usr/lib/tmpfiles.d/lto-archiver",
+    "/usr/lib/udev/rules.d/70-lto-archiver",
+    "/usr/libexec/lto-archiver/",
+    "/usr/share/lto-archiver/deployment/",
+    "/usr/share/lto-archiver/signing/"
+  ],
+  "signing_policy_sha256": "1b5f58e5df407b26dec9609c2081a90a8f77ad5fdea0b7d50a0e641205c50e84",
+  "version": "0.11.28"
+}

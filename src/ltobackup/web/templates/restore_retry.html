@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block nav_active %}catalog{% endblock %}
+{% block title %}Ambiguous outcome · LTO Archiver{% endblock %}
+{% block content %}
+<main class="page-shell detail-page" aria-labelledby="restore-retry-title" data-error-code="restore_plan_outcome_ambiguous">
+  <p class="eyebrow">Offline restore plan</p>
+  <h1 id="restore-retry-title">Ambiguous outcome</h1>
+  <div class="error-banner" role="alert">
+    <p data-error-part="explanation">The daemon did not confirm the outcome. The plan may already have been recorded.</p>
+    <p><strong>Code: restore_plan_outcome_ambiguous</strong></p>
+  </div>
+  <section class="detail-panel" aria-labelledby="restore-retry-action-title">
+    <h2 id="restore-retry-action-title">Retrieve or replay the plan</h2>
+    <p data-error-part="next-action">Submit this unchanged selection one more time: the same key retrieves the recorded plan without duplicating it.</p>
+    <form action="/catalog/restore-plans" method="post" autocomplete="off">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="hidden" name="idempotency_key" value="{{ idempotency_key }}">
+      <input type="hidden" name="destination_root" value="{{ destination_root }}">
+      <input type="hidden" name="destination_subdirectory" value="{{ destination_subdirectory }}">
+      {% for version_id in file_version_ids %}<input type="hidden" name="file_version_ids" value="{{ version_id }}">{% endfor %}
+      <button type="submit">Retrieve plan with the same request</button>
+    </form>
+  </section>
+  <p><a href="/catalog">Cancel and return to catalog</a></p>
+</main>
+{% endblock %}

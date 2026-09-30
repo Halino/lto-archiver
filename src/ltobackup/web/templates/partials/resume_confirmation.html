@@ -1,0 +1,14 @@
+<dialog id="resume-confirmation" class="resume-confirmation" aria-labelledby="resume-confirmation-title" aria-describedby="resume-confirmation-description">
+  <form method="dialog" id="resume-confirmation-form">
+    <h2 id="resume-confirmation-title">Resume paused job</h2>
+    <p id="resume-confirmation-description">Enter your password to resume {{ job.display_name }}. Changing cassettes does not require this confirmation.</p>
+    <label for="resume-confirmation-password">Password for {{ user.login_name }}</label>
+    <input id="resume-confirmation-password" type="password" autocomplete="current-password" required>
+    <p id="resume-confirmation-error" role="alert" hidden></p>
+    <div class="action-toolbar">
+      <button type="button" id="resume-confirmation-cancel">Cancel</button>
+      <button type="submit" id="resume-confirmation-submit">Confirm and resume</button>
+    </div>
+  </form>
+</dialog>
+<script defer src="/static/resume.js?v={{ asset_revision }}"></script>

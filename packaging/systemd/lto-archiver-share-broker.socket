@@ -1,0 +1,15 @@
+[Unit]
+Description=LTO Archiver privileged network share broker socket
+
+[Socket]
+ListenSequentialPacket=/run/lto-archiver-share-broker/control.sock
+FileDescriptorName=share-broker
+SocketUser=root
+SocketGroup=lto-archiver
+SocketMode=0660
+DirectoryMode=0750
+RemoveOnStop=yes
+Service=lto-archiver-share-broker.service
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,421 @@
+policy_module(lto_archiver, 1.1.36)
+
+require {
+    attribute domain;
+    type cgroup_t;
+    type cifs_t;
+    type device_t;
+    type fuse_device_t;
+    type fusefs_t;
+    type init_t;
+    type kernel_t;
+    type mount_t;
+    type mount_exec_t;
+    type nfs_t;
+    type root_t;
+    type scsi_generic_device_t;
+    type syslogd_t;
+    type syslogd_var_run_t;
+    type systemd_unit_file_t;
+    type tape_device_t;
+    type tmp_t;
+    type tmpfs_t;
+    type var_run_t;
+    class capability { chown dac_override fowner sys_admin sys_rawio };
+    class chr_file { getattr ioctl open read write };
+    class dir { add_name create getattr ioctl lock mounton open read remove_name rmdir search setattr write };
+    class file { append create execute execute_no_trans getattr ioctl lock map open read rename setattr unlink write };
+    class filesystem { getattr mount remount unmount };
+    class fifo_file { getattr ioctl write };
+    class lnk_file { getattr read };
+    class process { setrlimit };
+    class service { status stop };
+    class sock_file { create getattr open read setattr unlink write };
+    class system { start };
+    class unix_dgram_socket { connect create getattr getopt read setopt shutdown write };
+    class unix_stream_socket { accept connectto create getattr getopt read setopt shutdown write };
+}
+
+type lto_archiver_t;
+type lto_archiver_exec_t;
+# The authenticated preflight script shares this entry type so systemd runs
+# ExecStartPre in the same lto_archiver_t domain as the daemon.
+init_daemon_domain(lto_archiver_t, lto_archiver_exec_t)
+init_nnp_daemon_domain(lto_archiver_t)
+corecmd_exec_bin(lto_archiver_t)
+
+type lto_archiver_broker_t;
+type lto_archiver_broker_exec_t;
+init_daemon_domain(lto_archiver_broker_t, lto_archiver_broker_exec_t)
+init_nnp_daemon_domain(lto_archiver_broker_t)
+corecmd_exec_bin(lto_archiver_broker_t)
+type lto_archiver_share_broker_t;
+type lto_archiver_share_broker_exec_t;
+init_daemon_domain(lto_archiver_share_broker_t, lto_archiver_share_broker_exec_t)
+init_nnp_daemon_domain(lto_archiver_share_broker_t)
+corecmd_exec_bin(lto_archiver_share_broker_t)
+type lto_archiver_log_reader_t;
+type lto_archiver_log_reader_exec_t;
+init_daemon_domain(lto_archiver_log_reader_t, lto_archiver_log_reader_exec_t)
+init_nnp_daemon_domain(lto_archiver_log_reader_t)
+corecmd_exec_bin(lto_archiver_log_reader_t)
+type lto_archiver_ltfs_tool_exec_t;
+corecmd_executable_file(lto_archiver_ltfs_tool_exec_t)
+type lto_archiver_ltfs_info_exec_t;
+corecmd_executable_file(lto_archiver_ltfs_info_exec_t)
+
+type lto_archiver_web_t;
+type lto_archiver_web_exec_t;
+init_daemon_domain(lto_archiver_web_t, lto_archiver_web_exec_t)
+init_nnp_daemon_domain(lto_archiver_web_t)
+corecmd_exec_bin(lto_archiver_web_t)
+
+# Structured operational events use the journald AF_UNIX datagram socket.
+# The standard logging interface grants only the base-policy syslog-client
+# permissions and does not grant audit access or filesystem write authority.
+logging_send_syslog_msg(lto_archiver_t)
+logging_send_syslog_msg(lto_archiver_broker_t)
+logging_send_syslog_msg(lto_archiver_share_broker_t)
+allow lto_archiver_t self:unix_dgram_socket { connect create getattr getopt read setopt shutdown write };
+allow lto_archiver_broker_t self:unix_dgram_socket { connect create getattr getopt read setopt shutdown write };
+allow lto_archiver_share_broker_t self:unix_dgram_socket { connect create getattr getopt read setopt shutdown write };
+
+type lto_archiver_state_t;
+files_type(lto_archiver_state_t)
+type lto_archiver_broker_state_t;
+files_type(lto_archiver_broker_state_t)
+type lto_archiver_share_broker_state_t;
+files_type(lto_archiver_share_broker_state_t)
+type lto_archiver_web_state_t;
+files_type(lto_archiver_web_state_t)
+type lto_archiver_web_config_t;
+files_config_file(lto_archiver_web_config_t)
+type lto_archiver_web_tls_t;
+files_config_file(lto_archiver_web_tls_t)
+type lto_archiver_runtime_t;
+files_pid_file(lto_archiver_runtime_t)
+type lto_archiver_broker_runtime_t;
+files_pid_file(lto_archiver_broker_runtime_t)
+type lto_archiver_share_broker_runtime_t;
+files_pid_file(lto_archiver_share_broker_runtime_t)
+type lto_archiver_log_reader_runtime_t;
+files_pid_file(lto_archiver_log_reader_runtime_t)
+type lto_archiver_mount_t;
+files_mountpoint(lto_archiver_mount_t)
+type lto_archiver_device_t;
+dev_node(lto_archiver_device_t)
+type lto_archiver_config_t;
+files_config_file(lto_archiver_config_t)
+type lto_archiver_credential_t;
+files_pid_file(lto_archiver_credential_t)
+type lto_archiver_share_credential_t;
+files_config_file(lto_archiver_share_credential_t)
+type lto_archiver_share_source_t;
+files_mountpoint(lto_archiver_share_source_t)
+# Command output is captured in anonymous files under systemd's PrivateTmp.
+# A file transition keeps those writable objects distinct from generic tmp_t;
+# only the confined daemon/qualification domain can manage them.
+type lto_archiver_command_tmp_t;
+files_tmp_file(lto_archiver_command_tmp_t)
+manage_files_pattern(lto_archiver_t, tmp_t, lto_archiver_command_tmp_t)
+files_tmp_filetrans(lto_archiver_t, lto_archiver_command_tmp_t, file)
+# LTFS flocks its operation-lock directory and manages lock records beneath
+# it. The file context pins that directory to this type; no broad var_lock_t
+# access is required.
+type lto_archiver_ltfs_lock_t;
+files_type(lto_archiver_ltfs_lock_t)
+
+# The manual qualification unit runs as root but its catalog is deliberately
+# owned mode 0600 by lto-archiver. DAC override opens it, while chown lets
+# SQLite preserve that owner on new WAL/SHM files; fowner permits its shared
+# writable mapping after the ownership handoff. All tape mutations remain
+# brokered and lto_archiver_t never receives CAP_SYS_ADMIN.
+allow lto_archiver_t self:capability { chown dac_override fowner };
+# The blocked fork/exec child caps captured stdout/stderr before it announces
+# readiness to its parent.  This is a self-domain resource limit only.
+allow lto_archiver_t self:process setrlimit;
+
+# systemd owns creation of the socket-activation and LoadCredential objects.
+# Filename transitions keep these grants tied to the exact declared paths.
+type_transition init_t var_run_t:dir lto_archiver_runtime_t "lto-archiver";
+type_transition init_t var_run_t:dir lto_archiver_broker_runtime_t "lto-archiver-broker";
+type_transition init_t var_run_t:dir lto_archiver_share_broker_runtime_t "lto-archiver-share-broker";
+type_transition init_t var_run_t:dir lto_archiver_log_reader_runtime_t "lto-archiver-log-reader";
+type_transition init_t lto_archiver_runtime_t:sock_file lto_archiver_runtime_t;
+type_transition init_t lto_archiver_broker_runtime_t:sock_file lto_archiver_broker_runtime_t;
+type_transition init_t lto_archiver_share_broker_runtime_t:sock_file lto_archiver_share_broker_runtime_t;
+type_transition init_t lto_archiver_log_reader_runtime_t:sock_file lto_archiver_log_reader_runtime_t;
+type_transition init_t var_run_t:dir lto_archiver_credential_t "lto-archiverd.service";
+type_transition init_t var_run_t:dir lto_archiver_credential_t "lto-archiver-command-broker.service";
+type_transition init_t var_run_t:dir lto_archiver_credential_t "lto-archiver-ltfs-qualification.service";
+type_transition init_t var_run_t:dir lto_archiver_credential_t "lto-archiver-archive-runner-qualification.service";
+type_transition init_t var_run_t:dir lto_archiver_credential_t "lto-archiver-preflight.service";
+type_transition init_t var_run_t:dir lto_archiver_credential_t "lto-archiver-share-broker.service";
+type_transition init_t lto_archiver_credential_t:file lto_archiver_credential_t;
+allow init_t lto_archiver_runtime_t:dir manage_dir_perms;
+allow init_t lto_archiver_runtime_t:sock_file manage_sock_file_perms;
+allow init_t lto_archiver_broker_runtime_t:dir manage_dir_perms;
+allow init_t lto_archiver_broker_runtime_t:sock_file manage_sock_file_perms;
+allow init_t lto_archiver_share_broker_runtime_t:dir manage_dir_perms;
+allow init_t lto_archiver_share_broker_runtime_t:sock_file manage_sock_file_perms;
+allow init_t lto_archiver_log_reader_runtime_t:dir manage_dir_perms;
+allow init_t lto_archiver_log_reader_runtime_t:sock_file manage_sock_file_perms;
+allow init_t lto_archiver_credential_t:dir manage_dir_perms;
+allow init_t lto_archiver_credential_t:file manage_file_perms;
+# systemd follows the udev TAG+="systemd" alias while materializing the
+# corresponding device unit. It may read only this policy-owned symlink.
+allow init_t lto_archiver_device_t:lnk_file read;
+
+# The daemon owns catalog policy, source/restore data, and mounted LTFS data.
+# It deliberately has no FUSE device, filesystem mount, or sys_admin grant.
+allow lto_archiver_t root_t:dir search;
+files_search_var_lib(lto_archiver_t)
+allow lto_archiver_t lto_archiver_state_t:dir manage_dir_perms;
+allow lto_archiver_t lto_archiver_state_t:file manage_file_perms;
+allow lto_archiver_t lto_archiver_state_t:file map;
+allow lto_archiver_t lto_archiver_runtime_t:dir manage_dir_perms;
+allow lto_archiver_t lto_archiver_runtime_t:sock_file manage_sock_file_perms;
+allow lto_archiver_t lto_archiver_mount_t:dir manage_dir_perms;
+allow lto_archiver_t lto_archiver_mount_t:file manage_file_perms;
+allow lto_archiver_t cifs_t:dir { getattr ioctl lock open read search };
+allow lto_archiver_t cifs_t:file { getattr ioctl lock open read };
+# Source roots may be direct autofs mounts backed by NFS.  The reference-policy
+# interface includes read-only NFS traversal plus the autofs search needed to
+# trigger those mounts; it grants no NFS create, append, setattr, or write.
+fs_read_nfs_files(lto_archiver_t)
+# Accessing a mounted FUSE superblock requires filesystem getattr before the
+# narrower directory and file permissions below can be evaluated.  The daemon
+# still cannot mount, remount, unmount, or open /dev/fuse; those authorities
+# remain exclusive to the privileged broker.
+allow lto_archiver_t fusefs_t:filesystem getattr;
+allow lto_archiver_t fusefs_t:dir manage_dir_perms;
+allow lto_archiver_t fusefs_t:file manage_file_perms;
+allow lto_archiver_t tape_device_t:chr_file { getattr ioctl open read write };
+allow lto_archiver_t scsi_generic_device_t:chr_file { getattr ioctl open read write };
+# The configured tape identity lives under the base-policy /dev/tape/by-id
+# tree; only symlink traversal is admitted before reaching tape_device_t.
+allow lto_archiver_t device_t:dir search;
+allow lto_archiver_t device_t:lnk_file { getattr read };
+allow lto_archiver_t lto_archiver_device_t:dir search;
+allow lto_archiver_t lto_archiver_device_t:lnk_file { getattr read };
+allow lto_archiver_t lto_archiver_config_t:dir search;
+allow lto_archiver_t lto_archiver_config_t:file { getattr ioctl open read };
+allow lto_archiver_t lto_archiver_credential_t:dir search;
+allow lto_archiver_t lto_archiver_credential_t:file { getattr open read };
+# systemd materializes unit credentials on a private read-only tmpfs before
+# either application domain starts. The code separately pins the exact 0500
+# directory and fixed 0400 credential files; no tmpfs directory or write grant
+# is provided here.
+allow lto_archiver_t tmpfs_t:file { getattr open read };
+# ArchiveRunner launches these fixed, root-owned tools only through the
+# persisted command gate whose release is authorized by the root broker.
+allow lto_archiver_t lto_archiver_ltfs_tool_exec_t:file { execute execute_no_trans getattr map open read };
+allow lto_archiver_t lto_archiver_ltfs_info_exec_t:file { execute execute_no_trans getattr map open read };
+files_search_locks(lto_archiver_t)
+allow lto_archiver_t lto_archiver_ltfs_lock_t:dir { add_name getattr lock open read remove_name search write };
+allow lto_archiver_t lto_archiver_ltfs_lock_t:file { create getattr open read rename unlink write };
+# Preflight verifies metadata for the two separately-owned state roots without
+# gaining search, read, or write access to either tree.
+allow lto_archiver_t mount_exec_t:file getattr;
+# The host-mount oracle reads PID 1's mountinfo rather than the daemon's
+# private systemd mount namespace.  Grant only search on that process-typed
+# directory and the observed proc file reads; no directory metadata/read/write
+# or init_t process-control access is allowed.
+allow lto_archiver_t init_t:dir search;
+allow lto_archiver_t init_t:file { getattr open read };
+# Command supervision must observe the exact root-owned process launched by
+# the privileged broker and all of its same-domain descendants.  Unrelated
+# process domains remain unreadable; dontaudit prevents their expected /proc
+# traversal denials from saturating the host audit queue during a snapshot.
+allow lto_archiver_t lto_archiver_broker_t:dir { getattr search };
+allow lto_archiver_t lto_archiver_broker_t:file { getattr open read };
+dontaudit lto_archiver_t domain:dir { getattr search };
+dontaudit lto_archiver_t domain:file { getattr open read };
+allow lto_archiver_t lto_archiver_broker_state_t:dir getattr;
+allow lto_archiver_t lto_archiver_share_broker_state_t:dir getattr;
+allow lto_archiver_t lto_archiver_share_credential_t:dir getattr;
+# The daemon is the only application client of the root-owned reader socket.
+# WebUI and both brokers deliberately receive neither the socket-file nor peer
+# domain permissions below.
+allow lto_archiver_t lto_archiver_log_reader_runtime_t:dir search;
+allow lto_archiver_t lto_archiver_log_reader_runtime_t:sock_file { getattr open write };
+allow lto_archiver_t lto_archiver_log_reader_t:unix_stream_socket connectto;
+# The daemon performs a metadata-only liveness probe on each GUI-managed
+# source after the broker mounts it.  Permit traversal of the policy-owned
+# mountpoint, while the NFS/CIFS rules above remain the only remote readers.
+allow lto_archiver_t lto_archiver_share_source_t:dir { getattr search };
+allow lto_archiver_t lto_archiver_web_state_t:dir getattr;
+auth_use_nsswitch(lto_archiver_t)
+# Python's pwd/grp lookups reach systemd's DynamicUser provider on RHEL 9.
+# Use the reference-policy client interface rather than granting access to
+# generic systemd runtime sockets.
+systemd_userdbd_stream_connect(lto_archiver_t)
+# On the qualified RHEL 9 host, PID 1's DynamicUser provider is exposed with
+# kernel_t as its socket peer rather than systemd_userdbd_t.
+allow lto_archiver_t kernel_t:unix_stream_socket connectto;
+corecmd_getattr_bin_files(lto_archiver_t)
+files_getattr_usr_files(lto_archiver_t)
+files_read_etc_files(lto_archiver_t)
+files_search_mnt(lto_archiver_t)
+# Qualification resolves the pinned nst/sg pair and reads only their sysfs
+# serial/WWID identity before it can request any operation from the broker.
+dev_read_sysfs(lto_archiver_t)
+kernel_read_system_state(lto_archiver_t)
+selinux_get_enforce_mode(lto_archiver_t)
+
+# The root reader has one purpose: perform constrained read-only journal
+# queries. It has no application state, device, mount, or daemon authority.
+auth_read_passwd_file(lto_archiver_log_reader_t)
+journalctl_exec(lto_archiver_log_reader_t)
+allow lto_archiver_log_reader_t tmpfs_t:filesystem getattr;
+allow lto_archiver_log_reader_t lto_archiver_log_reader_runtime_t:dir { getattr search };
+allow lto_archiver_log_reader_t lto_archiver_log_reader_runtime_t:sock_file { getattr open read };
+allow lto_archiver_log_reader_t syslogd_var_run_t:dir { getattr open read search };
+allow lto_archiver_log_reader_t syslogd_var_run_t:file { getattr map open read };
+allow lto_archiver_log_reader_t syslogd_t:unix_stream_socket connectto;
+allow lto_archiver_log_reader_t lto_archiver_t:unix_stream_socket { accept getattr getopt read setopt shutdown write };
+
+# The broker owns only durable broker state, its delegated cgroup subtree, and
+# the exact pinned LTFS/FUSE2 mount lifecycle.  Device cgroup allow-lists are a
+# separate systemd boundary generated from the local root-owned configuration.
+allow lto_archiver_broker_t root_t:dir search;
+files_search_var_lib(lto_archiver_broker_t)
+# configure-device-policy --verify-only resolves configured paths before the
+# broker starts.  It may inspect only the directory objects required for that
+# validation; it receives no state payload or NFS file access.
+allow lto_archiver_broker_t lto_archiver_state_t:dir getattr;
+allow lto_archiver_broker_t nfs_t:dir getattr;
+allow lto_archiver_broker_t lto_archiver_share_source_t:dir getattr;
+allow lto_archiver_broker_t lto_archiver_broker_state_t:dir manage_dir_perms;
+allow lto_archiver_broker_t lto_archiver_broker_state_t:file manage_file_perms;
+allow lto_archiver_broker_t lto_archiver_broker_runtime_t:dir manage_dir_perms;
+allow lto_archiver_broker_t lto_archiver_broker_runtime_t:sock_file manage_sock_file_perms;
+allow lto_archiver_broker_t cgroup_t:dir manage_dir_perms;
+allow lto_archiver_broker_t cgroup_t:file manage_file_perms;
+allow lto_archiver_broker_t cgroup_t:filesystem getattr;
+allow lto_archiver_broker_t lto_archiver_credential_t:dir search;
+allow lto_archiver_broker_t lto_archiver_credential_t:file { getattr open read };
+allow lto_archiver_broker_t tmpfs_t:file { getattr open read };
+allow lto_archiver_broker_t lto_archiver_config_t:dir { getattr open read search };
+allow lto_archiver_broker_t lto_archiver_config_t:file { getattr ioctl open read };
+allow lto_archiver_broker_t lto_archiver_device_t:dir search;
+allow lto_archiver_broker_t lto_archiver_device_t:lnk_file { getattr read };
+allow lto_archiver_broker_t tape_device_t:chr_file { getattr ioctl open read write };
+allow lto_archiver_broker_t scsi_generic_device_t:chr_file { getattr ioctl open read write };
+allow lto_archiver_broker_t fuse_device_t:chr_file { getattr ioctl open read write };
+allow lto_archiver_broker_t lto_archiver_mount_t:dir { getattr mounton open read search write };
+allow lto_archiver_broker_t fusefs_t:filesystem { getattr mount remount unmount };
+allow lto_archiver_broker_t fusefs_t:dir manage_dir_perms;
+allow lto_archiver_broker_t fusefs_t:file manage_file_perms;
+allow lto_archiver_broker_t self:capability { sys_admin sys_rawio };
+allow lto_archiver_broker_t lto_archiver_ltfs_tool_exec_t:file { execute execute_no_trans getattr map open read };
+allow lto_archiver_broker_t lto_archiver_ltfs_info_exec_t:file { execute execute_no_trans getattr map open read };
+files_search_locks(lto_archiver_broker_t)
+allow lto_archiver_broker_t lto_archiver_ltfs_lock_t:dir { add_name getattr lock open read remove_name search write };
+allow lto_archiver_broker_t lto_archiver_ltfs_lock_t:file { create getattr open read rename unlink write };
+dev_read_sysfs(lto_archiver_broker_t)
+kernel_read_system_state(lto_archiver_broker_t)
+kernel_read_network_state(lto_archiver_broker_t)
+kernel_read_kernel_sysctls(lto_archiver_broker_t)
+selinux_get_enforce_mode(lto_archiver_broker_t)
+files_search_mnt(lto_archiver_broker_t)
+auth_use_nsswitch(lto_archiver_broker_t)
+# The broker performs the same fixed service-account lookup at startup.  On the
+# qualified RHEL 9 host, PID 1 exposes DynamicUser with kernel_t as its peer.
+allow lto_archiver_broker_t kernel_t:unix_stream_socket connectto;
+
+# The network-share broker has no tape, SCSI, FUSE, raw-I/O or direct mount
+# authority. It asks PID 1 over D-Bus to create closed transient mount units,
+# then verifies the resulting host mount namespace through mountinfo.
+allow lto_archiver_share_broker_t root_t:dir search;
+files_search_var_lib(lto_archiver_share_broker_t)
+allow lto_archiver_share_broker_t lto_archiver_share_broker_state_t:dir manage_dir_perms;
+allow lto_archiver_share_broker_t lto_archiver_share_broker_state_t:file manage_file_perms;
+allow lto_archiver_share_broker_t lto_archiver_share_credential_t:dir manage_dir_perms;
+allow lto_archiver_share_broker_t lto_archiver_share_credential_t:file manage_file_perms;
+allow lto_archiver_share_broker_t lto_archiver_share_broker_runtime_t:dir { getattr open read search };
+allow lto_archiver_share_broker_t lto_archiver_share_broker_runtime_t:sock_file { getattr open read write };
+allow lto_archiver_share_broker_t lto_archiver_config_t:dir search;
+allow lto_archiver_share_broker_t lto_archiver_config_t:file { getattr ioctl open read };
+allow lto_archiver_share_broker_t lto_archiver_state_t:dir getattr;
+allow lto_archiver_share_broker_t lto_archiver_mount_t:dir getattr;
+allow lto_archiver_share_broker_t nfs_t:dir getattr;
+allow lto_archiver_share_broker_t lto_archiver_credential_t:dir search;
+allow lto_archiver_share_broker_t lto_archiver_credential_t:file { getattr open read };
+allow lto_archiver_share_broker_t tmpfs_t:file { getattr open read };
+files_search_mnt(lto_archiver_share_broker_t)
+allow lto_archiver_share_broker_t lto_archiver_share_source_t:dir manage_dir_perms;
+type_transition lto_archiver_share_broker_t lto_archiver_share_source_t:dir lto_archiver_share_source_t;
+kernel_read_system_state(lto_archiver_share_broker_t)
+auth_use_nsswitch(lto_archiver_share_broker_t)
+systemd_userdbd_stream_connect(lto_archiver_share_broker_t)
+allow lto_archiver_share_broker_t kernel_t:unix_stream_socket connectto;
+sysnet_dns_name_resolve(lto_archiver_share_broker_t)
+init_dbus_chat(lto_archiver_share_broker_t)
+# Readiness enumerates mount units, while mount and unmount requests create or
+# stop only the schema-validated transient units sent through the closed broker
+# protocol.  These systemd SELinux permissions do not grant process, device,
+# filesystem-mount, or capability authority to the broker itself.
+init_status(lto_archiver_share_broker_t)
+init_start_transient_unit(lto_archiver_share_broker_t)
+init_stop_transient_unit(lto_archiver_share_broker_t)
+# RHEL systemd checks manager-level start/stop plus unit-level status/stop for
+# the transient fragment across the complete mount lifecycle.
+allow lto_archiver_share_broker_t init_t:system { start stop };
+allow lto_archiver_share_broker_t systemd_unit_file_t:service { status stop };
+
+# PID 1 launches the fixed mount.nfs/mount.cifs helpers in mount_t. Only that
+# helper domain can traverse the private SMB store and mount on the dedicated
+# managed-source targets.
+allow mount_t lto_archiver_config_t:dir search;
+allow mount_t lto_archiver_share_credential_t:dir { getattr open read search };
+allow mount_t lto_archiver_share_credential_t:file { getattr open read };
+allow mount_t lto_archiver_share_source_t:dir { getattr mounton open read search };
+
+# Exact daemon-to-share-broker local socket boundary.
+allow lto_archiver_t lto_archiver_share_broker_runtime_t:dir { getattr open search };
+allow lto_archiver_t lto_archiver_share_broker_runtime_t:sock_file { getattr open read write };
+allow lto_archiver_t lto_archiver_share_broker_t:unix_stream_socket connectto;
+allow lto_archiver_share_broker_t lto_archiver_t:unix_stream_socket { accept getattr getopt read setopt shutdown write };
+
+# Socket peers are deliberately exact. The broker's SO_PEERSEC check expects
+# system_u:system_r:lto_archiver_t:s0 for every accepted daemon connection.
+# O_PATH plus fstat anchors the broker socket directory against replacement.
+allow lto_archiver_t lto_archiver_broker_runtime_t:dir { getattr open search };
+allow lto_archiver_t lto_archiver_broker_runtime_t:sock_file { getattr open read write };
+allow lto_archiver_t lto_archiver_broker_t:unix_stream_socket connectto;
+allow lto_archiver_broker_t lto_archiver_t:unix_stream_socket { accept getattr getopt read setopt shutdown write };
+# Before attaching the still-blocked child to its delegated cgroup, the broker
+# pins /proc/PID and reads only stat to prove uid and process start time.
+allow lto_archiver_broker_t lto_archiver_t:dir { getattr open read search };
+allow lto_archiver_broker_t lto_archiver_t:file { getattr open read };
+# The authenticated release RPC writes exactly one byte to the pipe descriptor
+# supplied by the daemon after the durable release transition commits.
+allow lto_archiver_broker_t lto_archiver_t:fifo_file { getattr ioctl write };
+
+allow lto_archiver_web_t lto_archiver_runtime_t:dir search;
+allow lto_archiver_web_t lto_archiver_runtime_t:sock_file { getattr open read write };
+allow lto_archiver_web_t lto_archiver_t:unix_stream_socket connectto;
+allow lto_archiver_t lto_archiver_web_t:unix_stream_socket { accept getattr getopt read setopt shutdown write };
+allow lto_archiver_web_t lto_archiver_web_exec_t:file { execute execute_no_trans getattr map open read };
+allow lto_archiver_web_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_bind_generic_node(lto_archiver_web_t)
+corenet_tcp_bind_http_port(lto_archiver_web_t)
+allow lto_archiver_web_t root_t:dir search;
+files_search_var_lib(lto_archiver_web_t)
+allow lto_archiver_web_t lto_archiver_web_state_t:dir manage_dir_perms;
+allow lto_archiver_web_t lto_archiver_web_state_t:file manage_file_perms;
+allow lto_archiver_web_t lto_archiver_config_t:dir { getattr search };
+allow lto_archiver_web_t lto_archiver_web_config_t:file { getattr open read };
+allow lto_archiver_web_t lto_archiver_web_tls_t:dir { getattr open read search };
+allow lto_archiver_web_t lto_archiver_web_tls_t:file { getattr open read };
+# Python's confined Web startup traverses the host NSS providers and
+# initializes OpenSSL's generic certificate locations.
+# Keep these reads behind the RHEL reference-policy client interfaces: no
+# passwd/SSSD/userdbd/certificate management authority is granted.
+auth_use_nsswitch(lto_archiver_web_t)
+systemd_userdbd_stream_connect(lto_archiver_web_t)
+# The qualified RHEL 9 host exposes DynamicUser lookup through PID 1's
+# kernel-labelled socket peer, matching the daemon's already-qualified path.
+allow lto_archiver_web_t kernel_t:unix_stream_socket connectto;
+miscfiles_read_generic_certs(lto_archiver_web_t)
