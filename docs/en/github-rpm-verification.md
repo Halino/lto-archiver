@@ -5,9 +5,14 @@ The active application repository is
 the separate driver repository is
 [Halino/lto-ltfs-driver](https://github.com/Halino/lto-ltfs-driver).
 Published application source `v0.11.30` remains immutable: source CI passed but
-its artifact comparison gate failed. This tree prepares application `0.11.31`;
-source/tag approval and hosted RPM acceptance remain pending. Driver `v0.1.2`
-build, comparison and no-tape UBI container smoke gates passed, but signing and release
+its artifact comparison gate failed. Application `v0.11.31` source and tag
+were approved and published at commit `4507cd23e96fef48dd3099d0da69bb7cda3a9a27`.
+Its [hosted build run](https://github.com/Halino/lto-archiver/actions/runs/36776008356)
+passed both builds and verified byte-identical unsigned application/runtime
+RPMs and SRPMs. Driver `v0.1.2` at commit
+`61f8b6acb547e715624856e85786e7676fa28c37` passed its
+[hosted build, comparison and no-tape UBI container smoke gates](https://github.com/Halino/lto-ltfs-driver/actions/runs/36764908507).
+Both runs await signing; signed-package verification and final release
 acceptance remain pending. Signed Linux RPM releases are not yet available.
 Historical Windows ZIPs are [archived](../windows-archive.md), not a Linux
 download; do not use the repository's generic latest-release URL.
