@@ -1,0 +1,42 @@
+name: Smoke existing unsigned RPMs in disposable AlmaLinux 9 VM
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: existing-el9-compatibility-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install disposable VM host tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qemu-system-x86 qemu-utils genisoimage
+      - name: Test existing hash-pinned driver/runtime/app RPMs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EL9_DRIVER_ARTIFACT_URL: ${{ secrets.EL9_DRIVER_ARTIFACT_URL }}
+        run: python3 scripts/run-github-el9-smoke.py run "$RUNNER_TEMP/lto-el9-smoke"
+      - name: Retain actual VM report and diagnostics, including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: existing-el9-compatibility-smoke
+          path: |
+            ${{ runner.temp }}/lto-el9-smoke/report.json
+            ${{ runner.temp }}/lto-el9-smoke/environment.json
+            ${{ runner.temp }}/lto-el9-smoke/serial.log
+          if-no-files-found: warn
+          retention-days: 7

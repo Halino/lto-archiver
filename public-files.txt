@@ -3,6 +3,7 @@
 .github/workflows/ci.yml
 .github/workflows/diagnose-boundary-browser.yml
 .github/workflows/publish-release.yml
+.github/workflows/smoke-existing-el9.yml
 .gitignore
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
@@ -29,6 +30,7 @@ docs/en/troubleshooting.md
 docs/en/user-guide.md
 docs/linux/catalog-search.md
 docs/linux/development.md
+docs/linux/github-el9-smoke.md
 docs/linux/installation-rhel9.md
 docs/linux/migration.md
 docs/linux/public-fresh-install-smoke.md
@@ -142,8 +144,10 @@ requirements-web.in
 requirements-web.lock
 scripts/audit-release-content.py
 scripts/build-public-snapshot.py
+scripts/github_el9_guest.py
 scripts/observe-boundary-browser.py
 scripts/preflight-rhel9.sh
+scripts/run-github-el9-smoke.py
 scripts/validate-web-base-image.py
 src/ltobackup/__init__.py
 src/ltobackup/admin_cli.py
@@ -349,6 +353,7 @@ tests/test_deployment_artifacts.py
 tests/test_engine.py
 tests/test_fixture_compatibility.py
 tests/test_frozen_job.py
+tests/test_github_el9_smoke.py
 tests/test_incremental_scheduler.py
 tests/test_job_exclusive_tape_cleanup.py
 tests/test_linux_ci.py
