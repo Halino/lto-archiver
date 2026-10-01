@@ -27,8 +27,9 @@ this application does not embed or rebuild it.
 ## Availability
 
 Published application source `v0.11.30` remains immutable: its source CI passed,
-but its artifact comparison gate failed. This working tree prepares application
-`0.11.31`; source/tag approval and hosted RPM acceptance remain pending.
+but its artifact comparison gate failed. Application `v0.11.31` source and tag
+were approved and published; its [hosted build run](https://github.com/Halino/lto-archiver/actions/runs/36776008356)
+passed both builds and verified byte-identical unsigned application/runtime RPMs and SRPMs.
 Driver `v0.1.2` build, comparison and no-tape UBI container smoke gates passed; its signing and
 release acceptance remain pending. Source tags are not installable RPM release
 evidence. Final signing, attestation, disposable-host acceptance and publication

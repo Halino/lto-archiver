@@ -51,9 +51,11 @@ execution remain separately designated by the user. No offline verification
 protocol is introduced, and the pinned verifiers remain unchanged.
 
 Select the reviewed clean application and driver tag checkouts matching the
-prepared candidate tuple, pending separate source/tag/signed-asset approval
-(app 0.11.31-155, runtime 0.11.27-3, driver
-0.1.2-22). Verifiers are loaded only from the explicitly selected and pinned
+candidate tuple (app 0.11.31-155, runtime 0.11.27-3, driver 0.1.2-22).
+The application and driver source tags are approved and published, and their
+hosted unsigned build comparisons passed. Final signed-asset approval and
+actual disposable-VM smoke acceptance remain pending.
+Verifiers are loaded only from the explicitly selected and pinned
 source checkouts, never from an implicit fallback.
 The approval JSON is the existing Task 2 `FRESH_INPUT_KEYS` object, with its
 exact app/driver source commits, tags, repositories, signed asset hashes,
