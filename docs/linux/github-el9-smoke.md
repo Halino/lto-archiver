@@ -35,6 +35,11 @@ to this workflow. A short-lived official download URL for the exact driver ZIP
 is supplied as `EL9_DRIVER_ARTIFACT_URL`; it is masked, never logged, and cannot
 authorize other repository operations. The workflow token reads only the app
 artifact in its own repository. An expired driver URL fails without fallback.
+GitHub documents a one-minute URL lifetime. The driver ZIP is therefore fetched
+as the first step, before checkout or VM-host tools are installed. Runner
+allocation must finish within that lifetime; queue delays can make the attempt
+fail before any VM is started. No credential workaround or automatic retry is
+performed on expiration.
 Remove the temporary repository secret after the approved test; no personal
 credential is copied to create it, and its download capability expires.
 Reports and serial diagnostics are retained as workflow artifacts for seven

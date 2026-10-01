@@ -11,11 +11,11 @@ import json
 import os
 from pathlib import Path
 import signal
+import shutil
 import subprocess
 import tarfile
 import threading
 import time
-import urllib.parse
 import zipfile
 
 APP_COMMIT = "4507cd23e96fef48dd3099d0da69bb7cda3a9a27"
@@ -73,24 +73,15 @@ def command(*argv, **kwargs):
 
 def fetch_artifact(root, repository, artifact_id, archive_sha, members):
     path = root / (str(artifact_id) + ".zip")
-    with path.open("xb") as stream:
-        if repository == "Halino/lto-ltfs-driver":
-            # Official short-lived URL grants only access to this already public-source artifact.
-            # Never log the URL or pass a personal GitHub token to this workflow.
-            url = os.environ.get("EL9_DRIVER_ARTIFACT_URL", "")
-            parsed = urllib.parse.urlsplit(url)
-            if (parsed.scheme != "https" or not parsed.hostname
-                    or not parsed.hostname.endswith(".blob.core.windows.net")
-                    or parsed.username or parsed.password):
-                raise ValueError("Missing authorized short-lived driver artifact URL")
-            try:
-                result = subprocess.run(["curl", "--fail", "--silent", "--show-error", "--max-time", "120", url],
-                                        stdout=stream, timeout=130)
-            except (OSError, subprocess.SubprocessError):
-                raise ValueError("Short-lived driver artifact download could not complete") from None
-            if result.returncode:
-                raise ValueError("Short-lived driver artifact download failed")
-        else:
+    if repository == "Halino/lto-ltfs-driver":
+        # Downloaded by the first workflow step, before the official URL expires.
+        incoming = Path(os.environ.get("EL9_DRIVER_ARTIFACT_FILE", ""))
+        if not incoming.is_file() or incoming.is_symlink() or digest(incoming) != archive_sha:
+            raise ValueError("Missing or changed hash-pinned driver ZIP")
+        with incoming.open("rb") as source, path.open("xb") as destination:
+            shutil.copyfileobj(source, destination)
+    else:
+        with path.open("xb") as stream:
             command("gh", "api", f"repos/{repository}/actions/artifacts/{artifact_id}/zip", stdout=stream)
     for member, name in members:
         validate_archive(path, archive_sha, member, PACKAGES[name], root / "payload/rpms" / name)

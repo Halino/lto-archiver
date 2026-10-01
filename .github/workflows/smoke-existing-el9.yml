@@ -16,6 +16,19 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      - name: Fetch only the approved driver ZIP before its download URL expires
+        env:
+          EL9_DRIVER_ARTIFACT_URL: ${{ secrets.EL9_DRIVER_ARTIFACT_URL }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, urllib.parse
+          value = urllib.parse.urlsplit(os.environ['EL9_DRIVER_ARTIFACT_URL'])
+          if value.scheme != 'https' or not value.hostname or not value.hostname.endswith('.blob.core.windows.net') or value.username or value.password:
+              raise SystemExit('Missing authorized short-lived artifact URL')
+          PY
+          curl --fail --silent --show-error --max-time 120 "$EL9_DRIVER_ARTIFACT_URL" --output "$RUNNER_TEMP/el9-driver.zip"
+          printf '%s  %s\n' '1902ecee45ac064412e4b5ce1c7d39c1909fc20544744792c84d1fb041975a73' "$RUNNER_TEMP/el9-driver.zip" | sha256sum --check --strict
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
@@ -27,7 +40,7 @@ jobs:
       - name: Test existing hash-pinned driver/runtime/app RPMs
         env:
           GH_TOKEN: ${{ github.token }}
-          EL9_DRIVER_ARTIFACT_URL: ${{ secrets.EL9_DRIVER_ARTIFACT_URL }}
+          EL9_DRIVER_ARTIFACT_FILE: ${{ runner.temp }}/el9-driver.zip
         run: python3 scripts/run-github-el9-smoke.py run "$RUNNER_TEMP/lto-el9-smoke"
       - name: Retain actual VM report and diagnostics, including failures
         if: always()
