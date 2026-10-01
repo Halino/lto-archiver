@@ -1,6 +1,7 @@
 .gitattributes
 .github/workflows/build-release.yml
 .github/workflows/ci.yml
+.github/workflows/diagnose-boundary-browser.yml
 .github/workflows/publish-release.yml
 .gitignore
 CODE_OF_CONDUCT.md
@@ -141,6 +142,7 @@ requirements-web.in
 requirements-web.lock
 scripts/audit-release-content.py
 scripts/build-public-snapshot.py
+scripts/observe-boundary-browser.py
 scripts/preflight-rhel9.sh
 scripts/validate-web-base-image.py
 src/ltobackup/__init__.py
@@ -312,6 +314,7 @@ tests/test_archive_recovery.py
 tests/test_archive_runner.py
 tests/test_archive_runner_physical_qualification.py
 tests/test_automation.py
+tests/test_boundary_browser_diagnostic.py
 tests/test_boundary_candidate_refresh.py
 tests/test_boundary_coordinator.py
 tests/test_boundary_dispatcher.py
